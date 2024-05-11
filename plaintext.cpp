@@ -71,6 +71,19 @@ namespace SpatialFHE {
         }
     }
 
+    std::string PlainText::toString() const {
+        if (std::holds_alternative<int>(this->data)) {
+            return std::to_string(std::get<int>(this->data));
+        } else if (std::holds_alternative<std::string>(this->data)) {
+            return std::get<std::string>(this->data);
+        } else if (std::holds_alternative<seal::Plaintext>(this->data)) {
+            seal::Plaintext pt = std::get<seal::Plaintext>(this->data);
+            return pt.to_string();
+        } else {
+            return "Unknown";
+        }
+    }
+
     PlainText::~PlainText() {}
     
 } // namespace SpatialFHE

@@ -1,4 +1,5 @@
 #include "ciphertext.h"
+#include <b64/encode.h>
 
 using namespace std;
 namespace SpatialFHE {
@@ -56,6 +57,22 @@ namespace SpatialFHE {
             this->data_source = other.data_source;
         }
         return *this;
+    }
+
+    string CipherText::toString() {
+        if (holds_alternative<string>(this->data)) {
+            return get<string>(this->data);
+        } else if (holds_alternative<seal::Ciphertext>(this->data)) {
+            stringstream ss;
+            seal::Ciphertext ct = get<seal::Ciphertext>(this->data);
+            ct.save(ss);
+            base64::encoder b64Encoder;
+            stringstream b64ss;
+            b64Encoder.encode(ss, b64ss);
+            return b64ss.str();
+        } else {
+            return "Unknown";
+        }
     }
 
     CipherText::~CipherText() {}

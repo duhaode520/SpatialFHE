@@ -35,6 +35,8 @@ namespace SpatialFHE {
 
         CipherText operator=(CipherText const &other);
         CipherText operator=(CipherText &&other);
+
+        std::string toString();
     };
 
 }  // namespace SpatialFHE

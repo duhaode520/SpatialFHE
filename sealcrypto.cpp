@@ -33,57 +33,111 @@ namespace SpatialFHE {
     void SEALCrypto::LoadPublicKey(std::string const &pubKeyFilename) {}
 
     PlainText SEALCrypto::Encode(double d) {
-        return PlainText();
+        seal::Plaintext ptxt = seal::Plaintext();
+        this->ckksEncoder->encode(d, this->params->scale, ptxt);
+        return PlainText(ptxt);
     }
 
     PlainText SEALCrypto::Encode(long d) {
-        return PlainText();
+        vector<long> vec(this->slot_count, d);
+        seal::Plaintext ptxt = seal::Plaintext();
+        this->batchEncoder->encode(vec, ptxt);
+        return PlainText(ptxt);
     }
 
     PlainText SEALCrypto::Encode(std::string const &str) {
-        return PlainText();
+        if (this->params->schemeType == HECrypto::HEScheme::BFV) {
+            return this->Encode(stol(str));
+        } else if (this->params->schemeType == HECrypto::HEScheme::CKKS){
+            return this->Encode(stod(str));
+        }
     }
 
     PlainText SEALCrypto::Encode(std::vector<double> const &vec) {
-        return PlainText();
+        seal::Plaintext ptxt = seal::Plaintext();
+        this->ckksEncoder->encode(vec, this->params->scale, ptxt);
+        return PlainText(ptxt);
     }
 
     PlainText SEALCrypto::Encode(std::vector<long> const &vec) {
-        return PlainText();
+        seal::Plaintext ptxt = seal::Plaintext();
+        this->batchEncoder->encode(vec, ptxt);
+        return PlainText(ptxt);
     }
 
     std::vector<PlainText> SEALCrypto::EncodeMany(std::vector<double> const &vec) {
+        vector<PlainText> ptxt_vec;
+        if (this->slot_count >= vec.size()) {
+            ptxt_vec.emplace_back(this->Encode(vec));
+        } else {
+            this->createPlainVector<double>(ptxt_vec, vec);
+        }
         return std::vector<PlainText>();
     }
 
     std::vector<PlainText> SEALCrypto::EncodeMany(std::vector<long> const &vec) {
-        return std::vector<PlainText>();
+        vector<PlainText> ptxt_vec;
+        if (this->slot_count >= vec.size()) {
+            ptxt_vec.emplace_back(this->Encode(vec));
+        } else {
+            this->createPlainVector<long>(ptxt_vec, vec);
+        }
+        return ptxt_vec;
     }
 
     CipherText SEALCrypto::Encrypt(PlainText const &pt) {
-        return CipherText();
+        seal::Plaintext ptxt = seal::Plaintext();
+        seal::Ciphertext ctxt = seal::Ciphertext();
+        this->toSealPlainText(ptxt, pt);
+        this->_encrypt(ctxt, ptxt);
+        return CipherText(ctxt);
     }
 
-    std::string SEALCrypto::Encrypt(std::string const &str) {
-        return std::string();
+    std::string SEALCrypto::Encrypt(std::string const &spt) {
+        return this->Encrypt(PlainText(spt)).toString();
     }
 
     std::string SEALCrypto::Encrypt(std::vector<std::string> const &spt_vec) {
-        return std::string();
+        PlainText pt;
+        if (this->params->schemeType == HECrypto::HEScheme::BFV) {
+            vector<long> vec;
+            vec.resize(spt_vec.size());
+            transform(spt_vec.begin(), spt_vec.end(), vec.begin(), [](string const &s) { return stol(s); });
+            pt = this->Encode(vec);
+        } else if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
+            vector<double> vec;
+            vec.resize(spt_vec.size());
+            transform(spt_vec.begin(), spt_vec.end(), vec.begin(), [](string const &s) { return stod(s); });
+            pt = this->Encode(vec);
+        }
+        return this->Encrypt(pt).toString();
     }
 
     void SEALCrypto::LoadSecretkey(std::string const &secKeyFilename) {}
 
-    void SEALCrypto::Decode(std::vector<double> &vec, PlainText const &pt) {}
+    void SEALCrypto::Decode(std::vector<double> &vec, PlainText const &pt) {
+        seal::Plaintext ptxt = seal::Plaintext();
+        this->toSealPlainText(ptxt, pt);
+        this->ckksEncoder->decode(ptxt, vec);
+    }
 
-    void SEALCrypto::Decode(std::vector<long> &vec, PlainText const &pt) {}
+    void SEALCrypto::Decode(std::vector<long> &vec, PlainText const &pt) {
+        seal::Plaintext ptxt = seal::Plaintext();
+        this->toSealPlainText(ptxt, pt);
+        this->batchEncoder->decode(ptxt, vec);
+    }
 
     PlainText SEALCrypto::Decrypt(CipherText const &ct, bool noBatching) {
-        return PlainText();
+        seal::Ciphertext ctxt = seal::Ciphertext();
+        seal::Plaintext ptxt = seal::Plaintext();
+        this->toSealCipherText(ctxt, ct);
+        this->_decrypt(ptxt, ctxt);
+        // TODO: handle noBatching
+        return PlainText(ptxt);
     }
 
     std::string SEALCrypto::Decrypt(std::string const &sct, bool noBatching) {
-        return std::string();
+        this->Decrypt(CipherText(sct), noBatching).toString();
     }
 
     CipherText SEALCrypto::AsCipherText(std::string const &str) {
@@ -103,19 +157,40 @@ namespace SpatialFHE {
     }
 
     CipherText SEALCrypto::Add(CipherText const &ct_1, CipherText const &ct_2) {
-        return CipherText();
+        seal::Ciphertext ctxt_1 = seal::Ciphertext();
+        seal::Ciphertext ctxt_2 = seal::Ciphertext();
+
+        this->toSealCipherText(ctxt_1, ct_1);
+        this->toSealCipherText(ctxt_2, ct_2);
+
+        this->_add(ctxt_1, ctxt_2);
+        return CipherText(ctxt_1);
     }
 
     std::string SEALCrypto::Add(std::string const &sct_1, std::string const &sct_2) {
-        return std::string();
+        CipherText ct_1 = CipherText(sct_1);
+        CipherText ct_2 = CipherText(sct_2);
+        CipherText result = this->Add(ct_1, ct_2);
+        return result.toString();
+
     }
 
     CipherText SEALCrypto::AddPlain(CipherText const &ct, PlainText const &pt) {
-        return CipherText();
+        seal::Ciphertext ctxt = seal::Ciphertext();
+        seal::Plaintext ptxt = seal::Plaintext();
+        this->toSealCipherText(ctxt, ct);
+        this->toSealPlainText(ptxt, pt);
+
+        this->_add_plain(ctxt, ptxt);
+        return CipherText(ctxt);
+
     }
 
     std::string SEALCrypto::AddPlain(std::string const &sct, std::string const &spt) {
-        return std::string();
+        PlainText pt = PlainText(spt);
+        CipherText ct = CipherText(sct);
+        CipherText result = this->AddPlain(ct, pt);
+        return result.toString();
     }
 
     std::vector<CipherText> SEALCrypto::FullAdder(
@@ -197,11 +272,20 @@ namespace SpatialFHE {
     }
 
     CipherText SEALCrypto::And(CipherText const &ct_1, CipherText const &ct_2) {
-        return CipherText();
+        seal::Ciphertext ctxt_1 = seal::Ciphertext();
+        seal::Ciphertext ctxt_2 = seal::Ciphertext();
+        this->toSealCipherText(ctxt_1, ct_1);
+        this->toSealCipherText(ctxt_2, ct_2);
+        seal::Ciphertext result = seal::Ciphertext();
+        this->_and(result, ctxt_1, ctxt_2);
+        return CipherText(result);
     }
 
     std::string SEALCrypto::And(std::string const &sct_1, std::string const &sct_2) {
-        return std::string();
+        CipherText ct_1 = CipherText(sct_1);
+        CipherText ct_2 = CipherText(sct_2);
+        CipherText result = this->And(ct_1, ct_2);
+        return result.toString();
     }
 
     CipherText SEALCrypto::Or(CipherText const &ct_1, CipherText const &ct_2) {
@@ -277,7 +361,7 @@ namespace SpatialFHE {
     }
 
     template <typename T>
-    void SEALCrypto::createPlainVector(std::vector<seal::Plaintext> &vec, std::vector<T> const &data) {}
+    void SEALCrypto::createPlainVector(std::vector<PlainText> &vec, std::vector<T> const &data) {}
 
     template <typename T>
     void SEALCrypto::createMask(std::vector<T> &mask, const int &index) {}

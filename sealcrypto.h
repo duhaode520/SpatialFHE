@@ -5,7 +5,7 @@
 namespace SpatialFHE {
     class SEALCrypto : public HECrypto {
         struct SEALEncryptionParams {
-            HECrypto::HEScheme scheme;
+            HECrypto::HEScheme schemeType;
             size_t polyModulusDegree;
             uint64_t plainModulus;
             std::vector<int> coeffModulusBits;
@@ -23,7 +23,6 @@ namespace SpatialFHE {
         seal::SecretKey secretKey;
         seal::RelinKeys relinKeys;
         seal::GaloisKeys galoisKeys;
-        // seal::IntegerEncoder *intEncoder;
         seal::CKKSEncoder* ckksEncoder;
         seal::BatchEncoder* batchEncoder;
         size_t slot_count;
@@ -73,7 +72,6 @@ namespace SpatialFHE {
         void _total_sum(seal::Ciphertext& result, seal::Ciphertext const& ct);
         void _running_sum(seal::Ciphertext& result, seal::Ciphertext const& ct);
 
-
     public:
         SEALCrypto(/* args */);
         ~SEALCrypto();
@@ -99,7 +97,7 @@ namespace SpatialFHE {
         std::vector<PlainText> EncodeMany(std::vector<long> const& vec) override;
 
         CipherText Encrypt(PlainText const& pt) override;
-        std::string Encrypt(std::string const& str) override;
+        std::string Encrypt(std::string const& spt) override;
         std::string Encrypt(std::vector<std::string> const& spt_vec) override;
 
         // decode and decrypt
@@ -195,14 +193,14 @@ namespace SpatialFHE {
         std::string TotalSum(std::string const& sct) override;
 
         template <typename T>
-        void createPlainVector(std::vector<seal::Plaintext>& vec, std::vector<T> const& data);
+        void createPlainVector(std::vector<PlainText>& vec, std::vector<T> const& data);
 
         template <typename T>
-        void createMask(std::vector<T> &mask, const int& index);
-        
+        void createMask(std::vector<T>& mask, const int& index);
+
         template <typename T>
-        void createShiftMask(std::vector<T> &mask, const int step, const int n);
-        
+        void createShiftMask(std::vector<T>& mask, const int step, const int n);
+
         // get functions
         CipherText getOne();
         CipherText getZero();
@@ -218,7 +216,6 @@ namespace SpatialFHE {
 
         void toSealPlainText(seal::Plaintext& pt, PlainText const& p);
         void toSealPlainText(std::vector<seal::Plaintext>& vec_pt, std::vector<PlainText> const& vec_p);
-        
     };
 
 }  // namespace SpatialFHE

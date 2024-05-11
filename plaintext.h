@@ -29,6 +29,8 @@ namespace SpatialFHE {
 
         unsigned int size() const;
 
+        std::string toString() const;
+
         ~PlainText();
     };
 
