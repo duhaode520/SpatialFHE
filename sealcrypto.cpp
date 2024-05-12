@@ -1,4 +1,5 @@
 #include "sealcrypto.h"
+#include <b64/decode.h>
 
 using namespace std;
 
@@ -82,9 +83,14 @@ namespace SpatialFHE {
 
         }
 
-    void SEALCrypto::LoadKeyPair(std::string const &pubKeyFilename, std::string const &secKeyFilename) {}
+    void SEALCrypto::LoadKeyPair(std::string const &pubKeyFilename, std::string const &secKeyFilename) {
+        this->LoadPublicKey(pubKeyFilename);
+        this->LoadSecretkey(secKeyFilename);
+    }
 
-    void SEALCrypto::LoadPublicKey(std::string const &pubKeyFilename) {}
+    void SEALCrypto::LoadPublicKey(std::string const &pubKeyFilename) {
+
+    }
 
     PlainText SEALCrypto::Encode(double d) {
         seal::Plaintext ptxt = seal::Plaintext();
@@ -194,20 +200,32 @@ namespace SpatialFHE {
         this->Decrypt(CipherText(sct), noBatching).toString();
     }
 
-    CipherText SEALCrypto::AsCipherText(std::string const &str) {
-        return CipherText();
+    CipherText SEALCrypto::AsCipherText(std::string const &sct) {
+        seal::Ciphertext ctxt ;
+        base64::decoder decoder;
+        stringstream decoded, in(sct);
+        decoder.decode(in, decoded);
+        ctxt.load(*this->sealContext, decoded);
+        return CipherText(ctxt);
     }
 
-    std::vector<CipherText> SEALCrypto::AsCipherText(std::vector<std::string> const &strs) {
-        return std::vector<CipherText>();
+    std::vector<CipherText> SEALCrypto::AsCipherText(std::vector<std::string> const &scts) {
+        vector<CipherText> vec;
+        transform(scts.begin(), scts.end(), back_inserter(vec), [this](string const &s) { return this->AsCipherText(s); });
+        return vec;
     }
 
-    PlainText SEALCrypto::AsPlainText(std::string const &str) {
-        return PlainText();
+    PlainText SEALCrypto::AsPlainText(std::string const &spt) {
+        seal::Plaintext ptxt;
+        stringstream ss(spt);
+        ptxt.load(*this->sealContext, ss);
+        return PlainText(ptxt);
     }
 
-    std::vector<PlainText> SEALCrypto::AsPlainText(std::vector<std::string> const &strs) {
-        return std::vector<PlainText>();
+    std::vector<PlainText> SEALCrypto::AsPlainText(std::vector<std::string> const &spts) {
+        vector<PlainText> vec;
+        transform(spts.begin(), spts.end(), back_inserter(vec), [this](string const &s) { return this->AsPlainText(s); });
+        return vec;
     }
 
     CipherText SEALCrypto::Add(CipherText const &ct_1, CipherText const &ct_2) {
