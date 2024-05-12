@@ -24,9 +24,63 @@ namespace SpatialFHE {
     SEALCrypto::~SEALCrypto() {}
 
     void SEALCrypto::GenerateKeyPair(
-        CryptoParams const &params,
+        CryptoParams& params,
         std::string const &pubKeyFilename,
-        std::string const &secKeyFilename) {}
+        std::string const &secKeyFilename) {
+            this->params = new SEALEncryptionParams();
+            this->update_encryption_params(params);
+            seal::scheme_type type = this->set_fhe_scheme(this->params->schemeType);
+            seal::EncryptionParameters encParams(type);
+            encParams.set_poly_modulus_degree(this->params->polyModulusDegree);
+
+            if (!all_of(this->params->coeffModulusPrimes.begin(), this->params->coeffModulusPrimes.end(), [](long i) { return i == 0; })) {
+                vector<seal::Modulus> coeff_modulus;
+                for (auto &prime : this->params->coeffModulusPrimes) {
+                    coeff_modulus.push_back(seal::Modulus(prime));
+                }
+                encParams.set_coeff_modulus(coeff_modulus);
+            } else {
+                if (this->params->schemeType == HECrypto::HEScheme::BFV) {
+                    encParams.set_coeff_modulus(seal::CoeffModulus::BFVDefault(this->params->polyModulusDegree));
+                } else if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
+                    encParams.set_coeff_modulus(seal::CoeffModulus::Create(this->params->polyModulusDegree, this->params->coeffModulusBits));
+                }
+
+                vector<ulong> coeffmod_primes;
+                vector<ulong> coeffmod_bits;
+                for (auto &mod : encParams.coeff_modulus()) {
+                    coeffmod_primes.push_back(mod.value());
+                    coeffmod_bits.push_back(mod.bit_count());
+                }
+                
+                this->params->coeffModulusBits = vector<int>(coeffmod_bits.begin(), coeffmod_bits.end());
+                this->params->coeffModulusPrimes = coeffmod_primes;
+            }
+
+            this->sealParams = new seal::EncryptionParameters(encParams);
+            seal::SEALContext context(encParams);
+            this->sealContext = std::make_shared<seal::SEALContext>(context);
+
+            // keygen
+            seal::KeyGenerator keygen(context);
+
+            this->secretKey = keygen.secret_key();
+            
+            keygen.create_public_key(this->publicKey);
+
+
+            if (context.using_keyswitching()) {
+                keygen.create_relin_keys(this->relinKeys);
+                if (this->batching) {
+                    keygen.create_galois_keys(this->galoisKeys);
+                }
+            }
+
+
+            // TODO: save keys to file
+            // 可能需要重新考虑一个方式来保存或者说要不要保存
+
+        }
 
     void SEALCrypto::LoadKeyPair(std::string const &pubKeyFilename, std::string const &secKeyFilename) {}
 
@@ -442,5 +496,60 @@ namespace SpatialFHE {
     void SEALCrypto::_mask(seal::Ciphertext &result, seal::Ciphertext const &ct, std::vector<int> const &indices) {}
 
     void SEALCrypto::_total_sum(seal::Ciphertext &result, seal::Ciphertext const &ct) {}
+
+    void SEALCrypto::update_encryption_params(CryptoParams& crypto_params) {
+        if (crypto_params.find("PlaintextModulus") != crypto_params.end()) {
+            this->params->plainModulus = crypto_params["PlaintextModulus"].GetInt64();
+        }
+        if (crypto_params.find("PolyModulusDegree") != crypto_params.end()) {
+            this->params->polyModulusDegree = crypto_params["PolyModulusDegree"].GetInt64();
+        }
+        if (crypto_params.find("Scale") != crypto_params.end()) {
+            this->params->scale = crypto_params["Scale"].GetInt64();
+        }
+        if (crypto_params.find("SchemeType") != crypto_params.end()) {
+            parse_scheme(crypto_params["SchemeType"].GetString());
+        }
+        if (crypto_params.find("CoeffModulusBits") != crypto_params.end()) {
+            vector<long> lvec = to_long_vec(crypto_params["CoeffModulusBits"]);
+            this->params->coeffModulusBits = vector<int>(lvec.begin(), lvec.end());
+        }
+        if (crypto_params.find("CoeffModulusPrimes") != crypto_params.end()) {
+            vector<long> lvec = to_long_vec(crypto_params["CoeffModulusPrimes"]);   
+            this->params->coeffModulusPrimes = vector<ulong>(lvec.begin(), lvec.end());
+        }
+    }
+
+    seal::scheme_type SEALCrypto::set_fhe_scheme(HECrypto::HEScheme scheme) {
+        if (scheme == HECrypto::HEScheme::BFV) {
+            return seal::scheme_type::bfv;
+        } else if (scheme == HECrypto::HEScheme::CKKS) {
+            return seal::scheme_type::ckks;
+        } else {
+            cerr<<"Invalid scheme type"<<endl;
+            exit(1);
+        }
+    }
+
+    void SEALCrypto::parse_scheme(std::string const &scheme) {
+        if (scheme == "BFV") {
+            this->params->schemeType =  HECrypto::HEScheme::BFV;
+        } else if (scheme == "CKKS") {
+            this->params->schemeType =  HECrypto::HEScheme::CKKS;
+        } else {
+            cerr<<"Invalid scheme type: "<<scheme<<endl;
+            exit(1);
+        }
+    }
+
+    std::vector<long> SEALCrypto::to_long_vec(rapidjson::GenericValue<rapidjson::UTF8<>> &data) {
+        std::vector<long> vec;
+        // TODO: 可能有问题，需要测试
+        // 另外一种写法是 data[i].GetInt64()
+        for (auto &v : data.GetArray()) {
+            vec.push_back(v.GetInt64());
+        }
+        return vec;
+    }
 
 }  // namespace SpatialFHE

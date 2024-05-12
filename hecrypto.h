@@ -3,6 +3,7 @@
 #include <seal/seal.h>
 #include <ciphertext.h>
 #include <plaintext.h>
+#include <rapidjson/document.h>
 
 #include <map>
 #include <string>
@@ -24,14 +25,14 @@ namespace SpatialFHE {
 
         enum class HELibrary { SEAL, HELIB };
 
-        using CryptoParams = std::map<std::string, std::string>;
+        using CryptoParams = std::map<std::string, rapidjson::GenericValue<rapidjson::UTF8<>>>;
         HECrypto();
         ~HECrypto();
 
         // context
 
         virtual void GenerateKeyPair(
-            CryptoParams const& params,
+            CryptoParams& params,
             std::string const& pubKeyFilename,
             std::string const& secKeyFilename) = 0;
         virtual void LoadKeyPair(std::string const& pubKeyFilename, std::string const& secKeyFilename) = 0;

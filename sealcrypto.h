@@ -9,7 +9,7 @@ namespace SpatialFHE {
             size_t polyModulusDegree;
             uint64_t plainModulus;
             std::vector<int> coeffModulusBits;
-            std::vector<int> coeffModulusPrimes;
+            std::vector<ulong> coeffModulusPrimes; 
             double scale;
         };
 
@@ -17,7 +17,7 @@ namespace SpatialFHE {
         // members
 
         SEALEncryptionParams* params;
-        seal::EncryptionParameters* encryptionParams;
+        seal::EncryptionParameters* sealParams;
         std::shared_ptr<seal::SEALContext> sealContext;
         seal::PublicKey publicKey;
         seal::SecretKey secretKey;
@@ -72,6 +72,12 @@ namespace SpatialFHE {
         void _total_sum(seal::Ciphertext& result, seal::Ciphertext const& ct);
         void _running_sum(seal::Ciphertext& result, seal::Ciphertext const& ct);
 
+        void update_encryption_params(CryptoParams& params);
+        std::vector<long> to_long_vec(rapidjson::GenericValue<rapidjson::UTF8<>>& data);
+
+        seal::scheme_type set_fhe_scheme(HECrypto::HEScheme scheme);
+        void parse_scheme(std::string const& scheme);
+
     public:
         SEALCrypto(/* args */);
         ~SEALCrypto();
@@ -79,7 +85,7 @@ namespace SpatialFHE {
         // context
 
         void GenerateKeyPair(
-            CryptoParams const& params,
+            CryptoParams& params,
             std::string const& pubKeyFilename,
             std::string const& secKeyFilename) override;
         void LoadKeyPair(std::string const& pubKeyFilename, std::string const& secKeyFilename) override;
