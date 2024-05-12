@@ -280,67 +280,126 @@ namespace SpatialFHE {
     }
 
     CipherText SEALCrypto::Multiply(CipherText const &ct_1, CipherText const &ct_2) {
-        return CipherText();
+        seal::Ciphertext ctxt_1 = seal::Ciphertext();
+        seal::Ciphertext ctxt_2 = seal::Ciphertext();
+
+        this->toSealCipherText(ctxt_1, ct_1);
+        this->toSealCipherText(ctxt_2, ct_2);
+
+        this->_multiply(ctxt_1, ctxt_2);
+        return CipherText(ctxt_1);
     }
 
     std::string SEALCrypto::Multiply(std::string const &sct_1, std::string const &sct_2) {
-        return std::string();
+        CipherText ct_1 = CipherText(sct_1);
+        CipherText ct_2 = CipherText(sct_2);
+        CipherText result = this->Multiply(ct_1, ct_2);
+        return result.toString();
     }
 
     CipherText SEALCrypto::MultiplyPlain(CipherText const &ct, PlainText const &pt) {
-        return CipherText();
+        seal::Ciphertext ctxt = seal::Ciphertext();
+        seal::Plaintext ptxt = seal::Plaintext();
+        this->toSealCipherText(ctxt, ct);
+        this->toSealPlainText(ptxt, pt);
+
+        this->_multiply_plain(ctxt, ptxt);
+        return CipherText(ctxt);
     }
 
     std::string SEALCrypto::MultiplyPlain(std::string const &sct, std::string const &spt) {
-        return std::string();
+        PlainText pt = PlainText(spt);
+        CipherText ct = CipherText(sct);
+        CipherText result = this->MultiplyPlain(ct, pt);
+        return result.toString();
     }
 
     CipherText SEALCrypto::Square(CipherText const &ct) {
-        return CipherText();
+        seal::Ciphertext ctxt = seal::Ciphertext();
+        seal::Ciphertext result_ctxt = seal::Ciphertext();
+        this->toSealCipherText(ctxt, ct);
+        this->_square(result_ctxt, ctxt);
+        return CipherText(result_ctxt);
     }
 
     std::string SEALCrypto::Square(std::string const &sct) {
-        return std::string();
+        CipherText ct = CipherText(sct);
+        CipherText result = this->Square(ct);
+        return result.toString();
     }
 
     CipherText SEALCrypto::Power(CipherText const &ct, int const &n) {
-        return CipherText();
+        seal::Ciphertext ctxt = seal::Ciphertext();
+        seal::Ciphertext result = seal::Ciphertext();
+        this->toSealCipherText(ctxt, ct);
+        this->_power(result, ctxt, n);
+        return CipherText(result);
     }
 
     std::string SEALCrypto::Power(std::string const &sct, int const &n) {
-        return std::string();
+        CipherText ct = CipherText(sct);
+        CipherText result = this->Power(ct, n);
+        return result.toString();
     }
 
     CipherText SEALCrypto::Subtract(CipherText const &ct_1, CipherText const &ct_2) {
-        return CipherText();
+        seal::Ciphertext ctxt_1 = seal::Ciphertext();
+        seal::Ciphertext ctxt_2 = seal::Ciphertext();
+
+        this->toSealCipherText(ctxt_1, ct_1);
+        this->toSealCipherText(ctxt_2, ct_2);
+
+        this->_sub(ctxt_1, ctxt_2);
+        return CipherText(ctxt_1);
     }
 
     std::string SEALCrypto::Subtract(std::string const &sct_1, std::string const &sct_2) {
-        return std::string();
+        CipherText ct_1 = CipherText(sct_1);
+        CipherText ct_2 = CipherText(sct_2);
+        CipherText result = this->Subtract(ct_1, ct_2);
+        return result.toString();
     }
 
     CipherText SEALCrypto::Rotate(CipherText const &ct, int const &n) {
-        return CipherText();
+        seal::Ciphertext ctxt = seal::Ciphertext();
+        seal::Ciphertext result = seal::Ciphertext();
+        this->toSealCipherText(ctxt, ct);
+        this->_rotate(result, ctxt, n);
+        return CipherText(result);
     }
 
     std::string SEALCrypto::Rotate(std::string const &sct, int const &n) {
-        return std::string();
+        CipherText ct = CipherText(sct);
+        CipherText result = this->Rotate(ct, n);
+        return result.toString();
     }
 
     CipherText SEALCrypto::Shift(CipherText const &ct, int const &n) {
-        return CipherText();
+        seal::Ciphertext ctxt = seal::Ciphertext();
+        seal::Ciphertext result = seal::Ciphertext();
+        this->toSealCipherText(ctxt, ct);
+        this->_shift(result, ctxt, n);
+        return CipherText(result);
     }
 
     std::string SEALCrypto::Shift(std::string const &sct, int const &n) {
-        return std::string();
+        CipherText ct = CipherText(sct);
+        CipherText result = this->Shift(ct, n);
+        return result.toString();
     }
 
     CipherText SEALCrypto::RotateColumns(CipherText const &ct) {
-        return CipherText();
+        seal::Ciphertext ctxt = seal::Ciphertext();
+        seal::Ciphertext result = seal::Ciphertext();
+        this->toSealCipherText(ctxt, ct);
+        this->_rotate_columns(result, ctxt);
+        return CipherText(result);
     }
 
     std::string SEALCrypto::RotateColumns(std::string const &sct) {
-        return std::string();
+        CipherText ct = CipherText(sct);
+        CipherText result = this->RotateColumns(ct);
+        return result.toString();
     }
 
     CipherText SEALCrypto::And(CipherText const &ct_1, CipherText const &ct_2) {
@@ -361,75 +420,132 @@ namespace SpatialFHE {
     }
 
     CipherText SEALCrypto::Or(CipherText const &ct_1, CipherText const &ct_2) {
-        return CipherText();
+        seal::Ciphertext ctxt_1 = seal::Ciphertext();
+        seal::Ciphertext ctxt_2 = seal::Ciphertext();
+        this->toSealCipherText(ctxt_1, ct_1);
+        this->toSealCipherText(ctxt_2, ct_2);
+        seal::Ciphertext result = seal::Ciphertext();
+        this->_or(result, ctxt_1, ctxt_2);
+        return CipherText(result);
     }
 
     std::string SEALCrypto::Or(std::string const &sct_1, std::string const &sct_2) {
-        return std::string();
+        CipherText ct_1 = CipherText(sct_1);
+        CipherText ct_2 = CipherText(sct_2);
+        CipherText result = this->Or(ct_1, ct_2);
+        return result.toString();
     }
 
     CipherText SEALCrypto::Xor(CipherText const &ct_1, CipherText const &ct_2) {
-        return CipherText();
+        seal::Ciphertext ctxt_1 = seal::Ciphertext();
+        seal::Ciphertext ctxt_2 = seal::Ciphertext();
+        this->toSealCipherText(ctxt_1, ct_1);
+        this->toSealCipherText(ctxt_2, ct_2);
+        seal::Ciphertext result = seal::Ciphertext();
+        this->_xor(result, ctxt_1, ctxt_2);
+        return CipherText(result);
     }
 
+
     std::string SEALCrypto::Xor(std::string const &sct_1, std::string const &sct_2) {
-        return std::string();
+        CipherText ct_1 = CipherText(sct_1);
+        CipherText ct_2 = CipherText(sct_2);
+        CipherText result = this->Xor(ct_1, ct_2);
+        return result.toString();
     }
 
     CipherText SEALCrypto::Xnor(CipherText const &ct_1, CipherText const &ct_2) {
-        return CipherText();
+        seal::Ciphertext ctxt_1 = seal::Ciphertext();
+        seal::Ciphertext ctxt_2 = seal::Ciphertext();
+        this->toSealCipherText(ctxt_1, ct_1);
+        this->toSealCipherText(ctxt_2, ct_2);
+        seal::Ciphertext result = seal::Ciphertext();
+        this->_xnor(result, ctxt_1, ctxt_2);
+        return CipherText(result);
     }
 
     std::string SEALCrypto::Xnor(std::string const &sct_1, std::string const &sct_2) {
-        return std::string();
+        CipherText ct_1 = CipherText(sct_1);
+        CipherText ct_2 = CipherText(sct_2);
+        CipherText result = this->Xnor(ct_1, ct_2);
+        return result.toString();
     }
 
     CipherText SEALCrypto::Not(CipherText const &ct) {
-        return CipherText();
+        seal::Ciphertext ctxt = seal::Ciphertext();
+        this->toSealCipherText(ctxt, ct);
+        this->_not(ctxt, ctxt);
+        return CipherText(ctxt);
     }
 
     std::string SEALCrypto::Not(std::string const &sct) {
-        return std::string();
+        CipherText ct = CipherText(sct);
+        CipherText result = this->Not(ct);
+        return result.toString();
     }
 
     CipherText SEALCrypto::Mask(CipherText const &ct, int const &index) {
-        return CipherText();
+        seal::Ciphertext ctxt = seal::Ciphertext();
+        seal::Ciphertext result = seal::Ciphertext();
+        this->toSealCipherText(ctxt, ct);
+        this->_mask(result, ctxt, index);
+        return CipherText(result);
     }
 
     CipherText SEALCrypto::Mask(CipherText const &ct, std::vector<int> const &indices) {
-        return CipherText();
+        seal::Ciphertext ctxt = seal::Ciphertext();
+        seal::Ciphertext result = seal::Ciphertext();
+        this->toSealCipherText(ctxt, ct);
+        this->_mask(result, ctxt, indices);
+        return CipherText(result);
     }
 
     std::string SEALCrypto::Mask(std::string const &sct, int const &index) {
-        return std::string();
+        CipherText ct = CipherText(sct);
+        CipherText result = this->Mask(ct, index);
+        return result.toString();
     }
 
     std::string SEALCrypto::Mask(std::string const &sct, std::vector<int> const &indices) {
-        return std::string();
+        CipherText ct = CipherText(sct);
+        CipherText result = this->Mask(ct, indices);
+        return result.toString();
     }
 
     CipherText SEALCrypto::IsEqual(CipherText const &ct_1, CipherText const &ct_2) {
-        return CipherText();
+        return this->Xnor(ct_1, ct_2);
     }
 
     std::string SEALCrypto::IsEqual(std::string const &sct_1, std::string const &sct_2) {
-        return std::string();
+        return this->Xnor(sct_1, sct_2);
     }
 
     CipherText SEALCrypto::RunningSum(CipherText const &ct) {
-        return CipherText();
+        seal::Ciphertext ctxt = seal::Ciphertext();
+        seal::Ciphertext result = seal::Ciphertext();
+        this->toSealCipherText(ctxt, ct);
+        this->_running_sum(result, ctxt);
+        return CipherText(result);
     }
 
     std::string SEALCrypto::RunningSum(std::string const &sct) {
-        return std::string();
+        CipherText ct = CipherText(sct);
+        CipherText result = this->RunningSum(ct);
+        return result.toString();
     }
 
     CipherText SEALCrypto::TotalSum(CipherText const &ct) {
-        return CipherText();
+        seal::Ciphertext ctxt = seal::Ciphertext();
+        seal::Ciphertext result = seal::Ciphertext();
+        this->toSealCipherText(ctxt, ct);
+        this->_total_sum(result, ctxt);
+        return CipherText(result);
     }
 
     std::string SEALCrypto::TotalSum(std::string const &sct) {
-        return std::string();
+        CipherText ct = CipherText(sct);
+        CipherText result = this->TotalSum(ct);
+        return result.toString();
     }
 
     template <typename T>
