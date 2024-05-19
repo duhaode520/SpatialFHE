@@ -8,12 +8,12 @@
 
 
 namespace SpatialFHE {
-    using CipherTextType = std::variant<seal::Ciphertext, std::string>;
+    using CipherTextData = std::variant<seal::Ciphertext, std::string>;
 
     class CipherText {
     private:
         /* data */
-        CipherTextType data;
+        CipherTextData data;
         std::string data_source;
 
     public:
@@ -32,6 +32,8 @@ namespace SpatialFHE {
         // void setData()
 
         unsigned int size() const;
+
+        CipherTextData getData() const;
 
         CipherText operator=(CipherText const &other);
         CipherText operator=(CipherText &&other);

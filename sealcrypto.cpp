@@ -16,10 +16,8 @@ namespace SpatialFHE {
         this->galoisKeys = seal::GaloisKeys();
 
         // Initialize ciphertexts ctxt_one and ctxt_zero
-        p_pool = seal::MemoryManager::GetPool();
-        this->ctxt_one = seal::Ciphertext(p_pool);
-        p_pool = seal::MemoryManager::GetPool();
-        this->ctxt_zero = seal::Ciphertext(p_pool);
+        this->ctxt_one = seal::Ciphertext();
+        this->ctxt_zero = seal::Ciphertext();
     }
 
     SEALCrypto::~SEALCrypto() {}
@@ -77,7 +75,11 @@ namespace SpatialFHE {
                 }
             }
 
+            this->set_encoder(this->params->schemeType);
 
+            this->encryptor = new seal::Encryptor(*this->sealContext, this->publicKey);
+            this->decryptor = new seal::Decryptor(*this->sealContext, this->secretKey);
+            this->evaluator = new seal::Evaluator(*this->sealContext);
             // TODO: save keys to file
             // 可能需要重新考虑一个方式来保存或者说要不要保存
 
@@ -148,7 +150,7 @@ namespace SpatialFHE {
     CipherText SEALCrypto::Encrypt(PlainText const &pt) {
         seal::Plaintext ptxt = seal::Plaintext();
         seal::Ciphertext ctxt = seal::Ciphertext();
-        this->toSealPlainText(ptxt, pt);
+        this->toSealPlaintext(ptxt, pt);
         this->_encrypt(ctxt, ptxt);
         return CipherText(ctxt);
     }
@@ -177,20 +179,20 @@ namespace SpatialFHE {
 
     void SEALCrypto::Decode(std::vector<double> &vec, PlainText const &pt) {
         seal::Plaintext ptxt = seal::Plaintext();
-        this->toSealPlainText(ptxt, pt);
+        this->toSealPlaintext(ptxt, pt);
         this->ckksEncoder->decode(ptxt, vec);
     }
 
     void SEALCrypto::Decode(std::vector<long> &vec, PlainText const &pt) {
         seal::Plaintext ptxt = seal::Plaintext();
-        this->toSealPlainText(ptxt, pt);
+        this->toSealPlaintext(ptxt, pt);
         this->batchEncoder->decode(ptxt, vec);
     }
 
     PlainText SEALCrypto::Decrypt(CipherText const &ct, bool noBatching) {
         seal::Ciphertext ctxt = seal::Ciphertext();
         seal::Plaintext ptxt = seal::Plaintext();
-        this->toSealCipherText(ctxt, ct);
+        this->toSealCiphertext(ctxt, ct);
         this->_decrypt(ptxt, ctxt);
         // TODO: handle noBatching
         return PlainText(ptxt);
@@ -200,7 +202,7 @@ namespace SpatialFHE {
         this->Decrypt(CipherText(sct), noBatching).toString();
     }
 
-    CipherText SEALCrypto::AsCipherText(std::string const &sct) {
+    CipherText SEALCrypto::toCipherText(std::string const &sct) {
         seal::Ciphertext ctxt ;
         base64::decoder decoder;
         stringstream decoded, in(sct);
@@ -209,22 +211,22 @@ namespace SpatialFHE {
         return CipherText(ctxt);
     }
 
-    std::vector<CipherText> SEALCrypto::AsCipherText(std::vector<std::string> const &scts) {
+    std::vector<CipherText> SEALCrypto::toCipherText(std::vector<std::string> const &scts) {
         vector<CipherText> vec;
-        transform(scts.begin(), scts.end(), back_inserter(vec), [this](string const &s) { return this->AsCipherText(s); });
+        transform(scts.begin(), scts.end(), back_inserter(vec), [this](string const &s) { return this->toCipherText(s); });
         return vec;
     }
 
-    PlainText SEALCrypto::AsPlainText(std::string const &spt) {
+    PlainText SEALCrypto::toPlainText(std::string const &spt) {
         seal::Plaintext ptxt;
         stringstream ss(spt);
         ptxt.load(*this->sealContext, ss);
         return PlainText(ptxt);
     }
 
-    std::vector<PlainText> SEALCrypto::AsPlainText(std::vector<std::string> const &spts) {
+    std::vector<PlainText> SEALCrypto::toPlainText(std::vector<std::string> const &spts) {
         vector<PlainText> vec;
-        transform(spts.begin(), spts.end(), back_inserter(vec), [this](string const &s) { return this->AsPlainText(s); });
+        transform(spts.begin(), spts.end(), back_inserter(vec), [this](string const &s) { return this->toPlainText(s); });
         return vec;
     }
 
@@ -232,8 +234,8 @@ namespace SpatialFHE {
         seal::Ciphertext ctxt_1 = seal::Ciphertext();
         seal::Ciphertext ctxt_2 = seal::Ciphertext();
 
-        this->toSealCipherText(ctxt_1, ct_1);
-        this->toSealCipherText(ctxt_2, ct_2);
+        this->toSealCiphertext(ctxt_1, ct_1);
+        this->toSealCiphertext(ctxt_2, ct_2);
 
         this->_add(ctxt_1, ctxt_2);
         return CipherText(ctxt_1);
@@ -250,8 +252,8 @@ namespace SpatialFHE {
     CipherText SEALCrypto::AddPlain(CipherText const &ct, PlainText const &pt) {
         seal::Ciphertext ctxt = seal::Ciphertext();
         seal::Plaintext ptxt = seal::Plaintext();
-        this->toSealCipherText(ctxt, ct);
-        this->toSealPlainText(ptxt, pt);
+        this->toSealCiphertext(ctxt, ct);
+        this->toSealPlaintext(ptxt, pt);
 
         this->_add_plain(ctxt, ptxt);
         return CipherText(ctxt);
@@ -270,21 +272,36 @@ namespace SpatialFHE {
         std::vector<CipherText> const &vec_ct_2,
         const size_t max_count) {
         return std::vector<CipherText>();
+        vector<seal::Ciphertext> vec_ctxt_1;
+        vector<seal::Ciphertext> vec_ctxt_2;
+        vector<seal::Ciphertext> vec_ctxt_result;
+        this->toSealCiphertext(vec_ctxt_1, vec_ct_1);
+        this->toSealCiphertext(vec_ctxt_2, vec_ct_2);
+        this->_full_adder(vec_ctxt_result, vec_ctxt_1, vec_ctxt_2, max_count);
+        
+        vector<CipherText> vec_result;
+        this->toCipherText(vec_result, vec_ctxt_result);
+        return vec_result;
     }
 
     std::vector<string> SEALCrypto::FullAdder(
         std::vector<string> const &vec_ct_1,
         std::vector<string> const &vec_ct_2,
         const size_t max_count) {
-        return std::vector<string>();
+            vector<CipherText> ct_1 = this->toCipherText(vec_ct_1);
+            vector<CipherText> ct_2 = this->toCipherText(vec_ct_2);
+            vector<CipherText> result = this->FullAdder(ct_1, ct_2, max_count);
+            vector<string> sresult;
+            transform(result.begin(), result.end(), back_inserter(sresult), [](CipherText const &ct) { return ct.toString(); });
+            return sresult;
     }
 
     CipherText SEALCrypto::Multiply(CipherText const &ct_1, CipherText const &ct_2) {
         seal::Ciphertext ctxt_1 = seal::Ciphertext();
         seal::Ciphertext ctxt_2 = seal::Ciphertext();
 
-        this->toSealCipherText(ctxt_1, ct_1);
-        this->toSealCipherText(ctxt_2, ct_2);
+        this->toSealCiphertext(ctxt_1, ct_1);
+        this->toSealCiphertext(ctxt_2, ct_2);
 
         this->_multiply(ctxt_1, ctxt_2);
         return CipherText(ctxt_1);
@@ -300,8 +317,8 @@ namespace SpatialFHE {
     CipherText SEALCrypto::MultiplyPlain(CipherText const &ct, PlainText const &pt) {
         seal::Ciphertext ctxt = seal::Ciphertext();
         seal::Plaintext ptxt = seal::Plaintext();
-        this->toSealCipherText(ctxt, ct);
-        this->toSealPlainText(ptxt, pt);
+        this->toSealCiphertext(ctxt, ct);
+        this->toSealPlaintext(ptxt, pt);
 
         this->_multiply_plain(ctxt, ptxt);
         return CipherText(ctxt);
@@ -317,7 +334,7 @@ namespace SpatialFHE {
     CipherText SEALCrypto::Square(CipherText const &ct) {
         seal::Ciphertext ctxt = seal::Ciphertext();
         seal::Ciphertext result_ctxt = seal::Ciphertext();
-        this->toSealCipherText(ctxt, ct);
+        this->toSealCiphertext(ctxt, ct);
         this->_square(result_ctxt, ctxt);
         return CipherText(result_ctxt);
     }
@@ -331,7 +348,7 @@ namespace SpatialFHE {
     CipherText SEALCrypto::Power(CipherText const &ct, int const &n) {
         seal::Ciphertext ctxt = seal::Ciphertext();
         seal::Ciphertext result = seal::Ciphertext();
-        this->toSealCipherText(ctxt, ct);
+        this->toSealCiphertext(ctxt, ct);
         this->_power(result, ctxt, n);
         return CipherText(result);
     }
@@ -346,8 +363,8 @@ namespace SpatialFHE {
         seal::Ciphertext ctxt_1 = seal::Ciphertext();
         seal::Ciphertext ctxt_2 = seal::Ciphertext();
 
-        this->toSealCipherText(ctxt_1, ct_1);
-        this->toSealCipherText(ctxt_2, ct_2);
+        this->toSealCiphertext(ctxt_1, ct_1);
+        this->toSealCiphertext(ctxt_2, ct_2);
 
         this->_sub(ctxt_1, ctxt_2);
         return CipherText(ctxt_1);
@@ -363,7 +380,7 @@ namespace SpatialFHE {
     CipherText SEALCrypto::Rotate(CipherText const &ct, int const &n) {
         seal::Ciphertext ctxt = seal::Ciphertext();
         seal::Ciphertext result = seal::Ciphertext();
-        this->toSealCipherText(ctxt, ct);
+        this->toSealCiphertext(ctxt, ct);
         this->_rotate(result, ctxt, n);
         return CipherText(result);
     }
@@ -377,7 +394,7 @@ namespace SpatialFHE {
     CipherText SEALCrypto::Shift(CipherText const &ct, int const &n) {
         seal::Ciphertext ctxt = seal::Ciphertext();
         seal::Ciphertext result = seal::Ciphertext();
-        this->toSealCipherText(ctxt, ct);
+        this->toSealCiphertext(ctxt, ct);
         this->_shift(result, ctxt, n);
         return CipherText(result);
     }
@@ -391,7 +408,7 @@ namespace SpatialFHE {
     CipherText SEALCrypto::RotateColumns(CipherText const &ct) {
         seal::Ciphertext ctxt = seal::Ciphertext();
         seal::Ciphertext result = seal::Ciphertext();
-        this->toSealCipherText(ctxt, ct);
+        this->toSealCiphertext(ctxt, ct);
         this->_rotate_columns(result, ctxt);
         return CipherText(result);
     }
@@ -405,8 +422,8 @@ namespace SpatialFHE {
     CipherText SEALCrypto::And(CipherText const &ct_1, CipherText const &ct_2) {
         seal::Ciphertext ctxt_1 = seal::Ciphertext();
         seal::Ciphertext ctxt_2 = seal::Ciphertext();
-        this->toSealCipherText(ctxt_1, ct_1);
-        this->toSealCipherText(ctxt_2, ct_2);
+        this->toSealCiphertext(ctxt_1, ct_1);
+        this->toSealCiphertext(ctxt_2, ct_2);
         seal::Ciphertext result = seal::Ciphertext();
         this->_and(result, ctxt_1, ctxt_2);
         return CipherText(result);
@@ -422,8 +439,8 @@ namespace SpatialFHE {
     CipherText SEALCrypto::Or(CipherText const &ct_1, CipherText const &ct_2) {
         seal::Ciphertext ctxt_1 = seal::Ciphertext();
         seal::Ciphertext ctxt_2 = seal::Ciphertext();
-        this->toSealCipherText(ctxt_1, ct_1);
-        this->toSealCipherText(ctxt_2, ct_2);
+        this->toSealCiphertext(ctxt_1, ct_1);
+        this->toSealCiphertext(ctxt_2, ct_2);
         seal::Ciphertext result = seal::Ciphertext();
         this->_or(result, ctxt_1, ctxt_2);
         return CipherText(result);
@@ -439,8 +456,8 @@ namespace SpatialFHE {
     CipherText SEALCrypto::Xor(CipherText const &ct_1, CipherText const &ct_2) {
         seal::Ciphertext ctxt_1 = seal::Ciphertext();
         seal::Ciphertext ctxt_2 = seal::Ciphertext();
-        this->toSealCipherText(ctxt_1, ct_1);
-        this->toSealCipherText(ctxt_2, ct_2);
+        this->toSealCiphertext(ctxt_1, ct_1);
+        this->toSealCiphertext(ctxt_2, ct_2);
         seal::Ciphertext result = seal::Ciphertext();
         this->_xor(result, ctxt_1, ctxt_2);
         return CipherText(result);
@@ -457,8 +474,8 @@ namespace SpatialFHE {
     CipherText SEALCrypto::Xnor(CipherText const &ct_1, CipherText const &ct_2) {
         seal::Ciphertext ctxt_1 = seal::Ciphertext();
         seal::Ciphertext ctxt_2 = seal::Ciphertext();
-        this->toSealCipherText(ctxt_1, ct_1);
-        this->toSealCipherText(ctxt_2, ct_2);
+        this->toSealCiphertext(ctxt_1, ct_1);
+        this->toSealCiphertext(ctxt_2, ct_2);
         seal::Ciphertext result = seal::Ciphertext();
         this->_xnor(result, ctxt_1, ctxt_2);
         return CipherText(result);
@@ -473,7 +490,7 @@ namespace SpatialFHE {
 
     CipherText SEALCrypto::Not(CipherText const &ct) {
         seal::Ciphertext ctxt = seal::Ciphertext();
-        this->toSealCipherText(ctxt, ct);
+        this->toSealCiphertext(ctxt, ct);
         this->_not(ctxt, ctxt);
         return CipherText(ctxt);
     }
@@ -487,7 +504,7 @@ namespace SpatialFHE {
     CipherText SEALCrypto::Mask(CipherText const &ct, int const &index) {
         seal::Ciphertext ctxt = seal::Ciphertext();
         seal::Ciphertext result = seal::Ciphertext();
-        this->toSealCipherText(ctxt, ct);
+        this->toSealCiphertext(ctxt, ct);
         this->_mask(result, ctxt, index);
         return CipherText(result);
     }
@@ -495,7 +512,7 @@ namespace SpatialFHE {
     CipherText SEALCrypto::Mask(CipherText const &ct, std::vector<int> const &indices) {
         seal::Ciphertext ctxt = seal::Ciphertext();
         seal::Ciphertext result = seal::Ciphertext();
-        this->toSealCipherText(ctxt, ct);
+        this->toSealCiphertext(ctxt, ct);
         this->_mask(result, ctxt, indices);
         return CipherText(result);
     }
@@ -523,7 +540,7 @@ namespace SpatialFHE {
     CipherText SEALCrypto::RunningSum(CipherText const &ct) {
         seal::Ciphertext ctxt = seal::Ciphertext();
         seal::Ciphertext result = seal::Ciphertext();
-        this->toSealCipherText(ctxt, ct);
+        this->toSealCiphertext(ctxt, ct);
         this->_running_sum(result, ctxt);
         return CipherText(result);
     }
@@ -537,7 +554,7 @@ namespace SpatialFHE {
     CipherText SEALCrypto::TotalSum(CipherText const &ct) {
         seal::Ciphertext ctxt = seal::Ciphertext();
         seal::Ciphertext result = seal::Ciphertext();
-        this->toSealCipherText(ctxt, ct);
+        this->toSealCiphertext(ctxt, ct);
         this->_total_sum(result, ctxt);
         return CipherText(result);
     }
@@ -552,84 +569,366 @@ namespace SpatialFHE {
     void SEALCrypto::createPlainVector(std::vector<PlainText> &vec, std::vector<T> const &data) {}
 
     template <typename T>
-    void SEALCrypto::createMask(std::vector<T> &mask, const int &index) {}
+    void SEALCrypto::createMask(std::vector<T> &mask, const int &index) {
+        fill(mask.begin(), mask.end(), 0);
+        mask[index] = 1;
+    }
 
     template <typename T>
-    void SEALCrypto::createShiftMask(std::vector<T> &mask, const int step, const int n) {}
-
-    CipherText SEALCrypto::getOne() {
-        return CipherText();
+    void SEALCrypto::createMask(std::vector<T> &mask, const std::vector<int> &indices) {
+        fill(mask.begin(), mask.end(), 0);
+        for (auto &index : indices) {
+            mask[index] = 1;
+        }
     }
 
-    CipherText SEALCrypto::getZero() {
-        return CipherText();
+    template <typename T>
+    void SEALCrypto::createShiftMask(std::vector<T> &mask, const int step, const int n) {
+        if (step > -n && step < n) {
+            if (step < 0) {
+                for (int i = -1; i >= step; i--) {
+                    mask[i+mask.size()] = 0;
+                }
+            } else if (step > 0) { 
+                for (int i = 0; i < step; i++) {
+                    mask[i] = 0;
+                }
+            }
+        } else {
+            mask.assign(mask.size(), 0);
+        }
     }
 
-    void SEALCrypto::setEncoder(HECrypto::HEScheme scheme) {}
+    seal::Ciphertext SEALCrypto::getOne() {
+        if (this->ctxt_one.size() == 0) {
+            seal::Plaintext ptxt = seal::Plaintext("1");
+            this->_encrypt(this->ctxt_one, ptxt);
+        }
+    }
 
-    void SEALCrypto::setHEScheme(HECrypto::HEScheme scheme) {}
+    seal::Ciphertext SEALCrypto::getZero() {
+        if (this->ctxt_zero.size() == 0) {
+            seal::Plaintext ptxt = seal::Plaintext("0");
+            this->_encrypt(this->ctxt_zero, ptxt);
+        }
+    }
 
     void SEALCrypto::setEncryptionParams(CryptoParams const &params) {}
 
-    void SEALCrypto::toSealCipherText(seal::Ciphertext &ct, CipherText const &c) {}
+    void SEALCrypto::toSealCiphertext(seal::Ciphertext &ct, CipherText const &c) {
+        CipherTextData data = c.getData(); 
+        if (holds_alternative<string>(data)) {
+            string s = get<string>(data);
+            base64::decoder decoder;
+            stringstream decoded, in(s);
+            decoder.decode(in, decoded);
+            ct.load(*this->sealContext, decoded);
+        } else if (holds_alternative<seal::Ciphertext>(data)) {
+            ct = get<seal::Ciphertext>(data);
+        } else {
+            throw invalid_argument("Invalid CipherTextData type");
+        }
 
-    void SEALCrypto::toSealCipherText(std::vector<seal::Ciphertext> &vec_ct, std::vector<CipherText> const &vec_c) {}
+    }
 
-    void SEALCrypto::toSealPlainText(seal::Plaintext &pt, PlainText const &p) {}
+    void SEALCrypto::toSealCiphertext(std::vector<seal::Ciphertext> &vec_ct, std::vector<CipherText> const &vec_c) {
+        transform(vec_c.begin(), vec_c.end(), back_inserter(vec_ct), [this](CipherText const &c) {
+            seal::Ciphertext ct;
+            this->toSealCiphertext(ct, c);
+            return ct;
+        });
+    }
 
-    void SEALCrypto::toSealPlainText(std::vector<seal::Plaintext> &vec_pt, std::vector<PlainText> const &vec_p) {}
+    void SEALCrypto::toSealPlaintext(seal::Plaintext &pt, PlainText const &p) {}
 
-    void SEALCrypto::_encrypt(seal::Ciphertext &ct, seal::Plaintext const &pt) {}
+    void SEALCrypto::toSealPlaintext(std::vector<seal::Plaintext> &vec_pt, std::vector<PlainText> const &vec_p) {}
 
-    void SEALCrypto::_decrypt(seal::Plaintext &pt, seal::Ciphertext const &ct) {}
+    void SEALCrypto::toCipherText(CipherText &c, seal::Ciphertext const &ct) {
+        c.setData(ct);
+    }
 
-    void SEALCrypto::_add(seal::Ciphertext &ct_1, seal::Ciphertext const &ct_2) {}
+    void SEALCrypto::toCipherText(std::vector<CipherText> &vec_c, std::vector<seal::Ciphertext> const &vec_ct) {
+        transform(vec_ct.begin(), vec_ct.end(), back_inserter(vec_c), [this](seal::Ciphertext const &ct) {
+            CipherText c;
+            this->toCipherText(c, ct);
+            return c;
+        });
+    }
 
-    void SEALCrypto::_add(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {}
+    void SEALCrypto::toPlainText(PlainText &p, seal::Plaintext const &pt) {}
 
-    void SEALCrypto::_add_plain(seal::Ciphertext &ct, seal::Plaintext const &pt) {}
+    void SEALCrypto::toPlainText(std::vector<PlainText> &vec_p, std::vector<seal::Plaintext> const &vec_pt) {}
+
+    void SEALCrypto::_encrypt(seal::Ciphertext &ct, seal::Plaintext const &pt) {
+        this->encryptor->encrypt(pt, ct);
+    }
+
+    void SEALCrypto::_decrypt(seal::Plaintext &pt, seal::Ciphertext const &ct) {
+        this->decryptor->decrypt(ct, pt);
+    }
+
+    void SEALCrypto::_add(seal::Ciphertext &ct_1, seal::Ciphertext const &ct_2) {
+        this->evaluator->add_inplace(ct_1, ct_2);
+    }
+
+    void SEALCrypto::_add(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {
+        this->evaluator->add(ct_1, ct_2, result);
+    }
+
+    void SEALCrypto::_add_plain(seal::Ciphertext &ct, seal::Plaintext const &pt) {
+        this->evaluator->add_plain_inplace(ct, pt);
+    }
 
     void SEALCrypto::_full_adder(
         std::vector<seal::Ciphertext> &result,
         std::vector<seal::Ciphertext> const &vec_ct_1,
         std::vector<seal::Ciphertext> const &vec_ct_2,
-        const size_t max_count) {}
+        const size_t max_count) {
+            seal::Ciphertext x, y, temp, carry, carry_old;
+            carry_old = this->getZero();
+            
 
-    void SEALCrypto::_sub(seal::Ciphertext &ct_1, seal::Ciphertext const &ct_2) {}
+            int size = max(vec_ct_1.size(), vec_ct_2.size())+1;
+            result.resize(size);
 
-    void SEALCrypto::_sub(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {}
+            for (int i = 0; i < size; i++) {
+                if (i < vec_ct_1.size()) {
+                    x = vec_ct_1[i];
+                } else {
+                    x = this->getZero();
+                }
 
-    void SEALCrypto::_multiply(seal::Ciphertext &ct_1, seal::Ciphertext const &ct_2) {}
+                if (i < vec_ct_2.size()) {
+                    y = vec_ct_2[i];
+                } else {
+                    y = this->getZero();
+                }
 
-    void SEALCrypto::_multiply(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {}
+                _xor(carry, x, y);
+                _and(carry, carry, carry_old);
+                _and(temp, x, y);
+                _xor(carry, carry, temp);
+                _xor(result[i], x, y);
+                _xor(result[i], result[i], carry_old);
+                carry_old = carry;
+            }
+        }
 
-    void SEALCrypto::_multiply_plain(seal::Ciphertext &ct, seal::Plaintext const &pt) {}
+    void SEALCrypto::_sub(seal::Ciphertext &ct_1, seal::Ciphertext const &ct_2) {
+        this->evaluator->sub_inplace(ct_1, ct_2);
+    }
 
-    void SEALCrypto::_square(seal::Ciphertext &result, seal::Ciphertext const &ct) {}
+    void SEALCrypto::_sub(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {
+        this->evaluator->sub(ct_1, ct_2, result);
+    }
 
-    void SEALCrypto::_power(seal::Ciphertext &result, seal::Ciphertext const &ct, int const &n) {}
+    void SEALCrypto::_multiply(seal::Ciphertext &ct_1, seal::Ciphertext const &ct_2) {
+        this->evaluator->multiply_inplace(ct_1, ct_2);
+        if (this->params->plainModulus == 2) {
+            this->evaluator->relinearize_inplace(ct_1, this->relinKeys);
+        }
+        if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
+            this->evaluator->rescale_to_next_inplace(ct_1);
+        }
+    }
 
-    void SEALCrypto::_rotate(seal::Ciphertext &result, seal::Ciphertext const &ct, int const &step) {}
+    void SEALCrypto::_multiply(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {
+        this->evaluator->multiply(ct_1, ct_2, result);
+        if (this->params->plainModulus == 2) {
+            this->evaluator->relinearize_inplace(result, this->relinKeys);
+        }
+        if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
+            this->evaluator->rescale_to_next_inplace(result);
+        }
+    }
 
-    void SEALCrypto::_rotate_columns(seal::Ciphertext &result, seal::Ciphertext const &ct) {}
+    void SEALCrypto::_multiply_plain(seal::Ciphertext &ct, seal::Plaintext const &pt) {
+        this->evaluator->multiply_plain_inplace(ct, pt);
+        if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
+            this->evaluator->rescale_to_next_inplace(ct);
+        }
+    }
 
-    void SEALCrypto::_shift(seal::Ciphertext &result, seal::Ciphertext const &ct, int const &n) {}
+    void SEALCrypto::_square(seal::Ciphertext &result, seal::Ciphertext const &ct) {
+        this->evaluator->square(ct, result);
+        if (this->params->plainModulus == 2) {
+            this->evaluator->relinearize_inplace(result, this->relinKeys);
+        }
+        if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
+            this->evaluator->rescale_to_next_inplace(result);
+        }
+    }
 
-    void SEALCrypto::_and(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {}
+    void SEALCrypto::_power(seal::Ciphertext &result, seal::Ciphertext const &ct, int const &n) {
+        this->evaluator->exponentiate(ct, n, this->relinKeys, result);
+    }
 
-    void SEALCrypto::_or(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {}
+    void SEALCrypto::_rotate(seal::Ciphertext &result, seal::Ciphertext const &ct, int const &step) {
+        result = ct;
+        if (ct.size() > 2) {
+            this->evaluator->relinearize_inplace(result, this->relinKeys);
+        } else {
+            if (this->params->schemeType == HECrypto::HEScheme::BFV) {
+                this->evaluator->rotate_rows_inplace(result, -step, this->galoisKeys);
+            } else if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
+                this->evaluator->rotate_vector_inplace(result, -step, this->galoisKeys);
+            } else {
+                cerr<<"Invalid scheme type"<<endl;
+                exit(1);
+            }
+        }
+    }
 
-    void SEALCrypto::_xor(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {}
+    void SEALCrypto::_rotate_columns(seal::Ciphertext &result, seal::Ciphertext const &ct) {
+        if (this->params->schemeType == HECrypto::HEScheme::BFV) {
+            result = ct;
+            if (ct.size() > 2) {
+                this->evaluator->relinearize_inplace(result, this->relinKeys);
+            } else {
+                this->evaluator->rotate_columns_inplace(result, this->galoisKeys);
+            }
+        } else {
+            cerr<<"Invalid scheme type"<<endl;
+            exit(1);
+        }
+    }
 
-    void SEALCrypto::_xnor(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {}
+    void SEALCrypto::_shift(seal::Ciphertext &result, seal::Ciphertext const &ct, int const &step) {
+        seal::Plaintext mask;
+        if (this->params->schemeType == HECrypto::HEScheme::BFV) {
+            vector<ulong> tmp_mask;
+            this->createShiftMask<ulong>(tmp_mask, step, this->slot_count);
+            this->batchEncoder->encode(tmp_mask, mask);
+            this->_rotate(result, ct, step);
+            this->evaluator->multiply_plain_inplace(result, mask);
+        } else if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
+            vector<double> tmp_mask;
+            this->createShiftMask<double>(tmp_mask, step, this->slot_count);
+            this->ckksEncoder->encode(tmp_mask, this->params->scale, mask);
+            this->_rotate(result, ct, step);
+            this->evaluator->mod_switch_to_inplace(mask, result.parms_id());
+            this->evaluator->multiply_plain_inplace(result, mask);
+            this->evaluator->rescale_to_next_inplace(result);
+            result.scale() = this->params->scale;
+        } else {
+            cerr<<"Invalid scheme type"<<endl;
+            exit(1);
+        }
+    }
 
-    void SEALCrypto::_not(seal::Ciphertext &result, seal::Ciphertext const &ct) {}
+    void SEALCrypto::_and(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {
+        this->evaluator->multiply(ct_1, ct_2, result);
+    }
 
-    void SEALCrypto::_mask(seal::Ciphertext &result, seal::Ciphertext const &ct, int const &index) {}
+    void SEALCrypto::_or(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {
+        seal::Ciphertext mult12 = seal::Ciphertext();
+        this->_multiply(mult12, ct_1, ct_2);       
+        seal::Ciphertext add12 = seal::Ciphertext();
+        this->_add(add12, ct_1, ct_2);
+        this->_sub(result, add12, mult12);
+    }   
 
-    void SEALCrypto::_mask(seal::Ciphertext &result, seal::Ciphertext const &ct, std::vector<int> const &indices) {}
+    void SEALCrypto::_xor(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {
+        if (this->params->plainModulus == 2) {
+            this->_add(result, ct_1, ct_2);
+        } else {
+            seal::Ciphertext mult12 = seal::Ciphertext();
+            this->_multiply(mult12, ct_1, ct_2);
+            seal::Plaintext ptxt = seal::Plaintext("2");
+            this->_multiply_plain(mult12, ptxt);
+            seal::Ciphertext add12 = seal::Ciphertext();
+            this->_add(add12, ct_1, ct_2);
+            this->_sub(result, add12, mult12);
+        }
+    }
 
-    void SEALCrypto::_total_sum(seal::Ciphertext &result, seal::Ciphertext const &ct) {}
+    void SEALCrypto::_xnor(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {
+        if (this->params->plainModulus == 2) {
+            this->_add(result, ct_1, ct_2);
+            this->_add(result, this->getOne());
+        } else {
+            this->_not(result, ct_2);
+            this->_xor(result, ct_1, result);
+        }
+    }
+
+    void SEALCrypto::_not(seal::Ciphertext &result, seal::Ciphertext const &ct) {
+        this->_sub(result, this->getOne(), ct);
+    }
+
+    void SEALCrypto::_mask(seal::Ciphertext &result, seal::Ciphertext const &ct, int const &index) {
+        seal::Plaintext ptxt_mask;
+        result = ct;
+        if (this->params->schemeType == HECrypto::HEScheme::BFV) {
+            vector<ulong> mask;
+            mask.resize(this->slot_count, 0);           
+            this->createMask<ulong>(mask, index);
+            this->batchEncoder->encode(mask, ptxt_mask);
+            this->evaluator->multiply_plain_inplace(result, ptxt_mask);
+        } else if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
+            vector<double> mask;
+            mask.resize(this->slot_count, 0);
+            this->createMask<double>(mask, index);
+            this->ckksEncoder->encode(mask, this->params->scale, ptxt_mask);
+            this->evaluator->mod_switch_to_inplace(ptxt_mask, result.parms_id());
+            this->evaluator->multiply_plain_inplace(result, ptxt_mask);
+            this->evaluator->rescale_to_next_inplace(result);
+            result.scale() = this->params->scale;
+        } else {
+            cerr<<"Invalid scheme type"<<endl;
+            exit(1);
+        }
+    }
+
+    void SEALCrypto::_mask(seal::Ciphertext &result, seal::Ciphertext const &ct, std::vector<int> const &indices) {
+        seal::Plaintext ptxt_mask;
+        result = ct;
+        if (this->params->schemeType == HECrypto::HEScheme::BFV) {
+            vector<ulong> mask;
+            mask.resize(this->slot_count, 0);           
+            this->createMask<ulong>(mask, indices);
+            this->batchEncoder->encode(mask, ptxt_mask);
+            this->evaluator->multiply_plain_inplace(result, ptxt_mask);
+        } else if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
+            vector<double> mask;
+            mask.resize(this->slot_count, 0);
+            this->createMask<double>(mask, indices);
+            this->ckksEncoder->encode(mask, this->params->scale, ptxt_mask);
+            this->evaluator->mod_switch_to_inplace(ptxt_mask, result.parms_id());
+            this->evaluator->multiply_plain_inplace(result, ptxt_mask);
+            this->evaluator->rescale_to_next_inplace(result);
+            result.scale() = this->params->scale;
+        } else {
+            cerr<<"Invalid scheme type"<<endl;
+            exit(1);
+        }
+    }
+
+    void SEALCrypto::_total_sum(seal::Ciphertext &result, seal::Ciphertext const &ct) {
+        seal::Ciphertext tmp;
+        result = ct;
+        int limit = (this->params->schemeType == HECrypto::HEScheme::BFV) ? (this->slot_count >> 1) - 1 : this->slot_count >> 1;
+        for (int i = 1; i <= limit; i++) {
+            this->_rotate(tmp, ct, i);
+            this->_add(result, tmp);
+        }
+        if (this->params->schemeType == HECrypto::HEScheme::BFV) {
+            this->_rotate_columns(tmp, result);
+            this->_add(result, tmp);
+        }
+    }
+
+    void SEALCrypto::_running_sum(seal::Ciphertext &result, seal::Ciphertext const &ct) {
+        seal::Ciphertext tmp;
+        result = ct;
+        for (int i = 0; i <=2; i++) {
+            this->_shift(tmp, ct, 1 << i);
+            if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
+                this->evaluator->mod_switch_to_inplace(tmp, result.parms_id());
+            }
+            this->_add(result, tmp);
+        }
+    }
 
     void SEALCrypto::update_encryption_params(CryptoParams& crypto_params) {
         if (crypto_params.find("PlaintextModulus") != crypto_params.end()) {
@@ -673,6 +972,17 @@ namespace SpatialFHE {
         } else {
             cerr<<"Invalid scheme type: "<<scheme<<endl;
             exit(1);
+        }
+    }
+
+    void SEALCrypto::set_encoder(HECrypto::HEScheme scheme) {
+        // TODO: given that the IntegerEncoder is deprecated, we should find a way to replace it.
+        if (scheme == HECrypto::HEScheme::BFV) {
+            this->batchEncoder = new seal::BatchEncoder(*this->sealContext);
+            this->slot_count = this->batchEncoder->slot_count();
+        } else if (scheme == HECrypto::HEScheme::CKKS) {
+            this->ckksEncoder = new seal::CKKSEncoder(*this->sealContext);
+            this->slot_count = this->ckksEncoder->slot_count();
         }
     }
 

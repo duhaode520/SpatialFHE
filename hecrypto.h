@@ -65,11 +65,11 @@ namespace SpatialFHE {
 
         // transform to CipherText and PlainText
 
-        virtual CipherText AsCipherText(std::string const& str) = 0;
-        virtual std::vector<CipherText> AsCipherText(std::vector<std::string> const& strs) = 0;
+        virtual CipherText toCipherText(std::string const& str) = 0;
+        virtual std::vector<CipherText> toCipherText(std::vector<std::string> const& strs) = 0;
 
-        virtual PlainText AsPlainText(std::string const& str) = 0;
-        virtual std::vector<PlainText> AsPlainText(std::vector<std::string> const& strs) = 0;
+        virtual PlainText toPlainText(std::string const& str) = 0;
+        virtual std::vector<PlainText> toPlainText(std::vector<std::string> const& strs) = 0;
 
         // algebraic operations
 

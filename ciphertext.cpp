@@ -43,6 +43,10 @@ namespace SpatialFHE {
         }
     }
 
+    CipherTextData CipherText::getData() const {
+        return this->data;
+    }
+
     CipherText SpatialFHE::CipherText::operator=(CipherText const &other) {
         if (this != &other) {
             this->data = other.data;
