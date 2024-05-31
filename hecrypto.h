@@ -1,16 +1,16 @@
 #pragma once
 
 #include <seal/seal.h>
-#include <ciphertext.h>
-#include <plaintext.h>
 #include <rapidjson/document.h>
 
 #include <map>
 #include <string>
 #include <vector>
+#include "ciphertext.h"
+#include "plaintext.h"
 
 namespace SpatialFHE {
-    const char* HESchemeStrings[] = {"BGV", "BFV", "CKKS"};
+    extern const char* HESchemeStrings[];
 
     class HECrypto {
     private:

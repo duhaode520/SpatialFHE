@@ -7,8 +7,8 @@ namespace SpatialFHE {
     SEALCrypto::SEALCrypto() : HECrypto() {
         seal::MemoryPoolHandle p_pool;
         // initialize seal context
-        this->sealContext = std::make_shared<seal::SEALContext>();
-        
+        //FIXME: need to have a param
+        // this->sealContext = std::make_shared<seal::SEALContext>(this->sealContext);
         // Initialize keys
         this->publicKey = seal::PublicKey();
         this->secretKey = seal::SecretKey();
@@ -112,6 +112,8 @@ namespace SpatialFHE {
             return this->Encode(stol(str));
         } else if (this->params->schemeType == HECrypto::HEScheme::CKKS){
             return this->Encode(stod(str));
+        } else {
+            throw invalid_argument("Invalid scheme type");
         }
     }
 
@@ -199,7 +201,7 @@ namespace SpatialFHE {
     }
 
     std::string SEALCrypto::Decrypt(std::string const &sct, bool noBatching) {
-        this->Decrypt(CipherText(sct), noBatching).toString();
+        return this->Decrypt(CipherText(sct), noBatching).toString();
     }
 
     CipherText SEALCrypto::toCipherText(std::string const &sct) {
@@ -292,7 +294,7 @@ namespace SpatialFHE {
             vector<CipherText> ct_2 = this->toCipherText(vec_ct_2);
             vector<CipherText> result = this->FullAdder(ct_1, ct_2, max_count);
             vector<string> sresult;
-            transform(result.begin(), result.end(), back_inserter(sresult), [](CipherText const &ct) { return ct.toString(); });
+            transform(result.begin(), result.end(), back_inserter(sresult), [](CipherText &ct) { return ct.toString(); });
             return sresult;
     }
 
@@ -603,7 +605,8 @@ namespace SpatialFHE {
         if (this->ctxt_one.size() == 0) {
             seal::Plaintext ptxt = seal::Plaintext("1");
             this->_encrypt(this->ctxt_one, ptxt);
-        }
+        }  
+        return this->ctxt_one;
     }
 
     seal::Ciphertext SEALCrypto::getZero() {
@@ -611,6 +614,7 @@ namespace SpatialFHE {
             seal::Plaintext ptxt = seal::Plaintext("0");
             this->_encrypt(this->ctxt_zero, ptxt);
         }
+        return this->ctxt_zero;
     }
 
     void SEALCrypto::setEncryptionParams(CryptoParams const &params) {}

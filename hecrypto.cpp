@@ -1,6 +1,7 @@
 #include "hecrypto.h"
 
 namespace SpatialFHE {
+    const char* HESchemeStrings[] = {"BGV", "BFV", "CKKS"};
     HECrypto::HECrypto() {
         
     }
