@@ -16,13 +16,5 @@ find_package(RapidJSON CONFIG REQUIRED)
 
 add_definitions(-DBUFFERSIZE=65536)
 
-# 添加所有源文件到库中
-file(GLOB SOURCES "*.cpp")
-add_library(${PROJECT_NAME} SHARED ${SOURCES})
-
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
-target_link_libraries(${PROJECT_NAME} PRIVATE SEAL::seal)
-target_link_libraries(${PROJECT_NAME} PRIVATE ZLIB::ZLIB)
-target_link_libraries(${PROJECT_NAME} PRIVATE zstd::libzstd)
-target_link_libraries(${PROJECT_NAME} PRIVATE unofficial::b64::b64)
-target_link_libraries(${PROJECT_NAME} PRIVATE rapidjson)
+add_subdirectory(src)
+add_subdirectory(test)

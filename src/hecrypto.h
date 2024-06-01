@@ -146,8 +146,8 @@ namespace SpatialFHE {
         virtual std::string TotalSum(std::string const& sct) = 0;
 
         // gets
-
-        virtual void* GetCryptoParam(std::string const& param) = 0;
+        // unknown use, deprecated
+        // virtual void* GetCryptoParam(std::string const& param) = 0;
 
         static const char* HESchemeToString(HEScheme scheme);
     };
