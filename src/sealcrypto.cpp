@@ -7,8 +7,6 @@ namespace SpatialFHE {
     SEALCrypto::SEALCrypto() : HECrypto() {
         seal::MemoryPoolHandle p_pool;
         // initialize seal context
-        //FIXME: need to have a param
-        // this->sealContext = std::make_shared<seal::SEALContext>(this->sealContext);
         // Initialize keys
         this->publicKey = seal::PublicKey();
         this->secretKey = seal::SecretKey();
@@ -18,9 +16,27 @@ namespace SpatialFHE {
         // Initialize ciphertexts ctxt_one and ctxt_zero
         this->ctxt_one = seal::Ciphertext();
         this->ctxt_zero = seal::Ciphertext();
+
+        // Initialize pointers
+        this->sealParams = nullptr;
+        this->params = nullptr;
+        this->encryptor = nullptr;
+        this->decryptor = nullptr;
+        this->evaluator = nullptr;
+        this->ckksEncoder = nullptr;
+        this->batchEncoder = nullptr;
+
     }
 
-    SEALCrypto::~SEALCrypto() {}
+    SEALCrypto::~SEALCrypto() {
+        if (this->sealParams) delete this->sealParams;
+        if (this->params) delete this->params;
+        if (this->encryptor) delete this->encryptor;
+        if (this->decryptor) delete this->decryptor;
+        if (this->evaluator) delete this->evaluator;
+        if (this->ckksEncoder) delete this->ckksEncoder;
+        if (this->batchEncoder) delete this->batchEncoder;
+    }
 
     void SEALCrypto::GenerateKeyPair(
         CryptoParams& params,
@@ -990,13 +1006,15 @@ namespace SpatialFHE {
         }
     }
 
-    std::vector<long> SEALCrypto::to_long_vec(rapidjson::GenericValue<rapidjson::UTF8<>> &data) {
+    std::vector<long> SEALCrypto::to_long_vec(rapidjson::Value &data) {
         std::vector<long> vec;
-        // TODO: 可能有问题，需要测试
-        // 另外一种写法是 data[i].GetInt64()
-        for (auto &v : data.GetArray()) {
-            vec.push_back(v.GetInt64());
+        for (rapidjson::SizeType i = 0; i < data.Size(); i++) {
+            if (data[i].IsInt64())
+                vec.push_back(data[i].GetInt64());
+            else 
+                throw invalid_argument("Invalid data type");
         }
+
         return vec;
     }
 

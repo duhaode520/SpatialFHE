@@ -25,7 +25,7 @@ namespace SpatialFHE {
 
         enum class HELibrary { SEAL, HELIB };
 
-        using CryptoParams = std::map<std::string, rapidjson::GenericValue<rapidjson::UTF8<>>>;
+        using CryptoParams = std::map<std::string, rapidjson::Value>;
         HECrypto();
         ~HECrypto();
 

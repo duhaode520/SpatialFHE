@@ -73,7 +73,7 @@ namespace SpatialFHE {
         void _running_sum(seal::Ciphertext& result, seal::Ciphertext const& ct);
 
         void update_encryption_params(CryptoParams& params);
-        std::vector<long> to_long_vec(rapidjson::GenericValue<rapidjson::UTF8<>>& data);
+        std::vector<long> to_long_vec(rapidjson::Value& data);
 
         seal::scheme_type set_fhe_scheme(HECrypto::HEScheme scheme);
         void parse_scheme(std::string const& scheme);
