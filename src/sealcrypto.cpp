@@ -1,5 +1,11 @@
 #include "sealcrypto.h"
 #include <b64/decode.h>
+#include <seal/plaintext.h>
+#include <sstream>
+#include <variant>
+#include <vector>
+#include "hecrypto.h"
+#include "plaintext.h"
 
 using namespace std;
 
@@ -25,90 +31,95 @@ namespace SpatialFHE {
         this->evaluator = nullptr;
         this->ckksEncoder = nullptr;
         this->batchEncoder = nullptr;
-
     }
 
     SEALCrypto::~SEALCrypto() {
-        if (this->sealParams) delete this->sealParams;
-        if (this->params) delete this->params;
-        if (this->encryptor) delete this->encryptor;
-        if (this->decryptor) delete this->decryptor;
-        if (this->evaluator) delete this->evaluator;
-        if (this->ckksEncoder) delete this->ckksEncoder;
-        if (this->batchEncoder) delete this->batchEncoder;
+        if (this->sealParams)
+            delete this->sealParams;
+        if (this->params)
+            delete this->params;
+        if (this->encryptor)
+            delete this->encryptor;
+        if (this->decryptor)
+            delete this->decryptor;
+        if (this->evaluator)
+            delete this->evaluator;
+        if (this->ckksEncoder)
+            delete this->ckksEncoder;
+        if (this->batchEncoder)
+            delete this->batchEncoder;
     }
 
     void SEALCrypto::GenerateKeyPair(
-        CryptoParams& params,
+        CryptoParams &params,
         std::string const &pubKeyFilename,
         std::string const &secKeyFilename) {
-            this->params = new SEALEncryptionParams();
-            this->update_encryption_params(params);
-            seal::scheme_type type = this->set_fhe_scheme(this->params->schemeType);
-            seal::EncryptionParameters encParams(type);
-            encParams.set_poly_modulus_degree(this->params->polyModulusDegree);
+        this->params = new SEALEncryptionParams();
+        this->update_encryption_params(params);
+        seal::scheme_type type = this->set_fhe_scheme(this->params->schemeType);
+        seal::EncryptionParameters encParams(type);
+        encParams.set_poly_modulus_degree(this->params->polyModulusDegree);
 
-            if (!all_of(this->params->coeffModulusPrimes.begin(), this->params->coeffModulusPrimes.end(), [](long i) { return i == 0; })) {
-                vector<seal::Modulus> coeff_modulus;
-                for (auto &prime : this->params->coeffModulusPrimes) {
-                    coeff_modulus.push_back(seal::Modulus(prime));
-                }
-                encParams.set_coeff_modulus(coeff_modulus);
-            } else {
-                if (this->params->schemeType == HECrypto::HEScheme::BFV) {
-                    encParams.set_coeff_modulus(seal::CoeffModulus::BFVDefault(this->params->polyModulusDegree));
-                } else if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
-                    encParams.set_coeff_modulus(seal::CoeffModulus::Create(this->params->polyModulusDegree, this->params->coeffModulusBits));
-                }
-
-                vector<ulong> coeffmod_primes;
-                vector<ulong> coeffmod_bits;
-                for (auto &mod : encParams.coeff_modulus()) {
-                    coeffmod_primes.push_back(mod.value());
-                    coeffmod_bits.push_back(mod.bit_count());
-                }
-                
-                this->params->coeffModulusBits = vector<int>(coeffmod_bits.begin(), coeffmod_bits.end());
-                this->params->coeffModulusPrimes = coeffmod_primes;
+        if (!all_of(this->params->coeffModulusPrimes.begin(), this->params->coeffModulusPrimes.end(), [](long i) {
+                return i == 0;
+            })) {
+            vector<seal::Modulus> coeff_modulus;
+            for (auto &prime : this->params->coeffModulusPrimes) {
+                coeff_modulus.push_back(seal::Modulus(prime));
+            }
+            encParams.set_coeff_modulus(coeff_modulus);
+        } else {
+            if (this->params->schemeType == HECrypto::HEScheme::BFV) {
+                encParams.set_coeff_modulus(seal::CoeffModulus::BFVDefault(this->params->polyModulusDegree));
+            } else if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
+                encParams.set_coeff_modulus(
+                    seal::CoeffModulus::Create(this->params->polyModulusDegree, this->params->coeffModulusBits));
             }
 
-            this->sealParams = new seal::EncryptionParameters(encParams);
-            seal::SEALContext context(encParams);
-            this->sealContext = std::make_shared<seal::SEALContext>(context);
-
-            // keygen
-            seal::KeyGenerator keygen(context);
-
-            this->secretKey = keygen.secret_key();
-            
-            keygen.create_public_key(this->publicKey);
-
-
-            if (context.using_keyswitching()) {
-                keygen.create_relin_keys(this->relinKeys);
-                if (this->batching) {
-                    keygen.create_galois_keys(this->galoisKeys);
-                }
+            vector<ulong> coeffmod_primes;
+            vector<ulong> coeffmod_bits;
+            for (auto &mod : encParams.coeff_modulus()) {
+                coeffmod_primes.push_back(mod.value());
+                coeffmod_bits.push_back(mod.bit_count());
             }
 
-            this->set_encoder(this->params->schemeType);
-
-            this->encryptor = new seal::Encryptor(*this->sealContext, this->publicKey);
-            this->decryptor = new seal::Decryptor(*this->sealContext, this->secretKey);
-            this->evaluator = new seal::Evaluator(*this->sealContext);
-            // TODO: save keys to file
-            // 可能需要重新考虑一个方式来保存或者说要不要保存
-
+            this->params->coeffModulusBits = vector<int>(coeffmod_bits.begin(), coeffmod_bits.end());
+            this->params->coeffModulusPrimes = coeffmod_primes;
         }
+
+        this->sealParams = new seal::EncryptionParameters(encParams);
+        seal::SEALContext context(encParams);
+        this->sealContext = std::make_shared<seal::SEALContext>(context);
+
+        // keygen
+        seal::KeyGenerator keygen(context);
+
+        this->secretKey = keygen.secret_key();
+
+        keygen.create_public_key(this->publicKey);
+
+        if (context.using_keyswitching()) {
+            keygen.create_relin_keys(this->relinKeys);
+            if (this->batching) {
+                keygen.create_galois_keys(this->galoisKeys);
+            }
+        }
+
+        this->set_encoder(this->params->schemeType);
+
+        this->encryptor = new seal::Encryptor(*this->sealContext, this->publicKey);
+        this->decryptor = new seal::Decryptor(*this->sealContext, this->secretKey);
+        this->evaluator = new seal::Evaluator(*this->sealContext);
+        // TODO: save keys to file
+        // 可能需要重新考虑一个方式来保存或者说要不要保存
+    }
 
     void SEALCrypto::LoadKeyPair(std::string const &pubKeyFilename, std::string const &secKeyFilename) {
         this->LoadPublicKey(pubKeyFilename);
         this->LoadSecretkey(secKeyFilename);
     }
 
-    void SEALCrypto::LoadPublicKey(std::string const &pubKeyFilename) {
-
-    }
+    void SEALCrypto::LoadPublicKey(std::string const &pubKeyFilename) {}
 
     PlainText SEALCrypto::Encode(double d) {
         seal::Plaintext ptxt = seal::Plaintext();
@@ -126,7 +137,7 @@ namespace SpatialFHE {
     PlainText SEALCrypto::Encode(std::string const &str) {
         if (this->params->schemeType == HECrypto::HEScheme::BFV) {
             return this->Encode(stol(str));
-        } else if (this->params->schemeType == HECrypto::HEScheme::CKKS){
+        } else if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
             return this->Encode(stod(str));
         } else {
             throw invalid_argument("Invalid scheme type");
@@ -152,7 +163,7 @@ namespace SpatialFHE {
         } else {
             this->createPlainVector<double>(ptxt_vec, vec);
         }
-        return std::vector<PlainText>();
+        return ptxt_vec;
     }
 
     std::vector<PlainText> SEALCrypto::EncodeMany(std::vector<long> const &vec) {
@@ -221,7 +232,7 @@ namespace SpatialFHE {
     }
 
     CipherText SEALCrypto::toCipherText(std::string const &sct) {
-        seal::Ciphertext ctxt ;
+        seal::Ciphertext ctxt;
         base64::decoder decoder;
         stringstream decoded, in(sct);
         decoder.decode(in, decoded);
@@ -231,7 +242,8 @@ namespace SpatialFHE {
 
     std::vector<CipherText> SEALCrypto::toCipherText(std::vector<std::string> const &scts) {
         vector<CipherText> vec;
-        transform(scts.begin(), scts.end(), back_inserter(vec), [this](string const &s) { return this->toCipherText(s); });
+        transform(
+            scts.begin(), scts.end(), back_inserter(vec), [this](string const &s) { return this->toCipherText(s); });
         return vec;
     }
 
@@ -244,7 +256,8 @@ namespace SpatialFHE {
 
     std::vector<PlainText> SEALCrypto::toPlainText(std::vector<std::string> const &spts) {
         vector<PlainText> vec;
-        transform(spts.begin(), spts.end(), back_inserter(vec), [this](string const &s) { return this->toPlainText(s); });
+        transform(
+            spts.begin(), spts.end(), back_inserter(vec), [this](string const &s) { return this->toPlainText(s); });
         return vec;
     }
 
@@ -264,7 +277,6 @@ namespace SpatialFHE {
         CipherText ct_2 = CipherText(sct_2);
         CipherText result = this->Add(ct_1, ct_2);
         return result.toString();
-
     }
 
     CipherText SEALCrypto::AddPlain(CipherText const &ct, PlainText const &pt) {
@@ -275,7 +287,6 @@ namespace SpatialFHE {
 
         this->_add_plain(ctxt, ptxt);
         return CipherText(ctxt);
-
     }
 
     std::string SEALCrypto::AddPlain(std::string const &sct, std::string const &spt) {
@@ -296,7 +307,7 @@ namespace SpatialFHE {
         this->toSealCiphertext(vec_ctxt_1, vec_ct_1);
         this->toSealCiphertext(vec_ctxt_2, vec_ct_2);
         this->_full_adder(vec_ctxt_result, vec_ctxt_1, vec_ctxt_2, max_count);
-        
+
         vector<CipherText> vec_result;
         this->toCipherText(vec_result, vec_ctxt_result);
         return vec_result;
@@ -306,12 +317,12 @@ namespace SpatialFHE {
         std::vector<string> const &vec_ct_1,
         std::vector<string> const &vec_ct_2,
         const size_t max_count) {
-            vector<CipherText> ct_1 = this->toCipherText(vec_ct_1);
-            vector<CipherText> ct_2 = this->toCipherText(vec_ct_2);
-            vector<CipherText> result = this->FullAdder(ct_1, ct_2, max_count);
-            vector<string> sresult;
-            transform(result.begin(), result.end(), back_inserter(sresult), [](CipherText &ct) { return ct.toString(); });
-            return sresult;
+        vector<CipherText> ct_1 = this->toCipherText(vec_ct_1);
+        vector<CipherText> ct_2 = this->toCipherText(vec_ct_2);
+        vector<CipherText> result = this->FullAdder(ct_1, ct_2, max_count);
+        vector<string> sresult;
+        transform(result.begin(), result.end(), back_inserter(sresult), [](CipherText &ct) { return ct.toString(); });
+        return sresult;
     }
 
     CipherText SEALCrypto::Multiply(CipherText const &ct_1, CipherText const &ct_2) {
@@ -481,7 +492,6 @@ namespace SpatialFHE {
         return CipherText(result);
     }
 
-
     std::string SEALCrypto::Xor(std::string const &sct_1, std::string const &sct_2) {
         CipherText ct_1 = CipherText(sct_1);
         CipherText ct_2 = CipherText(sct_2);
@@ -605,9 +615,9 @@ namespace SpatialFHE {
         if (step > -n && step < n) {
             if (step < 0) {
                 for (int i = -1; i >= step; i--) {
-                    mask[i+mask.size()] = 0;
+                    mask[i + mask.size()] = 0;
                 }
-            } else if (step > 0) { 
+            } else if (step > 0) {
                 for (int i = 0; i < step; i++) {
                     mask[i] = 0;
                 }
@@ -621,7 +631,7 @@ namespace SpatialFHE {
         if (this->ctxt_one.size() == 0) {
             seal::Plaintext ptxt = seal::Plaintext("1");
             this->_encrypt(this->ctxt_one, ptxt);
-        }  
+        }
         return this->ctxt_one;
     }
 
@@ -636,7 +646,7 @@ namespace SpatialFHE {
     void SEALCrypto::setEncryptionParams(CryptoParams const &params) {}
 
     void SEALCrypto::toSealCiphertext(seal::Ciphertext &ct, CipherText const &c) {
-        CipherTextData data = c.getData(); 
+        CipherTextData data = c.getData();
         if (holds_alternative<string>(data)) {
             string s = get<string>(data);
             base64::decoder decoder;
@@ -648,7 +658,6 @@ namespace SpatialFHE {
         } else {
             throw invalid_argument("Invalid CipherTextData type");
         }
-
     }
 
     void SEALCrypto::toSealCiphertext(std::vector<seal::Ciphertext> &vec_ct, std::vector<CipherText> const &vec_c) {
@@ -659,9 +668,34 @@ namespace SpatialFHE {
         });
     }
 
-    void SEALCrypto::toSealPlaintext(seal::Plaintext &pt, PlainText const &p) {}
+    void SEALCrypto::toSealPlaintext(seal::Plaintext &pt, PlainText const &p) {
+        PlainTextData data = p.getData();
 
-    void SEALCrypto::toSealPlaintext(std::vector<seal::Plaintext> &vec_pt, std::vector<PlainText> const &vec_p) {}
+        if (holds_alternative<int>(data)) {
+            int value = get<int>(data);
+            vector<long> vec = {value};
+            this->batchEncoder->encode(vec, pt);
+        } else if (holds_alternative<string>(data)) {
+            string s = get<string>(data);
+            if (this->params->schemeType == HECrypto::HEScheme::BFV) {
+                istringstream iss(s);
+                vector<long> vec((istream_iterator<long>(iss)), istream_iterator<long>());
+                this->batchEncoder->encode(vec, pt);
+            }
+        } else if (holds_alternative<seal::Plaintext>(data)) {
+            pt = get<seal::Plaintext>(data);
+        } else {
+            throw invalid_argument("Invalid PlainTextData type");
+        }
+    }
+
+    void SEALCrypto::toSealPlaintext(std::vector<seal::Plaintext> &vec_pt, std::vector<PlainText> const &vec_p) {
+        transform(vec_p.begin(), vec_p.end(), back_inserter(vec_pt), [this](PlainText const &p) {
+            seal::Plaintext pt;
+            this->toSealPlaintext(pt, p);
+            return pt;
+        });
+    }
 
     void SEALCrypto::toCipherText(CipherText &c, seal::Ciphertext const &ct) {
         c.setData(ct);
@@ -704,35 +738,34 @@ namespace SpatialFHE {
         std::vector<seal::Ciphertext> const &vec_ct_1,
         std::vector<seal::Ciphertext> const &vec_ct_2,
         const size_t max_count) {
-            seal::Ciphertext x, y, temp, carry, carry_old;
-            carry_old = this->getZero();
-            
+        seal::Ciphertext x, y, temp, carry, carry_old;
+        carry_old = this->getZero();
 
-            int size = max(vec_ct_1.size(), vec_ct_2.size())+1;
-            result.resize(size);
+        int size = max(vec_ct_1.size(), vec_ct_2.size()) + 1;
+        result.resize(size);
 
-            for (int i = 0; i < size; i++) {
-                if (i < vec_ct_1.size()) {
-                    x = vec_ct_1[i];
-                } else {
-                    x = this->getZero();
-                }
-
-                if (i < vec_ct_2.size()) {
-                    y = vec_ct_2[i];
-                } else {
-                    y = this->getZero();
-                }
-
-                _xor(carry, x, y);
-                _and(carry, carry, carry_old);
-                _and(temp, x, y);
-                _xor(carry, carry, temp);
-                _xor(result[i], x, y);
-                _xor(result[i], result[i], carry_old);
-                carry_old = carry;
+        for (int i = 0; i < size; i++) {
+            if (i < vec_ct_1.size()) {
+                x = vec_ct_1[i];
+            } else {
+                x = this->getZero();
             }
+
+            if (i < vec_ct_2.size()) {
+                y = vec_ct_2[i];
+            } else {
+                y = this->getZero();
+            }
+
+            _xor(carry, x, y);
+            _and(carry, carry, carry_old);
+            _and(temp, x, y);
+            _xor(carry, carry, temp);
+            _xor(result[i], x, y);
+            _xor(result[i], result[i], carry_old);
+            carry_old = carry;
         }
+    }
 
     void SEALCrypto::_sub(seal::Ciphertext &ct_1, seal::Ciphertext const &ct_2) {
         this->evaluator->sub_inplace(ct_1, ct_2);
@@ -793,7 +826,7 @@ namespace SpatialFHE {
             } else if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
                 this->evaluator->rotate_vector_inplace(result, -step, this->galoisKeys);
             } else {
-                cerr<<"Invalid scheme type"<<endl;
+                cerr << "Invalid scheme type" << endl;
                 exit(1);
             }
         }
@@ -808,7 +841,7 @@ namespace SpatialFHE {
                 this->evaluator->rotate_columns_inplace(result, this->galoisKeys);
             }
         } else {
-            cerr<<"Invalid scheme type"<<endl;
+            cerr << "Invalid scheme type" << endl;
             exit(1);
         }
     }
@@ -831,7 +864,7 @@ namespace SpatialFHE {
             this->evaluator->rescale_to_next_inplace(result);
             result.scale() = this->params->scale;
         } else {
-            cerr<<"Invalid scheme type"<<endl;
+            cerr << "Invalid scheme type" << endl;
             exit(1);
         }
     }
@@ -842,11 +875,11 @@ namespace SpatialFHE {
 
     void SEALCrypto::_or(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {
         seal::Ciphertext mult12 = seal::Ciphertext();
-        this->_multiply(mult12, ct_1, ct_2);       
+        this->_multiply(mult12, ct_1, ct_2);
         seal::Ciphertext add12 = seal::Ciphertext();
         this->_add(add12, ct_1, ct_2);
         this->_sub(result, add12, mult12);
-    }   
+    }
 
     void SEALCrypto::_xor(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {
         if (this->params->plainModulus == 2) {
@@ -881,7 +914,7 @@ namespace SpatialFHE {
         result = ct;
         if (this->params->schemeType == HECrypto::HEScheme::BFV) {
             vector<ulong> mask;
-            mask.resize(this->slot_count, 0);           
+            mask.resize(this->slot_count, 0);
             this->createMask<ulong>(mask, index);
             this->batchEncoder->encode(mask, ptxt_mask);
             this->evaluator->multiply_plain_inplace(result, ptxt_mask);
@@ -895,7 +928,7 @@ namespace SpatialFHE {
             this->evaluator->rescale_to_next_inplace(result);
             result.scale() = this->params->scale;
         } else {
-            cerr<<"Invalid scheme type"<<endl;
+            cerr << "Invalid scheme type" << endl;
             exit(1);
         }
     }
@@ -905,7 +938,7 @@ namespace SpatialFHE {
         result = ct;
         if (this->params->schemeType == HECrypto::HEScheme::BFV) {
             vector<ulong> mask;
-            mask.resize(this->slot_count, 0);           
+            mask.resize(this->slot_count, 0);
             this->createMask<ulong>(mask, indices);
             this->batchEncoder->encode(mask, ptxt_mask);
             this->evaluator->multiply_plain_inplace(result, ptxt_mask);
@@ -919,7 +952,7 @@ namespace SpatialFHE {
             this->evaluator->rescale_to_next_inplace(result);
             result.scale() = this->params->scale;
         } else {
-            cerr<<"Invalid scheme type"<<endl;
+            cerr << "Invalid scheme type" << endl;
             exit(1);
         }
     }
@@ -927,7 +960,8 @@ namespace SpatialFHE {
     void SEALCrypto::_total_sum(seal::Ciphertext &result, seal::Ciphertext const &ct) {
         seal::Ciphertext tmp;
         result = ct;
-        int limit = (this->params->schemeType == HECrypto::HEScheme::BFV) ? (this->slot_count >> 1) - 1 : this->slot_count >> 1;
+        int limit =
+            (this->params->schemeType == HECrypto::HEScheme::BFV) ? (this->slot_count >> 1) - 1 : this->slot_count >> 1;
         for (int i = 1; i <= limit; i++) {
             this->_rotate(tmp, ct, i);
             this->_add(result, tmp);
@@ -941,7 +975,7 @@ namespace SpatialFHE {
     void SEALCrypto::_running_sum(seal::Ciphertext &result, seal::Ciphertext const &ct) {
         seal::Ciphertext tmp;
         result = ct;
-        for (int i = 0; i <=2; i++) {
+        for (int i = 0; i <= 2; i++) {
             this->_shift(tmp, ct, 1 << i);
             if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
                 this->evaluator->mod_switch_to_inplace(tmp, result.parms_id());
@@ -950,7 +984,7 @@ namespace SpatialFHE {
         }
     }
 
-    void SEALCrypto::update_encryption_params(CryptoParams& crypto_params) {
+    void SEALCrypto::update_encryption_params(CryptoParams &crypto_params) {
         if (crypto_params.find("PlaintextModulus") != crypto_params.end()) {
             this->params->plainModulus = crypto_params["PlaintextModulus"].GetInt64();
         }
@@ -968,7 +1002,7 @@ namespace SpatialFHE {
             this->params->coeffModulusBits = vector<int>(lvec.begin(), lvec.end());
         }
         if (crypto_params.find("CoeffModulusPrimes") != crypto_params.end()) {
-            vector<long> lvec = to_long_vec(crypto_params["CoeffModulusPrimes"]);   
+            vector<long> lvec = to_long_vec(crypto_params["CoeffModulusPrimes"]);
             this->params->coeffModulusPrimes = vector<ulong>(lvec.begin(), lvec.end());
         }
     }
@@ -979,18 +1013,18 @@ namespace SpatialFHE {
         } else if (scheme == HECrypto::HEScheme::CKKS) {
             return seal::scheme_type::ckks;
         } else {
-            cerr<<"Invalid scheme type"<<endl;
+            cerr << "Invalid scheme type" << endl;
             exit(1);
         }
     }
 
     void SEALCrypto::parse_scheme(std::string const &scheme) {
         if (scheme == "BFV") {
-            this->params->schemeType =  HECrypto::HEScheme::BFV;
+            this->params->schemeType = HECrypto::HEScheme::BFV;
         } else if (scheme == "CKKS") {
-            this->params->schemeType =  HECrypto::HEScheme::CKKS;
+            this->params->schemeType = HECrypto::HEScheme::CKKS;
         } else {
-            cerr<<"Invalid scheme type: "<<scheme<<endl;
+            cerr << "Invalid scheme type: " << scheme << endl;
             exit(1);
         }
     }
@@ -1011,7 +1045,7 @@ namespace SpatialFHE {
         for (rapidjson::SizeType i = 0; i < data.Size(); i++) {
             if (data[i].IsInt64())
                 vec.push_back(data[i].GetInt64());
-            else 
+            else
                 throw invalid_argument("Invalid data type");
         }
 
