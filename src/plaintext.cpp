@@ -9,8 +9,8 @@ namespace SpatialFHE {
     }
 
     PlainText::PlainText(PlainText &&other) {
-        this->data = other.data;
-        this->data_source = other.data_source;
+        this->data = PlainTextData(other.data);
+        this->data_source = std::string(other.data_source);
     }
 
     PlainText::PlainText(int const &value) {
@@ -57,6 +57,10 @@ namespace SpatialFHE {
     void PlainText::setData(std::string const &value) {
         this->data = value;
         this->data_source = "string";
+    }
+
+    PlainTextData PlainText::getData() const {
+        return this->data;
     }
 
     unsigned int PlainText::size() const {

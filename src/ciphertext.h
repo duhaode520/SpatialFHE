@@ -2,7 +2,6 @@
 
 #include <seal/seal.h>
 
-#include <algorithm>
 #include <string>
 #include <variant>
 

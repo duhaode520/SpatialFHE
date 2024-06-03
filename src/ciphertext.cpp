@@ -11,8 +11,8 @@ namespace SpatialFHE {
     }
 
     CipherText::CipherText(CipherText &&other) {
-        this->data = other.data;
-        this->data_source = other.data_source;
+        this->data = CipherTextData(other.data);
+        this->data_source = string(other.data_source);
     }
 
     CipherText::CipherText(seal::Ciphertext const &ct) {

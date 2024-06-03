@@ -6,12 +6,13 @@
 #include <variant>
 
 namespace SpatialFHE {
-    using PlainTextType = std::variant<int, std::string, seal::Plaintext>;
+    using PlainTextData = std::variant<int, std::string, seal::Plaintext>;
 
     class PlainText {
     private:
-        PlainTextType data;
+        PlainTextData data;
         std::string data_source;
+
     public:
         PlainText();
         PlainText(PlainText const &other);
@@ -26,6 +27,8 @@ namespace SpatialFHE {
         void setData(int const &value);
         void setData(seal::Plaintext const &value);
         void setData(std::string const &value);
+
+        PlainTextData getData() const;
 
         unsigned int size() const;
 
