@@ -1,5 +1,6 @@
 #pragma once
 
+#include <seal/ciphertext.h>
 #include "hecrypto.h"
 
 namespace SpatialFHE {
@@ -10,6 +11,7 @@ namespace SpatialFHE {
             uint64_t plainModulus;
             std::vector<int> coeffModulusBits;
             std::vector<ulong> coeffModulusPrimes; 
+            int scaleFactor;
             double scale;
         };
 
@@ -79,6 +81,7 @@ namespace SpatialFHE {
         void parse_scheme(std::string const& scheme);
 
         void set_encoder(HECrypto::HEScheme scheme);
+        void reset_scale(seal::Ciphertext& ct);
 
     public:
         SEALCrypto(/* args */);
@@ -115,8 +118,8 @@ namespace SpatialFHE {
         void Decode(std::vector<double>& vec, PlainText const& pt) override;
         void Decode(std::vector<long>& vec, PlainText const& pt) override;
 
-        PlainText Decrypt(CipherText const& ct, bool noBatching) override;
-        std::string Decrypt(std::string const& sct, bool noBatching) override;
+        PlainText Decrypt(CipherText const& ct, bool noBatching=1) override;
+        std::string Decrypt(std::string const& sct, bool noBatching=1) override;
 
         // transform to CipherText and PlainText
 
@@ -152,6 +155,7 @@ namespace SpatialFHE {
         CipherText Square(CipherText const& ct) override;
         std::string Square(std::string const& sct) override;
 
+        //Power is only for BFV
         CipherText Power(CipherText const& ct, int const& n) override;
         std::string Power(std::string const& sct, int const& n) override;
 
