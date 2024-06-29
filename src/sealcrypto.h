@@ -1,6 +1,7 @@
 #pragma once
 
 #include <seal/ciphertext.h>
+#include <seal/plaintext.h>
 #include "hecrypto.h"
 
 namespace SpatialFHE {
@@ -39,6 +40,9 @@ namespace SpatialFHE {
 
         void _encrypt(seal::Ciphertext& ct, seal::Plaintext const& pt);
         void _decrypt(seal::Plaintext& pt, seal::Ciphertext const& ct);
+
+        void _encode(seal::Plaintext& pt, double d);
+        void _encode(seal::Plaintext& pt, long l);
 
         void _add(seal::Ciphertext& ct_1, seal::Ciphertext const& ct_2);
         void _add(seal::Ciphertext& result, seal::Ciphertext const& ct_1, seal::Ciphertext const& ct_2);
@@ -81,7 +85,8 @@ namespace SpatialFHE {
         void parse_scheme(std::string const& scheme);
 
         void set_encoder(HECrypto::HEScheme scheme);
-        void reset_scale(seal::Ciphertext& ct);
+        void parms_unify(seal::Ciphertext& src, seal::Ciphertext& dst);
+        void parms_unify(seal::Plaintext &src, seal::Ciphertext &dst);
 
     public:
         SEALCrypto(/* args */);
@@ -100,7 +105,7 @@ namespace SpatialFHE {
         void LoadPublicKey(std::string const& pubKeyFilename) override;
 
         PlainText Encode(double d) override;
-        PlainText Encode(long d) override;
+        PlainText Encode(long l) override;
         PlainText Encode(std::string const& str) override;
         PlainText Encode(std::vector<double> const& vec) override;
         PlainText Encode(std::vector<long> const& vec) override;

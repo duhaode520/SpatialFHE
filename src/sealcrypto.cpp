@@ -1,5 +1,6 @@
 #include "sealcrypto.h"
 #include <b64/decode.h>
+#include <seal/ciphertext.h>
 #include <seal/plaintext.h>
 #include <cmath>
 #include <sstream>
@@ -126,14 +127,13 @@ namespace SpatialFHE {
 
     PlainText SEALCrypto::Encode(double d) {
         seal::Plaintext ptxt = seal::Plaintext();
-        this->ckksEncoder->encode(d, this->params->scale, ptxt);
+        this->_encode(ptxt, d);
         return PlainText(ptxt);
     }
 
-    PlainText SEALCrypto::Encode(long d) {
-        vector<long> vec(this->slot_count, d);
+    PlainText SEALCrypto::Encode(long l) {
         seal::Plaintext ptxt = seal::Plaintext();
-        this->batchEncoder->encode(vec, ptxt);
+        this->_encode(ptxt, l);
         return PlainText(ptxt);
     }
 
@@ -647,7 +647,12 @@ namespace SpatialFHE {
 
     seal::Ciphertext SEALCrypto::getOne() {
         if (this->ctxt_one.size() == 0) {
-            seal::Plaintext ptxt = seal::Plaintext("1");
+            seal::Plaintext ptxt = seal::Plaintext();
+            if (this->params->schemeType == HECrypto::HEScheme::BFV)
+                this->_encode(ptxt, 1l);
+            else if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
+                this->_encode(ptxt, 1.0);
+            }
             this->_encrypt(this->ctxt_one, ptxt);
         }
         return this->ctxt_one;
@@ -655,7 +660,12 @@ namespace SpatialFHE {
 
     seal::Ciphertext SEALCrypto::getZero() {
         if (this->ctxt_zero.size() == 0) {
-            seal::Plaintext ptxt = seal::Plaintext("0");
+            seal::Plaintext ptxt = seal::Plaintext();
+            if (this->params->schemeType == HECrypto::HEScheme::BFV)
+                this->_encode(ptxt, 0l);
+            else if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
+                this->_encode(ptxt, 0.0);
+            }
             this->_encrypt(this->ctxt_zero, ptxt);
         }
         return this->ctxt_zero;
@@ -739,11 +749,19 @@ namespace SpatialFHE {
         this->decryptor->decrypt(ct, pt);
     }
 
+    void SEALCrypto::_encode(seal::Plaintext &pt, double d) {
+        this->ckksEncoder->encode(d, this->params->scale, pt);
+    }
+
+    void SEALCrypto::_encode(seal::Plaintext &pt, long l) {
+        vector<long> vec(this->slot_count, l);
+        this->batchEncoder->encode(vec, pt);
+    } 
+
     void SEALCrypto::_add(seal::Ciphertext &ct_1, seal::Ciphertext const &ct_2) {
         this->evaluator->add_inplace(ct_1, ct_2);
     }
 
-    // !Deprecated, must use in-place version
     void SEALCrypto::_add(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {
         this->evaluator->add(ct_1, ct_2, result);
     }
@@ -790,7 +808,6 @@ namespace SpatialFHE {
         this->evaluator->sub_inplace(ct_1, ct_2);
     }
 
-    // !Deprecated, must use in-place version
     void SEALCrypto::_sub(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {
         this->evaluator->sub(ct_1, ct_2, result);
     }
@@ -805,7 +822,6 @@ namespace SpatialFHE {
         }
     }
 
-    // !Deprecated, must use in-place version
     void SEALCrypto::_multiply(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {
         this->evaluator->multiply(ct_1, ct_2, result);
         if (this->params->plainModulus == 2) {
@@ -895,23 +911,11 @@ namespace SpatialFHE {
     }
 
     void SEALCrypto::_or(seal::Ciphertext &result, seal::Ciphertext const &ct_1, seal::Ciphertext const &ct_2) {
-        cout << "ct_1 scale: " << ct_1.scale()
-            << " chain index: "
-            << sealContext->get_context_data(ct_1.parms_id())->chain_index() << endl;
         seal::Ciphertext mult12 = seal::Ciphertext();
         this->_multiply(mult12, ct_1, ct_2);
-        cout << "mult12 scale: " << mult12.scale()
-            << " chain index: "
-            << sealContext->get_context_data(mult12.parms_id())->chain_index() << endl;
         seal::Ciphertext add12 = seal::Ciphertext();
         this->_add(add12, ct_1, ct_2);
-        cout << "add12 scale: " << add12.scale()
-            << " chain index: "
-            << sealContext->get_context_data(add12.parms_id())->chain_index() << endl;
-        reset_scale(add12);
-        reset_scale(mult12);
-        // add12 at level 1, mult12 at level 2
-        evaluator->mod_switch_to_inplace(add12, mult12.parms_id());
+        parms_unify(add12, mult12);
         this->_sub(result, add12, mult12);
     }
 
@@ -921,10 +925,13 @@ namespace SpatialFHE {
         } else {
             seal::Ciphertext mult12 = seal::Ciphertext();
             this->_multiply(mult12, ct_1, ct_2);
-            seal::Plaintext ptxt = seal::Plaintext("2");
+            seal::Plaintext ptxt = seal::Plaintext();
+            this->_encode(ptxt, 2.0);
+            this->parms_unify(ptxt, mult12);
             this->_multiply_plain(mult12, ptxt);
             seal::Ciphertext add12 = seal::Ciphertext();
             this->_add(add12, ct_1, ct_2);
+            this->parms_unify(add12, mult12);
             this->_sub(result, add12, mult12);
         }
     }
@@ -1086,12 +1093,26 @@ namespace SpatialFHE {
         return vec;
     }
 
-    void SEALCrypto::reset_scale(seal::Ciphertext &ct) {
-        if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
-            ct.scale() = this->params->scale;
-        } else {
+    void SEALCrypto::parms_unify(seal::Ciphertext &src, seal::Ciphertext &dst) {
+        if (this->params->schemeType != HECrypto::HEScheme::CKKS) {
             cerr << "Invalid scheme type" << endl;
             throw invalid_argument("Invalid scheme type");
+        }
+
+        if (src.parms_id() != dst.parms_id()) {
+            dst.scale() = src.scale();
+            this->evaluator->mod_switch_to_inplace(src, dst.parms_id());
+        }
+    }
+
+    void SEALCrypto::parms_unify(seal::Plaintext &src, seal::Ciphertext &dst) {
+        if (this->params->schemeType != HECrypto::HEScheme::CKKS) {
+            cerr << "Invalid scheme type" << endl;
+            throw invalid_argument("Invalid scheme type");
+        }
+
+        if (src.parms_id() != dst.parms_id()) {
+            this->evaluator->mod_switch_to_inplace(src, dst.parms_id());
         }
     }
 

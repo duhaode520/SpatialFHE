@@ -203,7 +203,7 @@ TEST_F(SealCryptoCKKSSuite, And) {
 
 TEST_F(SealCryptoCKKSSuite, Or) {
 	SpatialFHE::PlainText pt1 = crypto.Encode(1.0);
-	SpatialFHE::PlainText pt2 = crypto.Encode(2.0);
+	SpatialFHE::PlainText pt2 = crypto.Encode(0.0);
 	SpatialFHE::CipherText ct1 = crypto.Encrypt(pt1);
 	SpatialFHE::CipherText ct2 = crypto.Encrypt(pt2);
 	SpatialFHE::CipherText ct3 = crypto.Or(ct1, ct2);
@@ -211,5 +211,27 @@ TEST_F(SealCryptoCKKSSuite, Or) {
 	std::vector<double> result;
 	crypto.Decode(result, res_pt);
 	std::cout << result.size();
-	ASSERT_NEAR(3.0, result[0], ERROR);
+	ASSERT_NEAR(1.0, result[0], ERROR);
+}
+
+TEST_F(SealCryptoCKKSSuite, Not) {
+	SpatialFHE::PlainText pt1 = crypto.Encode(1.0);
+	SpatialFHE::CipherText ct1 = crypto.Encrypt(pt1);
+	SpatialFHE::CipherText ct2 = crypto.Not(ct1);
+	SpatialFHE::PlainText res_pt = crypto.Decrypt(ct2);
+	std::vector<double> result;
+	crypto.Decode(result, res_pt);
+	ASSERT_NEAR(0.0, result[0], ERROR);
+}
+
+TEST_F(SealCryptoCKKSSuite, Xor) {
+	SpatialFHE::PlainText pt1 = crypto.Encode(1.0);
+	SpatialFHE::PlainText pt2 = crypto.Encode(0.0);
+	SpatialFHE::CipherText ct1 = crypto.Encrypt(pt1);
+	SpatialFHE::CipherText ct2 = crypto.Encrypt(pt2);
+	SpatialFHE::CipherText ct3 = crypto.Xor(ct1, ct2);
+	SpatialFHE::PlainText res_pt = crypto.Decrypt(ct3);
+	std::vector<double> result;
+	crypto.Decode(result, res_pt);
+	ASSERT_NEAR(1.0, result[0], ERROR);
 }
