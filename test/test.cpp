@@ -7,12 +7,12 @@
 #include "sealcrypto.h"
 
 // Test SealCryptoInit
-TEST(SEALCryptoTest, Init) {
+TEST(SEALCryptoInitTest, Init) {
     SpatialFHE::SEALCrypto sealCrypto;
     ASSERT_NE(nullptr, &sealCrypto);
 }
 
-TEST(SEALCryptoTest, GenerateKeyPair) {
+TEST(SEALCryptoInitTest, GenerateKeyPair) {
     // 1. Create a CryptoParams object with valid parameters.
     SpatialFHE::HECrypto::CryptoParams params;
 

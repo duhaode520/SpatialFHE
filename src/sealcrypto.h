@@ -93,7 +93,7 @@ namespace SpatialFHE {
         ~SEALCrypto();
 
         // context
-
+        // TODO: 把KeyGen和运算分开
         void GenerateKeyPair(
             CryptoParams& params,
             std::string const& pubKeyFilename,

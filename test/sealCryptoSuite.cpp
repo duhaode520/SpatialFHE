@@ -17,9 +17,9 @@ protected:
 
 		const std::string json = R"(
 			{
-				"CoeffModulusBits": [60, 30, 30, 30, 60],
+				"CoeffModulusBits": [60, 40, 40, 40, 60],
 				"SchemeType": "CKKS",
-				"PolyModulusDegree": 8192,
+				"PolyModulusDegree": 16384,
 				"PlaintextModulus": 0,
 				"CoeffModulusPrimes": [0],
 				"ScaleFactor": 30
