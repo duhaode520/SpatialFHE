@@ -15,12 +15,6 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 enable_testing()
 
-#生成test选项和可执行文件 并进行链接
-# add_executable(testA testA.cpp)
-# target_link_libraries(testA gtest_main)
-
-# add_executable(testB testB.cpp)
-# target_link_libraries(testB gtest_main)
 
 #这里创建了一个TestAll选项
 FILE(GLOB_RECURSE CURRENT_TEST *.cpp)
@@ -41,7 +35,5 @@ target_link_libraries(testAll rapidjson)
 #gtest register
 include(GoogleTest)
 gtest_discover_tests(
-	# testA
-	# testB
 	testAll
 )

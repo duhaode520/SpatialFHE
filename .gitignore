@@ -1,3 +1,5 @@
 .vscode
 build
 CMakePresets.json
+java_test/.idea
+java_test/target

@@ -27,7 +27,7 @@ namespace SpatialFHE {
 
         using CryptoParams = std::map<std::string, rapidjson::Value>;
         HECrypto();
-        ~HECrypto();
+        virtual ~HECrypto();
 
         // context
 
