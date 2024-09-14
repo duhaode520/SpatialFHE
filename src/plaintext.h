@@ -16,23 +16,23 @@ namespace SpatialFHE {
     public:
         PlainText();
         PlainText(PlainText const &other);
-        PlainText(PlainText &&other);
-        PlainText(int const &value);
-        PlainText(seal::Plaintext const &value);
-        PlainText(std::string const &value);
+        PlainText(PlainText &&other) noexcept ;
+        explicit PlainText(int const &value);
+        explicit PlainText(seal::Plaintext const &value);
+        explicit PlainText(std::string const &value);
 
-        PlainText operator=(PlainText const &other);
-        PlainText operator=(PlainText &&other);
+        PlainText& operator=(PlainText const &other);
+        PlainText& operator=(PlainText &&other) noexcept ;
 
         void setData(int const &value);
         void setData(seal::Plaintext const &value);
         void setData(std::string const &value);
 
-        PlainTextData getData() const;
+        [[nodiscard]] PlainTextData getData() const;
 
-        unsigned int size() const;
+        [[nodiscard]] unsigned int size() const;
 
-        std::string toString() const;
+        [[nodiscard]] std::string toString() const;
 
         ~PlainText();
     };

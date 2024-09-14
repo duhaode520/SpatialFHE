@@ -3,3 +3,5 @@ build
 CMakePresets.json
 java_test/.idea
 java_test/target
+/cmake-build-debug/
+.idea

@@ -3,14 +3,14 @@
 
 using namespace std;
 namespace SpatialFHE {
-    CipherText::CipherText() {}
+    CipherText::CipherText() = default;
 
     CipherText::CipherText(CipherText const &other) {
         this->data = other.data;
         this->data_source = other.data_source;
     }
 
-    CipherText::CipherText(CipherText &&other) {
+    CipherText::CipherText(CipherText &&other) noexcept {
         this->data = CipherTextData(other.data);
         this->data_source = string(other.data_source);
     }
@@ -47,7 +47,7 @@ namespace SpatialFHE {
         return this->data;
     }
 
-    CipherText SpatialFHE::CipherText::operator=(CipherText const &other) {
+    CipherText& SpatialFHE::CipherText::operator=(CipherText const &other) {
         if (this != &other) {
             this->data = other.data;
             this->data_source = other.data_source;
@@ -55,7 +55,7 @@ namespace SpatialFHE {
         return *this;
     }
 
-    CipherText SpatialFHE::CipherText::operator=(CipherText &&other) {
+    CipherText& SpatialFHE::CipherText::operator=(CipherText &&other) noexcept {
         if (this != &other) {
             this->data = other.data;
             this->data_source = other.data_source;
@@ -79,6 +79,6 @@ namespace SpatialFHE {
         }
     }
 
-    CipherText::~CipherText() {}
+    CipherText::~CipherText() = default;
 
 }  // namespace SpatialFHE

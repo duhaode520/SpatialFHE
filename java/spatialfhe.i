@@ -11,7 +11,16 @@
 %include "std_string.i"
 
 %feature("director") SEALCrypto;
+%ignore *::operator=;
 
+namespace std {
+   %template(IntVector)             vector<int>;
+   %template(DoubleVector)          vector<double>;
+   %template(LongVector)            vector<uint32_t>;
+   %rename(LongVector)              vector<uint32_t>;
+   %template(BooleanVector)         vector<bool>;
+   %template(StringVector)          vector<string>;
+}
 
 %include "ciphertext.h"
 %include "plaintext.h"

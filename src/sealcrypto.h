@@ -51,7 +51,7 @@ namespace SpatialFHE {
             std::vector<seal::Ciphertext>& result,
             std::vector<seal::Ciphertext> const& vec_ct_1,
             std::vector<seal::Ciphertext> const& vec_ct_2,
-            const size_t max_count);
+            size_t max_count);
         void _sub(seal::Ciphertext& ct_1, seal::Ciphertext const& ct_2);
         void _sub(seal::Ciphertext& result, seal::Ciphertext const& ct_1, seal::Ciphertext const& ct_2);
 
@@ -81,21 +81,25 @@ namespace SpatialFHE {
         void update_encryption_params(CryptoParams& params);
         std::vector<long> to_long_vec(rapidjson::Value& data);
 
-        seal::scheme_type set_fhe_scheme(HECrypto::HEScheme scheme);
+        static seal::scheme_type set_fhe_scheme(HECrypto::HEScheme scheme);
         void parse_scheme(std::string const& scheme);
 
         void set_encoder(HECrypto::HEScheme scheme);
         void parms_unify(seal::Ciphertext& src, seal::Ciphertext& dst);
-        void parms_unify(seal::Plaintext &src, seal::Ciphertext &dst);
+        void parms_unify(seal::Plaintext &src, seal::Ciphertext &dst) const;
 
     public:
         SEALCrypto(/* args */);
-        ~SEALCrypto();
+        ~SEALCrypto() override;
 
         // context
         // TODO: 把KeyGen和运算分开
         void GenerateKeyPair(
             CryptoParams& params,
+            std::string const& pubKeyFilename,
+            std::string const& secKeyFilename) override;
+        void GenerateKeyPair(
+            std::string const& param_string,
             std::string const& pubKeyFilename,
             std::string const& secKeyFilename) override;
         void LoadKeyPair(std::string const& pubKeyFilename, std::string const& secKeyFilename) override;
@@ -118,13 +122,13 @@ namespace SpatialFHE {
 
         // decode and decrypt
 
-        void LoadSecretkey(std::string const& secKeyFilename) override;
+        void LoadSecretKey(std::string const& secKeyFilename) override;
 
         void Decode(std::vector<double>& vec, PlainText const& pt) override;
         void Decode(std::vector<long>& vec, PlainText const& pt) override;
 
-        PlainText Decrypt(CipherText const& ct, bool noBatching=1) override;
-        std::string Decrypt(std::string const& sct, bool noBatching=1) override;
+        PlainText Decrypt(CipherText const& ct, bool noBatching=true) override;
+        std::string Decrypt(std::string const& sct, bool noBatching=true) override;
 
         // transform to CipherText and PlainText
 
@@ -145,11 +149,11 @@ namespace SpatialFHE {
         std::vector<CipherText> FullAdder(
             std::vector<CipherText> const& vec_ct_1,
             std::vector<CipherText> const& vec_ct_2,
-            const size_t max_count) override;
+            size_t max_count) override;
         std::vector<std::string> FullAdder(
             std::vector<std::string> const& vec_sct_1,
             std::vector<std::string> const& vec_sct_2,
-            const size_t max_count) override;
+            size_t max_count) override;
 
         CipherText Multiply(CipherText const& ct_1, CipherText const& ct_2) override;
         std::string Multiply(std::string const& sct_1, std::string const& sct_2) override;
@@ -219,7 +223,7 @@ namespace SpatialFHE {
         void createMask(std::vector<T>& mask, const std::vector<int>& indices);
 
         template <typename T>
-        void createShiftMask(std::vector<T>& mask, const int step, const int n);
+        void createShiftMask(std::vector<T>& mask, const int step, size_t n);
 
         // get functions
         seal::Ciphertext getOne();
@@ -228,14 +232,14 @@ namespace SpatialFHE {
         // set functions
         void setEncryptionParams(CryptoParams const& params);
 
-        // tranform functions
+        // transform functions
         void toSealCiphertext(seal::Ciphertext& ct, CipherText const& c);
         void toSealCiphertext(std::vector<seal::Ciphertext>& vec_ct, std::vector<CipherText> const& vec_c);
 
         void toSealPlaintext(seal::Plaintext& pt, PlainText const& p);
         void toSealPlaintext(std::vector<seal::Plaintext>& vec_pt, std::vector<PlainText> const& vec_p);
 
-        void toCipherText(CipherText& c, seal::Ciphertext const& ct);
+        static void toCipherText(CipherText& c, seal::Ciphertext const& ct);
         void toCipherText(std::vector<CipherText>& vec_c, std::vector<seal::Ciphertext> const& vec_ct);
 
         void toPlainText(PlainText& p, seal::Plaintext const& pt);

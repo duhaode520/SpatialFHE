@@ -18,10 +18,10 @@ namespace SpatialFHE {
     public:
         CipherText();
         CipherText(CipherText const &other);
-        CipherText(CipherText &&other);
+        CipherText(CipherText &&other) noexcept ;
 
-        CipherText(seal::Ciphertext const &ct);
-        CipherText(const std::string &str);
+        explicit CipherText(seal::Ciphertext const &ct);
+        explicit CipherText(const std::string &str);
         // CipherText(CipherTextType) 应该还有一个构造函数
 
         ~CipherText();
@@ -30,12 +30,12 @@ namespace SpatialFHE {
         void setData(const std::string &str);
         // void setData()
 
-        unsigned int size() const;
+        [[nodiscard]] unsigned int size() const;
 
-        CipherTextData getData() const;
+        [[nodiscard]] CipherTextData getData() const;
 
-        CipherText operator=(CipherText const &other);
-        CipherText operator=(CipherText &&other);
+        CipherText& operator=(CipherText const &other);
+        CipherText& operator=(CipherText &&other) noexcept ;
 
         std::string toString();
     };

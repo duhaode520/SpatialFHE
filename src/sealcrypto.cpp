@@ -36,20 +36,13 @@ namespace SpatialFHE {
     }
 
     SEALCrypto::~SEALCrypto() {
-        if (this->sealParams)
-            delete this->sealParams;
-        if (this->params)
-            delete this->params;
-        if (this->encryptor)
-            delete this->encryptor;
-        if (this->decryptor)
-            delete this->decryptor;
-        if (this->evaluator)
-            delete this->evaluator;
-        if (this->ckksEncoder)
-            delete this->ckksEncoder;
-        if (this->batchEncoder)
-            delete this->batchEncoder;
+        delete this->sealParams;
+        delete this->params;
+        delete this->encryptor;
+        delete this->decryptor;
+        delete this->evaluator;
+        delete this->ckksEncoder;
+        delete this->batchEncoder;
     }
 
     void SEALCrypto::GenerateKeyPair(
@@ -65,9 +58,9 @@ namespace SpatialFHE {
         if (!all_of(this->params->coeffModulusPrimes.begin(), this->params->coeffModulusPrimes.end(), [](long i) {
                 return i == 0;
             })) {
-            vector<seal::Modulus> coeff_modulus;
+            vector<seal::Modulus> coeff_modulus(this->params->coeffModulusPrimes.size());
             for (auto &prime : this->params->coeffModulusPrimes) {
-                coeff_modulus.push_back(seal::Modulus(prime));
+                coeff_modulus.emplace_back(prime);
             }
             encParams.set_coeff_modulus(coeff_modulus);
         } else {
@@ -118,9 +111,20 @@ namespace SpatialFHE {
         // 可能需要重新考虑一个方式来保存或者说要不要保存
     }
 
+    void SEALCrypto::GenerateKeyPair(
+        std::string const &param_string,
+        std::string const &pubKeyFilename,
+        std::string const &secKeyFilename) {
+
+        CryptoParams params;
+        rapidjson::Document doc;
+        HECrypto::ParseParams(params, doc, param_string);
+        GenerateKeyPair(params, pubKeyFilename, secKeyFilename);
+    }
+
     void SEALCrypto::LoadKeyPair(std::string const &pubKeyFilename, std::string const &secKeyFilename) {
         this->LoadPublicKey(pubKeyFilename);
-        this->LoadSecretkey(secKeyFilename);
+        this->LoadSecretKey(secKeyFilename);
     }
 
     void SEALCrypto::LoadPublicKey(std::string const &pubKeyFilename) {}
@@ -207,7 +211,7 @@ namespace SpatialFHE {
         return this->Encrypt(pt).toString();
     }
 
-    void SEALCrypto::LoadSecretkey(std::string const &secKeyFilename) {}
+    void SEALCrypto::LoadSecretKey(std::string const &secKeyFilename) {}
 
     void SEALCrypto::Decode(std::vector<double> &vec, PlainText const &pt) {
         seal::Plaintext ptxt = seal::Plaintext();
@@ -303,7 +307,6 @@ namespace SpatialFHE {
         std::vector<CipherText> const &vec_ct_1,
         std::vector<CipherText> const &vec_ct_2,
         const size_t max_count) {
-        return std::vector<CipherText>();
         vector<seal::Ciphertext> vec_ctxt_1;
         vector<seal::Ciphertext> vec_ctxt_2;
         vector<seal::Ciphertext> vec_ctxt_result;
@@ -616,20 +619,20 @@ namespace SpatialFHE {
 
     template <typename T>
     void SEALCrypto::createMask(std::vector<T> &mask, const int &index) {
-        fill(mask.begin(), mask.end(), 0);
+        fill(mask.begin(), mask.end(), false);
         mask[index] = 1;
     }
 
     template <typename T>
     void SEALCrypto::createMask(std::vector<T> &mask, const std::vector<int> &indices) {
-        fill(mask.begin(), mask.end(), 0);
+        fill(mask.begin(), mask.end(), false);
         for (auto &index : indices) {
             mask[index] = 1;
         }
     }
 
     template <typename T>
-    void SEALCrypto::createShiftMask(std::vector<T> &mask, const int step, const int n) {
+    void SEALCrypto::createShiftMask(std::vector<T> &mask, const int step, const size_t n) {
         if (step > -n && step < n) {
             if (step < 0) {
                 for (int i = -1; i >= step; i--) {
@@ -732,7 +735,7 @@ namespace SpatialFHE {
     void SEALCrypto::toCipherText(std::vector<CipherText> &vec_c, std::vector<seal::Ciphertext> const &vec_ct) {
         transform(vec_ct.begin(), vec_ct.end(), back_inserter(vec_c), [this](seal::Ciphertext const &ct) {
             CipherText c;
-            this->toCipherText(c, ct);
+            toCipherText(c, ct);
             return c;
         });
     }
@@ -778,7 +781,7 @@ namespace SpatialFHE {
         seal::Ciphertext x, y, temp, carry, carry_old;
         carry_old = this->getZero();
 
-        int size = max(vec_ct_1.size(), vec_ct_2.size()) + 1;
+        ulong size = max(vec_ct_1.size(), vec_ct_2.size()) + 1;
         result.resize(size);
 
         for (int i = 0; i < size; i++) {
@@ -864,7 +867,7 @@ namespace SpatialFHE {
                 this->evaluator->rotate_vector_inplace(result, -step, this->galoisKeys);
             } else {
                 cerr << "Invalid scheme type" << endl;
-                throw "Invalid scheme type";
+                throw std::runtime_error("Invalid scheme type");
             }
         }
     }
@@ -879,7 +882,7 @@ namespace SpatialFHE {
             }
         } else {
             cerr << "Invalid scheme type" << endl;
-            throw "Invalid scheme type";
+            throw std::runtime_error("Invalid scheme type");
         }
     }
 
@@ -902,7 +905,7 @@ namespace SpatialFHE {
             result.scale() = this->params->scale;
         } else {
             cerr << "Invalid scheme type" << endl;
-            throw "Invalid scheme type";
+            throw std::runtime_error("Invalid scheme type");
         }
     }
 
@@ -970,7 +973,7 @@ namespace SpatialFHE {
             result.scale() = this->params->scale;
         } else {
             cerr << "Invalid scheme type" << endl;
-            throw "Invalid scheme type";
+            throw std::runtime_error("Invalid scheme type");
         }
     }
 
@@ -994,14 +997,14 @@ namespace SpatialFHE {
             result.scale() = this->params->scale;
         } else {
             cerr << "Invalid scheme type" << endl;
-            throw "Invalid scheme type";
+            throw std::runtime_error("Invalid scheme type");
         }
     }
 
     void SEALCrypto::_total_sum(seal::Ciphertext &result, seal::Ciphertext const &ct) {
         seal::Ciphertext tmp;
         result = ct;
-        int limit =
+        size_t limit =
             (this->params->schemeType == HECrypto::HEScheme::BFV) ? (this->slot_count >> 1) - 1 : this->slot_count >> 1;
         for (int i = 1; i <= limit; i++) {
             this->_rotate(tmp, ct, i);
@@ -1056,7 +1059,7 @@ namespace SpatialFHE {
             return seal::scheme_type::ckks;
         } else {
             cerr << "Invalid scheme type" << endl;
-            throw "Invalid scheme type";
+            throw std::runtime_error("Invalid scheme type");
         }
     }
 
@@ -1084,6 +1087,7 @@ namespace SpatialFHE {
     std::vector<long> SEALCrypto::to_long_vec(rapidjson::Value &data) {
         std::vector<long> vec;
         for (rapidjson::SizeType i = 0; i < data.Size(); i++) {
+            int t = data[i].GetType();
             if (data[i].IsInt64())
                 vec.push_back(data[i].GetInt64());
             else
@@ -1105,7 +1109,7 @@ namespace SpatialFHE {
         }
     }
 
-    void SEALCrypto::parms_unify(seal::Plaintext &src, seal::Ciphertext &dst) {
+    void SEALCrypto::parms_unify(seal::Plaintext &src, seal::Ciphertext &dst)const {
         if (this->params->schemeType != HECrypto::HEScheme::CKKS) {
             cerr << "Invalid scheme type" << endl;
             throw invalid_argument("Invalid scheme type");

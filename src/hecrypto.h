@@ -10,7 +10,7 @@
 #include "plaintext.h"
 
 namespace SpatialFHE {
-    extern const char* HESchemeStrings[];
+    // extern std::string HESchemeStrings[];
 
     class HECrypto {
     private:
@@ -35,6 +35,10 @@ namespace SpatialFHE {
             CryptoParams& params,
             std::string const& pubKeyFilename,
             std::string const& secKeyFilename) = 0;
+        virtual void GenerateKeyPair(
+            std::string const& param_string,
+            std::string const& pubKeyFilename,
+            std::string const& secKeyFilename) = 0;
         virtual void LoadKeyPair(std::string const& pubKeyFilename, std::string const& secKeyFilename) = 0;
 
         // encode and encrypt
@@ -55,7 +59,7 @@ namespace SpatialFHE {
 
         // decode and decrypt
 
-        virtual void LoadSecretkey(std::string const& secKeyFilename) = 0;
+        virtual void LoadSecretKey(std::string const& secKeyFilename) = 0;
 
         virtual void Decode(std::vector<double>& vec, PlainText const& pt) = 0;
         virtual void Decode(std::vector<long>& vec, PlainText const& pt) = 0;
@@ -82,11 +86,11 @@ namespace SpatialFHE {
         virtual std::vector<CipherText> FullAdder(
             std::vector<CipherText> const& vec_ct_1,
             std::vector<CipherText> const& vec_ct_2,
-            const size_t max_count) = 0;
+            size_t max_count) = 0;
         virtual std::vector<std::string> FullAdder(
             std::vector<std::string> const& vec_sct_1,
             std::vector<std::string> const& vec_sct_2,
-            const size_t max_count) = 0;
+            size_t max_count) = 0;
 
         virtual CipherText Multiply(CipherText const& ct_1, CipherText const& ct_2) = 0;
         virtual std::string Multiply(std::string const& sct_1, std::string const& sct_2) = 0;
@@ -149,7 +153,9 @@ namespace SpatialFHE {
         // unknown use, deprecated
         // virtual void* GetCryptoParam(std::string const& param) = 0;
 
-        static const char* HESchemeToString(HEScheme scheme);
+        // static std::string HESchemeToString(HEScheme scheme);
+
+        static void ParseParams(HECrypto::CryptoParams& params, rapidjson::Document& doc, std::string const& param_string);
     };
 
 }  // namespace SpatialFHE

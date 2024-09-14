@@ -2,6 +2,7 @@
 #include <seal/ciphertext.h>
 #include <vector>
 #include "ciphertext.h"
+#include "hecrypto.h"
 
 #define private public
 #include "sealcrypto.h"
@@ -15,21 +16,23 @@ protected:
 
 		SpatialFHE::HECrypto::CryptoParams params;
 
-		const std::string json = R"(
-			{
-				"CoeffModulusBits": [60, 40, 40, 40, 60],
-				"SchemeType": "CKKS",
-				"PolyModulusDegree": 16384,
-				"PlaintextModulus": 0,
-				"CoeffModulusPrimes": [0],
-				"ScaleFactor": 30
-			})";
-		rapidjson::Document doc; // doc 被销毁后可能导致读出来的value为空, extremly tricky
-		doc.Parse(json.c_str());
-		for (auto& m : doc.GetObject()) {
-			params[m.name.GetString()] = m.value;
-		}
-		crypto.GenerateKeyPair(params, "publicKey.txt", "secretKey.txt");
+		// const std::string json = R"(
+		// 	{
+		// 		"CoeffModulusBits": [60, 40, 40, 40, 60],
+		// 		"SchemeType": "CKKS",
+		// 		"PolyModulusDegree": 16384,
+		// 		"PlaintextModulus": 0,
+		// 		"CoeffModulusPrimes": [0],
+		// 		"ScaleFactor": 30
+		// 	})";
+
+		const std::string json = "{\"CoeffModulusBits\":[60,40,40,40,60],\"SchemeType\":\"CKKS\",\"PolyModulusDegree\":16384,\"PlaintextModulus\":0,\"CoeffModulusPrimes\":[0],\"ScaleFactor\":30}";
+		// rapidjson::Document doc; // doc 被销毁后可能导致读出来的value为空, extremly tricky
+		// doc.Parse(json.c_str());
+		// for (auto& m : doc.GetObject()) {
+		// 	params[m.name.GetString()] = m.value;
+		// }
+		crypto.GenerateKeyPair(json, "publicKey.txt", "secretKey.txt");
 	}
 
     static void TearDownTestSuite() {

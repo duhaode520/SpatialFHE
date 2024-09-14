@@ -1,14 +1,14 @@
 #include "plaintext.h"
 
 namespace SpatialFHE {
-    PlainText::PlainText() {}
+    PlainText::PlainText() = default;
 
     PlainText::PlainText(PlainText const &other) {
         this->data = other.data;
         this->data_source = other.data_source;
     }
 
-    PlainText::PlainText(PlainText &&other) {
+    PlainText::PlainText(PlainText &&other)  noexcept {
         this->data = PlainTextData(other.data);
         this->data_source = std::string(other.data_source);
     }
@@ -28,7 +28,7 @@ namespace SpatialFHE {
         this->data_source = "string";
     }
 
-    PlainText PlainText::operator=(PlainText const &other) {
+    PlainText& PlainText::operator=(PlainText const &other) {
         if (this != &other) {
             this->data = other.data;
             this->data_source = other.data_source;
@@ -36,7 +36,7 @@ namespace SpatialFHE {
         return *this;
     }
 
-    PlainText PlainText::operator=(PlainText &&other) {
+    PlainText& PlainText::operator=(PlainText &&other)  noexcept {
         if (this != &other) {
             this->data = other.data;
             this->data_source = other.data_source;
@@ -88,6 +88,6 @@ namespace SpatialFHE {
         }
     }
 
-    PlainText::~PlainText() {}
+    PlainText::~PlainText() = default;
     
 } // namespace SpatialFHE
