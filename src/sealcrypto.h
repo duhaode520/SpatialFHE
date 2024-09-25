@@ -19,20 +19,20 @@ namespace SpatialFHE {
     private:
         // members
 
-        SEALEncryptionParams* params;
-        seal::EncryptionParameters* sealParams;
+        std::shared_ptr<SEALEncryptionParams> params;
+        std::shared_ptr<seal::EncryptionParameters> sealParams;
         std::shared_ptr<seal::SEALContext> sealContext;
         seal::PublicKey publicKey;
         seal::SecretKey secretKey;
         seal::RelinKeys relinKeys;
         seal::GaloisKeys galoisKeys;
-        seal::CKKSEncoder* ckksEncoder;
-        seal::BatchEncoder* batchEncoder;
+        std::shared_ptr<seal::CKKSEncoder> ckksEncoder;
+        std::shared_ptr<seal::BatchEncoder> batchEncoder;
         size_t slot_count;
         bool batching;
-        seal::Encryptor* encryptor;
-        seal::Evaluator* evaluator;
-        seal::Decryptor* decryptor;
+        std::shared_ptr<seal::Encryptor> encryptor;
+        std::shared_ptr<seal::Evaluator> evaluator;
+        std::shared_ptr<seal::Decryptor> decryptor;
         seal::Ciphertext ctxt_one;
         seal::Ciphertext ctxt_zero;
 
@@ -79,7 +79,7 @@ namespace SpatialFHE {
         void _running_sum(seal::Ciphertext& result, seal::Ciphertext const& ct);
 
         void update_encryption_params(CryptoParams& params);
-        std::vector<long> to_long_vec(rapidjson::Value& data);
+        static std::vector<long> to_long_vec(rapidjson::Value& data);
 
         static seal::scheme_type set_fhe_scheme(HECrypto::HEScheme scheme);
         void parse_scheme(std::string const& scheme);
@@ -89,19 +89,14 @@ namespace SpatialFHE {
         void parms_unify(seal::Plaintext &src, seal::Ciphertext &dst) const;
 
     public:
-        SEALCrypto(/* args */);
+        SEALCrypto();
+        explicit SEALCrypto(CryptoParams& params);
+        explicit SEALCrypto(const std::string& params_string);
         ~SEALCrypto() override;
 
         // context
         // TODO: 把KeyGen和运算分开
-        void GenerateKeyPair(
-            CryptoParams& params,
-            std::string const& pubKeyFilename,
-            std::string const& secKeyFilename) override;
-        void GenerateKeyPair(
-            std::string const& param_string,
-            std::string const& pubKeyFilename,
-            std::string const& secKeyFilename) override;
+        void GenerateKeyPair(std::string const& pubKeyFilename, std::string const& secKeyFilename) override;
         void LoadKeyPair(std::string const& pubKeyFilename, std::string const& secKeyFilename) override;
 
         // encode and encrypt
@@ -217,20 +212,20 @@ namespace SpatialFHE {
         void createPlainVector(std::vector<PlainText>& vec, std::vector<T> const& data);
 
         template <typename T>
-        void createMask(std::vector<T>& mask, const int& index);
+        static void createMask(std::vector<T>& mask, const int& index);
 
         template <typename T>
-        void createMask(std::vector<T>& mask, const std::vector<int>& indices);
+        static void createMask(std::vector<T>& mask, const std::vector<int>& indices);
 
         template <typename T>
-        void createShiftMask(std::vector<T>& mask, const int step, size_t n);
+        static void createShiftMask(std::vector<T>& mask, int step, size_t n);
 
         // get functions
         seal::Ciphertext getOne();
         seal::Ciphertext getZero();
 
         // set functions
-        void setEncryptionParams(CryptoParams const& params);
+        void initSealParams();
 
         // transform functions
         void toSealCiphertext(seal::Ciphertext& ct, CipherText const& c);

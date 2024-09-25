@@ -25,18 +25,17 @@ TEST(SEALCryptoInitTest, GenerateKeyPair) {
             "CoeffModulusPrimes": [0],
             "Scale": 1073741824
         })";
-    rapidjson::Document doc; // doc 被销毁后可能导致读出来的value为空, extremly tricky
-    doc.Parse(json.c_str());
-    for (auto& m : doc.GetObject()) {
-        params[m.name.GetString()] = m.value;
-    }
-
+    // rapidjson::Document doc; // doc 被销毁后可能导致读出来的value为空, extremly tricky
+    // doc.Parse(json.c_str());
+    // for (auto& m : doc.GetObject()) {
+    //     params[m.name.GetString()] = m.value;
+    // }
 
     // 2. Create a SEALCrypto object.
-    SpatialFHE::SEALCrypto crypto;
+    SpatialFHE::SEALCrypto crypto(json);
 
     // 3. Call GenerateKeyPair on the SEALCrypto object with the CryptoParams object and two valid file paths.
-    ASSERT_NO_THROW(crypto.GenerateKeyPair(params, "publicKey.txt", "secretKey.txt"));
+    ASSERT_NO_THROW(crypto.GenerateKeyPair("public.key", "secret.key"));
     // crypto.GenerateKeyPair(params, "publicKey.txt", "secretKey.txt");
 
     // 5. Verify that the sealParams, sealContext, secretKey, publicKey, encryptor, decryptor, and evaluator member variables were correctly set.
@@ -64,6 +63,14 @@ TEST(SEALCryptoInitTest, GenerateKeyPair) {
     if (crypto.params->schemeType == SpatialFHE::HECrypto::HEScheme::BFV) {
         ASSERT_NE(nullptr, &crypto.batchEncoder);
     }
+
+
+    // 8. create another SEALCrypto object and load the key pairs from the file.
+    SpatialFHE::SEALCrypto crypto2(json);
+    ASSERT_NO_THROW(crypto2.LoadKeyPair("public.key", "secret.key"));
+    ASSERT_NE(nullptr, &crypto2.publicKey);
+    ASSERT_NE(nullptr, &crypto2.secretKey);
+
 }
 
 

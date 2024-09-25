@@ -29,16 +29,8 @@ namespace SpatialFHE {
         HECrypto();
         virtual ~HECrypto();
 
-        // context
-
-        virtual void GenerateKeyPair(
-            CryptoParams& params,
-            std::string const& pubKeyFilename,
-            std::string const& secKeyFilename) = 0;
-        virtual void GenerateKeyPair(
-            std::string const& param_string,
-            std::string const& pubKeyFilename,
-            std::string const& secKeyFilename) = 0;
+        // key pair
+        virtual void GenerateKeyPair(std::string const& pubKeyFilename, std::string const& secKeyFilename) = 0;
         virtual void LoadKeyPair(std::string const& pubKeyFilename, std::string const& secKeyFilename) = 0;
 
         // encode and encrypt
