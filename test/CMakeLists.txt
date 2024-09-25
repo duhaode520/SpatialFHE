@@ -19,14 +19,14 @@ enable_testing()
 #这里创建了一个TestAll选项
 FILE(GLOB_RECURSE CURRENT_TEST *.cpp)
 add_executable(testAll ${CURRENT_TEST})
-target_link_libraries(testAll gtest_main)
-target_link_libraries(testAll SpatialFHE)
+target_link_libraries(testAll PRIVATE gtest_main)
+target_link_libraries(testAll PRIVATE SpatialFHE)
 
-target_link_libraries(testAll SEAL::seal)
-target_link_libraries(testAll ZLIB::ZLIB)
-target_link_libraries(testAll zstd::libzstd)
-target_link_libraries(testAll unofficial::b64::b64)
-target_link_libraries(testAll rapidjson)
+target_link_libraries(testAll PRIVATE SEAL::seal)
+target_link_libraries(testAll PRIVATE ZLIB::ZLIB)
+target_link_libraries(testAll PRIVATE zstd::libzstd)
+target_link_libraries(testAll PRIVATE unofficial::b64::b64)
+target_link_libraries(testAll PRIVATE rapidjson)
 #####
 #
 # 这里追加新的Unit Test

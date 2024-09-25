@@ -64,8 +64,8 @@ namespace SpatialFHE {
         virtual void Decode(std::vector<double>& vec, PlainText const& pt) = 0;
         virtual void Decode(std::vector<long>& vec, PlainText const& pt) = 0;
 
-        virtual PlainText Decrypt(CipherText const& ct, bool noBatching) = 0;
-        virtual std::string Decrypt(std::string const& sct, bool noBatching) = 0;
+        virtual PlainText Decrypt(CipherText const& ct, bool noBatching=true) = 0;
+        virtual std::string Decrypt(std::string const& sct, bool noBatching=true) = 0;
 
         // transform to CipherText and PlainText
 
