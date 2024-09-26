@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 
 public class LoadTest {
     public static void main(String[] args) {
-        FHEHelper helper = FHEHelper.getOrCreate("public.key", "private.key", true);
+        FHEHelper helper = FHEHelper.getOrCreate("hdfs://dhdmaster:8020/tmp/public.key", "tmp/private.key", true);
         SEALCrypto crypto = (SEALCrypto)helper.getCrypto();
         PlainText pt1 = crypto.Encode(1.0);
         PlainText pt2 = crypto.Encode(2.0);

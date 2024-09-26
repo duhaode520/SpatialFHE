@@ -11,7 +11,7 @@ import java.util.Properties;
 
 public class FHEHelper {
 
-    static private volatile FHEHelper instance;
+    static volatile FHEHelper instance;
     static private final String JSON_CONFIG_PATH = "conf/fhe.json";
     static private final String JNI_CONFIG_PATH = "conf/jni.conf";
 
@@ -28,10 +28,10 @@ public class FHEHelper {
             e.printStackTrace();
         }
 
-        crypto = new SEALCrypto();
+        String jsonConfig = loadConfig();
+        crypto = new SEALCrypto(jsonConfig);
         if (isInit) {
-            String jsonConfig = loadConfig();
-            crypto.GenerateKeyPair(jsonConfig, publicKeyPath, secretKeyPath);
+            crypto.GenerateKeyPair(publicKeyPath, secretKeyPath);
         } else {
             crypto.LoadKeyPair(publicKeyPath, secretKeyPath);
         }
