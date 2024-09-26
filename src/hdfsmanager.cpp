@@ -138,6 +138,9 @@ namespace SpatialFHE {
     }
 
     void HDFSManager::OpenOutputStream() {
+        if (!createParentDir(this->path)) {
+            return;
+        }
         this->output_stream.open(this->path);
     }
 

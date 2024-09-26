@@ -8,9 +8,19 @@ namespace SpatialFHE {
 
     LocalFSManager::LocalFSManager(const std::string &path) : FSManager(path) {}
 
-    LocalFSManager::~LocalFSManager() = default;
+    LocalFSManager::~LocalFSManager() {
+        if (input_stream.is_open()) {
+            input_stream.close();
+        }
+        if (output_stream.is_open()) {
+            output_stream.close();
+        }
+    };
 
     void LocalFSManager::OpenOutputStream() {
+        if (!createParentDir(this->path)) {
+            return;
+        }
         output_stream.open(this->path);
     }
 
@@ -21,6 +31,9 @@ namespace SpatialFHE {
         output_stream.close();
     }
     void LocalFSManager::OpenInputStream() {
+        if (!createParentDir(this->path)) {
+            return;
+        }
         input_stream.open(this->path);
     }
     std::ifstream &LocalFSManager::GetInputStream() {

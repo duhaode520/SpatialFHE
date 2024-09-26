@@ -45,6 +45,24 @@ TEST_F(FSManagerTest, LocalIO) {
         local_fs_manager->CloseInputStream();
         ASSERT_EQ(content, read_content);
 }
+TEST_F(FSManagerTest, LocalNewDirIO) {
+    string local_path = "tmp/test.txt";
+    shared_ptr<FSManager> local_fs_manager = FSManager::createFSManager(local_path);
+    // write
+    string content = "hello world";
+    local_fs_manager->OpenOutputStream();
+    std::ofstream& out = local_fs_manager->GetOutputStream();
+    out << content;
+    local_fs_manager->CloseOutputStream();
+    // read
+    local_fs_manager->OpenInputStream();
+    std::ifstream& in = local_fs_manager->GetInputStream();
+    string read_content;
+    // read line
+    std::getline(in, read_content);
+    local_fs_manager->CloseInputStream();
+    ASSERT_EQ(content, read_content);
+}
 
 TEST_F(FSManagerTest, HDFSIO) {
     string hdfs_path = "hdfs://dhdmaster:8020/tmp/test.txt";

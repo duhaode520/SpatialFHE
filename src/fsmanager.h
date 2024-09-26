@@ -13,7 +13,7 @@ namespace SpatialFHE {
         std::ofstream output_stream;
         std::ifstream input_stream;
 
-        static bool createParentDir(const std::string& destPath);
+        static bool createParentDir(const std::string& path);
     public:
         explicit FSManager(const std::string& path);
         virtual ~FSManager() = default;
