@@ -59,7 +59,7 @@ class FHEHelperTest {
     }
 
     void compute() {
-        FHEHelper helper = FHEHelper.getOrCreate(publicKeyPath, secretKeyPath, isInit);
+        FHEHelper helper = FHEHelper.getOrCreate(publicKeyPath, secretKeyPath, "conf", isInit);
         assertNotNull(helper);
         assertNotNull(helper.getCrypto());
         assertEquals(publicKeyPath, helper.getPublicKeyPath());
