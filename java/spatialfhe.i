@@ -20,6 +20,7 @@ namespace std {
    %rename(LongVector)              vector<uint32_t>;
    %template(BooleanVector)         vector<bool>;
    %template(StringVector)          vector<string>;
+   %template(PlainTextVector)       vector<SpatialFHE::PlainText>;
 }
 
 %include "ciphertext.h"
