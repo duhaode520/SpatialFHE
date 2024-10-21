@@ -15,9 +15,35 @@ namespace SpatialFHE {
     public:
         // TODO: 后面可以再加上 HELibrary，现在只用 SEAL
         BaseFHEManager();
-        BaseFHEManager(std::string publicKeyPath, std::string secretKeyPath, std::string paramsString, bool isInit);
+        BaseFHEManager(
+            const std::string& publicKeyPath,
+            const std::string& secretKeyPath,
+            const std::string& paramsString,
+            bool isInit);
         virtual ~BaseFHEManager() = default;
+
+        // encode
+        [[nodiscard]] PlainText encode(double d) const;
+        [[nodiscard]] PlainText encode(long l) const;
+        [[nodiscard]] PlainText encode(std::string const& str) const;
+        [[nodiscard]] PlainText encode(std::vector<double> const& vec) const;
+        // remains encodeMany not implemented
+
+        [[nodiscard]] CipherText encrypt(PlainText const& pt) const;
+
+        [[nodiscard]] CipherText encodeAndEncrypt(double d) const;
+        [[nodiscard]] CipherText encodeAndEncrypt(long l) const;
+
+        void decode(std::vector<double>& vec, PlainText const& pt) const;
+        void decode(std::vector<long>& vec, PlainText const& pt) const;
+
+        [[nodiscard]] PlainText decrypt(CipherText const& ct) const;
+
+        void decodeAndDecrypt(std::vector<double>& vec, CipherText const& ct) const;
+        void decodeAndDecrypt(std::vector<long>& vec, CipherText const& ct) const;
+
+        [[nodiscard]] CipherText add(CipherText const& ct1, CipherText const& ct2) const;
     };
-}
+}  // namespace SpatialFHE
 
 #endif //BASEFHEMANAGER_H

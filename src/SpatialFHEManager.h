@@ -11,7 +11,7 @@ namespace SpatialFHE {
     class SpatialFHEManager : public BaseFHEManager, public MatFHEManager{
     public:
         SpatialFHEManager();
-        SpatialFHEManager(std::string publicKeyPath, std::string secretKeyPath, std::string paramsString, bool isInit);
+        SpatialFHEManager(const std::string& publicKeyPath, const std::string& secretKeyPath, const std::string& paramsString, bool isInit);
         ~SpatialFHEManager() override;
 
         // MatFHEManger implementation

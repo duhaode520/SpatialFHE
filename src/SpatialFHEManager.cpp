@@ -7,10 +7,10 @@
 #include <utility>
 SpatialFHE::SpatialFHEManager::SpatialFHEManager() = default;
 SpatialFHE::SpatialFHEManager::SpatialFHEManager(
-    std::string publicKeyPath,
-    std::string secretKeyPath,
-    std::string paramsString,
-    bool isInit) : BaseFHEManager(std::move(publicKeyPath), std::move(secretKeyPath), std::move(paramsString), isInit) {
+    const std::string& publicKeyPath,
+    const std::string& secretKeyPath,
+    const std::string& paramsString,
+    bool isInit) : BaseFHEManager(publicKeyPath, secretKeyPath, paramsString, isInit) {
 
     }
 SpatialFHE::SpatialFHEManager::~SpatialFHEManager() = default;
@@ -22,7 +22,7 @@ SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::encryptMat(int width, int h
     for(auto &plain : plain_vec){
         cipher_vec.emplace_back(crypto->Encrypt(plain));
     }
-    return CipherMat(width, height, cipher_vec);
+    return {width, height, cipher_vec};
 }
 
 std::vector<double> SpatialFHE::SpatialFHEManager::decryptMat(CipherMat &cipher_mat) {
@@ -58,5 +58,5 @@ SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::addMat(CipherMat &a, Cipher
     for (int i = 0; i < size; i++) {
         result.emplace_back(crypto->Add(a.getData()[i], b.getData()[i]));
     }
-    return CipherMat(a.getWidth(), a.getHeight(), result);
+    return {a.getWidth(), a.getHeight(), result};
 }
