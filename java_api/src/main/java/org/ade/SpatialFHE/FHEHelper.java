@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.ade.SpatialFHE.spatialfhe.HECrypto;
 import org.ade.SpatialFHE.spatialfhe.SEALCrypto;
+import org.ade.SpatialFHE.spatialfhe.SpatialFHEManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,23 +19,86 @@ public class FHEHelper {
     private static final String JNI_CONFIG_PATH = "jni.conf";
     private static final Logger logger = LoggerFactory.getLogger(FHEHelper.class);
 
-    private final HECrypto crypto;
+    private final SpatialFHEManager manager;
     private final String publicKeyPath;
-    private final String confDir;
 
     private FHEHelper(String publicKeyPath, String secretKeyPath, String confDir, boolean isInit) {
         // load config
-        Properties jniConfig = new Properties();
         this.publicKeyPath = publicKeyPath;
-        this.confDir = confDir;
         try {
+            Properties jniConfig = new Properties();
             jniConfig.load(Files.newInputStream(Paths.get(confDir).resolve(JNI_CONFIG_PATH)));
             System.load(jniConfig.getProperty("libPath"));
         } catch (Exception e) {
             logger.error("Error loading JNI library: {}. Stacktrace: {}", e.getMessage(), e);
         }
 
-        String jsonConfig = loadConfig();
+        String jsonConfig = loadConfig(confDir);
+        manager = new SpatialFHEManager(publicKeyPath, secretKeyPath, jsonConfig, isInit);
+    }
+
+    private FHEHelper(String publicKeyPath, String secretKeyPath, String libPath, String jsonConfig, boolean isInit) {
+        this.publicKeyPath = publicKeyPath;
+        try {
+            System.load(libPath);
+        } catch (Exception e) {
+            logger.error("Error loading JNI library: {}. Stacktrace: {}", e.getMessage(), e);
+        }
+        manager = new SpatialFHEManager(publicKeyPath, secretKeyPath, jsonConfig, isInit);
+    }
+
+    public static FHEHelper getOrCreate(String publicKeyPath, String secretKeyPath, String confDir, boolean isInit) {
+        if (instance == null) {
+            synchronized (FHEHelper.class) {
+                if (instance == null) {
+                    instance = new FHEHelper(publicKeyPath, secretKeyPath, confDir, isInit);
+                }
+            }
+        }
+        return instance;
+    }
+
+    public static FHEHelper getOrCreate(String publicKeyPath, String secretKeyPath, String libPath, String jsonConfig, boolean isInit) {
+        if (instance == null) {
+            synchronized (FHEHelper.class) {
+                if (instance == null) {
+                    instance = new FHEHelper(publicKeyPath, secretKeyPath, libPath, jsonConfig, isInit);
+                }
+            }
+        }
+        return instance;
+    }
+
+    public static FHEHelper getInstance() {
+        if (instance == null) {
+            throw new NullPointerException("FHE Singleton is not initialized");
+        }
+        return instance;
+    }
+
+    public SpatialFHEManager getManager() {
+        return manager;
+    }
+
+    public String getPublicKeyPath() {
+        return publicKeyPath;
+    }
+
+    private String loadConfig(String confDir) {
+        // load json config from file
+        Gson gson = new Gson();
+        try {
+             String fileString = new String(Files.readAllBytes(Paths.get(confDir).resolve(JSON_CONFIG_PATH)));
+            JsonObject jsonObject = gson.fromJson(fileString, JsonObject.class);
+            return jsonObject.toString();
+        } catch (Exception e) {
+            logger.error("Error load crypto configs: {}, Stacktrace: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private HECrypto initCrypto(String publicKeyPath, String secretKeyPath, boolean isInit, String jsonConfig) {
+        final HECrypto crypto;
         crypto = new SEALCrypto(jsonConfig);
         try {
             if (isInit) {
@@ -49,37 +113,6 @@ public class FHEHelper {
         } catch (Exception e) {
             logger.error("Error init SEAL Crpyto: {}, Stacktrace: {}", e.getMessage(), e);
         }
-    }
-
-    public static FHEHelper getOrCreate(String publicKeyPath, String secretKeyPath, String confDir, boolean isInit) {
-        if (instance == null) {
-            synchronized (FHEHelper.class) {
-                if (instance == null) {
-                    instance = new FHEHelper(publicKeyPath, secretKeyPath, confDir, isInit);
-                }
-            }
-        }
-        return instance;
-    }
-
-    public HECrypto getCrypto() {
         return crypto;
-    }
-
-    public String getPublicKeyPath() {
-        return publicKeyPath;
-    }
-
-    private String loadConfig() {
-        // load json config from file
-        Gson gson = new Gson();
-        try {
-             String fileString = new String(Files.readAllBytes(Paths.get(confDir).resolve(JSON_CONFIG_PATH)));
-            JsonObject jsonObject = gson.fromJson(fileString, JsonObject.class);
-            return jsonObject.toString();
-        } catch (Exception e) {
-            logger.error("Error load crypto configs: {}, Stacktrace: {}", e.getMessage(), e);
-            return null;
-        }
     }
 }

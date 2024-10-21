@@ -61,17 +61,14 @@ class FHEHelperTest {
     void compute() {
         FHEHelper helper = FHEHelper.getOrCreate(publicKeyPath, secretKeyPath, "conf", isInit);
         assertNotNull(helper);
-        assertNotNull(helper.getCrypto());
+        assertNotNull(helper.getManager());
         assertEquals(publicKeyPath, helper.getPublicKeyPath());
-        SEALCrypto crypto = (SEALCrypto)helper.getCrypto();
-        PlainText pt1 = crypto.Encode(1.0);
-        PlainText pt2 = crypto.Encode(2.0);
-        CipherText ct1 = crypto.Encrypt(pt1);
-        CipherText ct2 = crypto.Encrypt(pt2);
-        CipherText ct3 = crypto.Add(ct1, ct2);
-        PlainText pt3 = crypto.Decrypt(ct3);
+        SpatialFHEManager manager = helper.getManager();
+        CipherText ct1 = manager.encodeAndEncrypt(1.0);
+        CipherText ct2 = manager.encodeAndEncrypt(2.0);
+        CipherText ct3 = manager.add(ct1, ct2);
         DoubleVector dv = new DoubleVector();
-        crypto.Decode(dv, pt3);
+        manager.decodeAndDecrypt(dv, ct3);
         assertEquals(3.0, dv.get(0), 1e-4);
     }
 

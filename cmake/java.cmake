@@ -57,7 +57,7 @@ add_subdirectory(java)
 ##  Java Native Maven Package  ##
 #################################
 file(MAKE_DIRECTORY ${JAVA_NATIVE_PROJECT_DIR}/${JAVA_RESSOURCES_PATH}/${JAVA_NATIVE_PROJECT})
-file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/java_test/src/main/resources/${JAVA_NATIVE_PROJECT})
+file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/java_api/src/main/resources/${JAVA_NATIVE_PROJECT})
 
 configure_file(${PROJECT_SOURCE_DIR}/java/pom-native.xml.in ${JAVA_NATIVE_PROJECT_DIR}/pom.xml @ONLY)
 
@@ -68,7 +68,7 @@ add_custom_command(
     ${JAVA_RESSOURCES_PATH}/${JAVA_NATIVE_PROJECT}/
   COMMAND ${CMAKE_COMMAND} -E copy
     $<TARGET_FILE:jni${JAVA_ARTIFACT}>
-    ${PROJECT_SOURCE_DIR}/java_test/src/main/resources/${JAVA_NATIVE_PROJECT}/
+        ${PROJECT_SOURCE_DIR}/java_api/src/main/resources/${JAVA_NATIVE_PROJECT}/
   COMMAND ${MAVEN_EXECUTABLE} compile -B
   COMMAND ${MAVEN_EXECUTABLE} package -B -Dfatjar=true
   COMMAND ${MAVEN_EXECUTABLE} install -B $<$<BOOL:${SKIP_GPG}>:-Dgpg.skip=true>
