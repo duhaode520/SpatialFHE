@@ -84,6 +84,17 @@ TEST_F(SealCryptoCKKSSuite, EncryptDecrypt) {
     ASSERT_NEAR(1.0, result[0], ERROR);
 }
 
+TEST_F(SealCryptoCKKSSuite, CipherTextToString) {
+    PlainText pt = crypto.Encode(std::vector<double>({1, 2,3,4,5,6}));
+    CipherText ct = crypto.Encrypt(pt);
+    std::string str = ct.toString();
+    CipherText new_ct = crypto.buildCipherText(str);
+    PlainText res_pt = crypto.Decrypt(new_ct);
+    std::vector<double> result;
+    crypto.Decode(result, res_pt);
+    ASSERT_NEAR(1.0, result[0], ERROR);
+}
+
 TEST_F(SealCryptoCKKSSuite, Add) {
     PlainText pt1 = crypto.Encode(1.0);
     PlainText pt2 = crypto.Encode(2.0);

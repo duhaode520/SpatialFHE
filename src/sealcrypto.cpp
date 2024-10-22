@@ -317,7 +317,7 @@ namespace SpatialFHE {
         this->_full_adder(vec_ctxt_result, vec_ctxt_1, vec_ctxt_2, max_count);
 
         vector<CipherText> vec_result;
-        this->toCipherText(vec_result, vec_ctxt_result);
+        toCipherText(vec_result, vec_ctxt_result);
         return vec_result;
     }
 
@@ -764,12 +764,22 @@ namespace SpatialFHE {
             return pt;
         });
     }
+    CipherText SEALCrypto::buildCipherText(std::string const &str) const {
+        stringstream ss(str);
+        base64::decoder b64decoder;
+        stringstream decoded;
+        b64decoder.decode(ss, decoded);
+
+        seal::Ciphertext ct;
+        ct.load(*sealContext, decoded);
+        return CipherText(ct);
+    }
 
     void SEALCrypto::toCipherText(CipherText &c, seal::Ciphertext const &ct) {
         c.setData(ct);
     }
 
-    void SEALCrypto::toCipherText(std::vector<CipherText> &vec_c, std::vector<seal::Ciphertext> const &vec_ct) {
+    void SEALCrypto::toCipherText(std::vector<CipherText> &vec_c, std::vector<seal::Ciphertext> const &vec_ct) const {
         transform(vec_ct.begin(), vec_ct.end(), back_inserter(vec_c), [this](seal::Ciphertext const &ct) {
             CipherText c;
             toCipherText(c, ct);

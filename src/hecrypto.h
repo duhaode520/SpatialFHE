@@ -147,7 +147,9 @@ namespace SpatialFHE {
 
         // static std::string HESchemeToString(HEScheme scheme);
 
+        virtual CipherText buildCipherText(std::string const& str) const = 0;
         static void ParseParams(HECrypto::CryptoParams& params, rapidjson::Document& doc, std::string const& param_string);
+
     };
 
 }  // namespace SpatialFHE

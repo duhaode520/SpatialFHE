@@ -234,11 +234,14 @@ namespace SpatialFHE {
         void toSealPlaintext(seal::Plaintext& pt, PlainText const& p);
         void toSealPlaintext(std::vector<seal::Plaintext>& vec_pt, std::vector<PlainText> const& vec_p);
 
-        static void toCipherText(CipherText& c, seal::Ciphertext const& ct);
-        void toCipherText(std::vector<CipherText>& vec_c, std::vector<seal::Ciphertext> const& vec_ct);
+        [[nodiscard]] CipherText buildCipherText(std::string const& str) const override;
 
-        void toPlainText(PlainText& p, seal::Plaintext const& pt);
-        void toPlainText(std::vector<PlainText>& vec_p, std::vector<seal::Plaintext> const& vec_pt);
+        static void toCipherText(CipherText& c, seal::Ciphertext const& ct);
+        void toCipherText(std::vector<CipherText>& vec_c, std::vector<seal::Ciphertext> const& vec_ct)const;
+
+        static void toPlainText(PlainText& p, seal::Plaintext const& pt);
+        static void toPlainText(std::vector<PlainText>& vec_p, std::vector<seal::Plaintext> const& vec_pt);
+
     };
 
 }  // namespace SpatialFHE
