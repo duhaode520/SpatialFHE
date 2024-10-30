@@ -4,7 +4,6 @@
 
 #include "SpatialFHEManager.h"
 
-#include <utility>
 SpatialFHE::SpatialFHEManager::SpatialFHEManager() = default;
 SpatialFHE::SpatialFHEManager::SpatialFHEManager(
     const std::string& publicKeyPath,
@@ -45,13 +44,8 @@ std::vector<double> SpatialFHE::SpatialFHEManager::decryptMat(CipherMat &cipher_
     return std::vector<double>(result.begin(), result.begin() + width * height);
 }
 
-SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::addMat(CipherMat &a, CipherMat &b) {
-    if (a.getWidth() != b.getWidth() || a.getHeight() != b.getHeight()) {
-        throw std::invalid_argument("CipherMat size not match");
-    }
-    if (a.getData().size() != b.getData().size()) {
-        throw std::invalid_argument("CipherMat CipherText vector size not match");
-    }
+SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::addMat(CipherMat const &a, CipherMat const &b) {
+    validateSameSize(a, b);
     int size = a.getData().size();
     std::vector<CipherText> result;
     result.reserve(size);
@@ -59,4 +53,58 @@ SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::addMat(CipherMat &a, Cipher
         result.emplace_back(crypto->Add(a.getData()[i], b.getData()[i]));
     }
     return {a.getWidth(), a.getHeight(), result};
+}
+SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::addMatPlain(CipherMat const &a, const std::vector<double> &plain) {
+    std::vector<PlainText> plain_vec = crypto->EncodeMany(plain);
+    int size = a.getData().size();
+    std::vector<CipherText> result;
+    result.reserve(size);
+    for (int i = 0; i < size; i++) {
+        result.emplace_back(crypto->AddPlain(a.getData()[i], plain_vec[i]));
+    }
+    return {a.getWidth(), a.getHeight(), result};
+}
+
+
+SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::subMat(CipherMat const &a, CipherMat const &b) {
+    validateSameSize(a, b);
+    int size = a.getData().size();
+    std::vector<CipherText> result;
+    result.reserve(size);
+    for (int i = 0; i < size; i++) {
+        result.emplace_back(crypto->Subtract(a.getData()[i], b.getData()[i]));
+    }
+    return {a.getWidth(), a.getHeight(), result};
+}
+
+SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::multiplyMat(CipherMat const &a, CipherMat const &b) {
+    validateSameSize(a, b);
+    int size = a.getData().size();
+    std::vector<CipherText> result;
+    result.reserve(size);
+    for (int i = 0; i < size; i++) {
+        result.emplace_back(crypto->Multiply(a.getData()[i], b.getData()[i]));
+    }
+    return {a.getWidth(), a.getHeight(), result};
+}
+
+SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::multiplyMatPlain(
+    CipherMat const &a, const std::vector<double> &plain) {
+    std::vector<PlainText> plain_vec = crypto->EncodeMany(plain);
+    int size = a.getData().size();
+    std::vector<CipherText> result;
+    result.reserve(size);
+    for (int i = 0; i < size; i++) {
+        result.emplace_back(crypto->MultiplyPlain(a.getData()[i], plain_vec[i]));
+    }
+    return {a.getWidth(), a.getHeight(), result};
+}
+
+void SpatialFHE::SpatialFHEManager::validateSameSize(SpatialFHE::CipherMat const &a, SpatialFHE::CipherMat const &b) {
+    if (a.getWidth() != b.getWidth() || a.getHeight() != b.getHeight()) {
+        throw std::invalid_argument("CipherMat size not match");
+    }
+    if (a.getData().size() != b.getData().size()) {
+        throw std::invalid_argument("CipherMat CipherText vector size not match");
+    }
 }

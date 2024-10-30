@@ -25,7 +25,7 @@ namespace SpatialFHE {
 
         [[nodiscard]] int getWidth() const;
         [[nodiscard]] int getHeight() const;
-        std::vector<CipherText>& getData();
+        [[nodiscard]] const std::vector<CipherText> &getData() const;
     };
 
 }

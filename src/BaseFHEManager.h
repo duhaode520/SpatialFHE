@@ -43,7 +43,11 @@ namespace SpatialFHE {
         void decodeAndDecrypt(std::vector<long>& vec, CipherText const& ct) const;
 
         [[nodiscard]] CipherText add(CipherText const& ct1, CipherText const& ct2) const;
-
+        [[nodiscard]] CipherText addPlain(CipherText const& ct, PlainText const& pt) const;
+        [[nodiscard]] CipherText sub(CipherText const& ct1, CipherText const& ct2) const;
+        [[nodiscard]] CipherText multiply(CipherText const& ct1, CipherText const& ct2) const;
+        [[nodiscard]] CipherText multiplyPlain(CipherText const& ct, PlainText const& pt) const;
+        [[nodiscard]] CipherText square(CipherText const& ct) const;
 
         [[nodiscard]] CipherText buildCipherText(std::string const& str) const;
     };

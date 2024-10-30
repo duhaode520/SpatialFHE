@@ -11,7 +11,13 @@ class MatFHEManager {
 public:
     virtual CipherMat encryptMat(int width, int height, const std::vector<double> &data) = 0;
     virtual std::vector<double> decryptMat(CipherMat &cipher_mat) = 0;
-    virtual CipherMat addMat(CipherMat& a, CipherMat &b) = 0;
+
+    virtual CipherMat addMat(CipherMat const &a, CipherMat const &b) = 0;
+    virtual CipherMat addMatPlain(CipherMat const& a, const std::vector<double> &plain) = 0;
+    virtual CipherMat subMat(CipherMat const &a, CipherMat const &b) = 0;
+    virtual CipherMat multiplyMat(CipherMat const& a, CipherMat const& b) = 0;
+    virtual CipherMat multiplyMatPlain(CipherMat const& a, const std::vector<double> &plain) = 0;
+
     virtual ~MatFHEManager() = default;
 };
 }  // namespace SpatialFHE

@@ -79,6 +79,26 @@ void BaseFHEManager::decodeAndDecrypt(std::vector<long> &vec, CipherText const &
 CipherText BaseFHEManager::add(CipherText const &ct1, CipherText const &ct2) const {
     return crypto->Add(ct1, ct2);
 }
+CipherText BaseFHEManager::addPlain(CipherText const &ct, PlainText const &pt) const {
+    return crypto->AddPlain(ct, pt);
+}
+
+CipherText BaseFHEManager::sub(CipherText const &ct1, CipherText const &ct2) const {
+    return crypto->Subtract(ct1, ct2);
+}
+
+CipherText BaseFHEManager::multiply(CipherText const &ct1, CipherText const &ct2) const {
+    return crypto->Multiply(ct1, ct2);
+}
+
+CipherText BaseFHEManager::multiplyPlain(CipherText const &ct, PlainText const &pt) const {
+    return crypto->MultiplyPlain(ct, pt);
+}
+
+CipherText BaseFHEManager::square(CipherText const &ct) const {
+    return crypto->Square(ct);
+}
+
 CipherText BaseFHEManager::buildCipherText(std::string const &str) const {
     return crypto->buildCipherText(str);
 }

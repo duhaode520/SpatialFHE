@@ -46,7 +46,7 @@ namespace SpatialFHE {
     int CipherMat::getHeight() const {
         return height;
     }
-    std::vector<CipherText> &CipherMat::getData() {
+    const std::vector<CipherText> &CipherMat::getData() const {
         return data;
     }
 } // SpatialFHE
