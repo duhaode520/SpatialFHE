@@ -1,4 +1,4 @@
-#include "hecrypto.h"
+#include "HECrypto.h"
 
 namespace SpatialFHE {
     // std::string HESchemeStrings[] = {"BGV", "BFV", "CKKS"};

@@ -3,7 +3,7 @@
 //
 
 #include "BaseFHEManager.h"
-#include "sealcrypto.h"
+#include "SealCrypto.h"
 
 using namespace  SpatialFHE;
 

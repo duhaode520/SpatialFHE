@@ -1,4 +1,4 @@
-#include "plaintext.h"
+#include "PlainText.h"
 
 namespace SpatialFHE {
     PlainText::PlainText() = default;

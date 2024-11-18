@@ -1,4 +1,4 @@
-#include "ciphertext.h"
+#include "CipherText.h"
 #include <b64/encode.h>
 
 using namespace std;

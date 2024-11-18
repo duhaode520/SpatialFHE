@@ -2,7 +2,7 @@
 
 #include <seal/ciphertext.h>
 #include <seal/plaintext.h>
-#include "hecrypto.h"
+#include "HECrypto.h"
 
 namespace SpatialFHE {
     class SEALCrypto : public HECrypto {

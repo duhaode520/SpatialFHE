@@ -1,7 +1,7 @@
-#include "fsmanager.h"
+#include "FSManager.h"
+#include "HDFSManager.h"
+#include "LocalFSManager.h"
 
-#include <hdfsmanager.h>
-#include <localfsmanager.h>
 #include <sys/stat.h>
 
 namespace SpatialFHE {

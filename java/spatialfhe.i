@@ -1,10 +1,10 @@
 // @formatting: off
 %module(directors = "1") spatialfhe 
 %{
-    #include "ciphertext.h"
-    #include "plaintext.h"
-    #include "hecrypto.h"
-    #include "sealcrypto.h"
+    #include "CipherText.h"
+    #include "PlainText.h"
+    #include "HECrypto.h"
+    #include "SealCrypto.h"
     #include "CipherMat.h"
     #include "BaseFHEManager.h"
     #include "MatFHEManager.h"
@@ -28,10 +28,10 @@ namespace std {
    %template(CipherTextVector)      vector<SpatialFHE::CipherText>;
 }
 
-%include "ciphertext.h"
-%include "plaintext.h"
-%include "hecrypto.h"
-%include "sealcrypto.h"
+%include "CipherText.h"
+%include "PlainText.h"
+%include "HECrypto.h"
+%include "SealCrypto.h"
 %include "CipherMat.h"
 %include "BaseFHEManager.h"
 %include "MatFHEManager.h"

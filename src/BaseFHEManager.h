@@ -4,7 +4,7 @@
 
 #ifndef BASEFHEMANAGER_H
 #define BASEFHEMANAGER_H
-#include "hecrypto.h"
+#include "HECrypto.h"
 
 namespace SpatialFHE {
     class BaseFHEManager {

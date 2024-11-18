@@ -1,4 +1,4 @@
-#include "sealcrypto.h"
+#include "SealCrypto.h"
 #include <b64/decode.h>
 #include <seal/ciphertext.h>
 #include <seal/plaintext.h>
@@ -6,12 +6,11 @@
 #include <sstream>
 #include <variant>
 #include <vector>
-#include "hecrypto.h"
-#include "plaintext.h"
-#include "fsmanager.h"
-#include "hdfsmanager.h"
+#include "HECrypto.h"
+#include "PlainText.h"
+#include "FSManager.h"
+#include "HDFSManager.h"
 
-#include <sealcrypto.h>
 
 using namespace std;
 

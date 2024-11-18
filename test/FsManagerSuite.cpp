@@ -6,9 +6,9 @@
 #include <hdfs/hdfs.h>
 
 // #define private public
-#include "fsmanager.h"
-#include "localfsmanager.h"
-#include "hdfsmanager.h"
+#include "FSManager.h"
+#include "LocalFSManager.h"
+#include "HDFSManager.h"
 // #undef private
 using namespace SpatialFHE;
 using namespace std;

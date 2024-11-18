@@ -4,7 +4,7 @@
 #include "testutils.h"
 
 #define private public
-#include "sealcrypto.h"
+#include "SealCrypto.h"
 
 // Test SealCryptoInit
 TEST(SEALCryptoInitTest, Init) {

@@ -1,7 +1,7 @@
 #ifndef HDFSMANAGER_H
 #define HDFSMANAGER_H
 
-#include "fsmanager.h"
+#include "FSManager.h"
 #include <iostream>
 #include "hdfs/hdfs.h"
 

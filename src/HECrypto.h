@@ -6,8 +6,8 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "ciphertext.h"
-#include "plaintext.h"
+#include "CipherText.h"
+#include "PlainText.h"
 
 namespace SpatialFHE {
     // extern std::string HESchemeStrings[];
@@ -23,7 +23,7 @@ namespace SpatialFHE {
             CKKS,
         };
 
-        enum class HELibrary { SEAL, HELIB };
+        enum class HELibrary { SEAL, Phantom };
 
         using CryptoParams = std::map<std::string, rapidjson::Value>;
         HECrypto();

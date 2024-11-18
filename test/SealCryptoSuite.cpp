@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 #include <seal/ciphertext.h>
 #include <vector>
-#include "ciphertext.h"
-#include "hecrypto.h"
+#include "CipherText.h"
+#include "HECrypto.h"
 
 #define private public
-#include "sealcrypto.h"
+#include "SealCrypto.h"
 #undef private
 
 using namespace SpatialFHE;

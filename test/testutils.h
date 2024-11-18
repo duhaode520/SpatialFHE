@@ -4,7 +4,7 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 #include <map>
-#include "hecrypto.h"
+#include "HECrypto.h"
 
 void createTestParams(SpatialFHE::HECrypto::CryptoParams& params) {
     const std::string json = R"(

@@ -2,7 +2,7 @@
 // Created by ubuntu on 9/19/24.
 //
 
-#include "hdfsmanager.h"
+#include "HDFSManager.h"
 #include <unistd.h>
 #include <sys/stat.h>
 

@@ -1,6 +1,6 @@
 #ifndef LOCALFSMANAGER_H
 #define LOCALFSMANAGER_H
-#include "fsmanager.h"
+#include "FSManager.h"
 
 namespace SpatialFHE {
 

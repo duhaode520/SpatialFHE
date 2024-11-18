@@ -2,7 +2,7 @@
 // Created by ubuntu on 9/19/24.
 //
 
-#include "localfsmanager.h"
+#include "LocalFSManager.h"
 
 namespace SpatialFHE {
 

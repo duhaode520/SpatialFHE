@@ -4,8 +4,7 @@
 #include <gtest/gtest.h>
 #include <seal/ciphertext.h>
 #include <vector>
-#include "ciphertext.h"
-#include "hecrypto.h"
+#include "HECrypto.h"
 #include "SpatialFHEManager.h"
 
 #define private public

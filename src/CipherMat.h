@@ -5,7 +5,7 @@
 #ifndef CIPHERMAT_H
 #define CIPHERMAT_H
 
-#include "ciphertext.h"
+#include "CipherText.h"
 #include <vector>
 
 namespace SpatialFHE {
