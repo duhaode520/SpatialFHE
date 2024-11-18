@@ -4,21 +4,82 @@
 
 #include "SpatialFHEManager.h"
 
-SpatialFHE::SpatialFHEManager::SpatialFHEManager() = default;
-SpatialFHE::SpatialFHEManager::SpatialFHEManager(
-    const std::string& publicKeyPath,
-    const std::string& secretKeyPath,
-    const std::string& paramsString,
-    bool isInit) : BaseFHEManager(publicKeyPath, secretKeyPath, paramsString, isInit) {
-
+SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::parallelOp2(
+    CipherMat const &a,
+    CipherMat const &b,
+    std::function<CipherText(CipherText const &, CipherText const &)> func) const {
+    validateSameSize(a, b);
+    int size = a.getData().size();
+    std::vector<CipherText> result(size);
+    int numThreads = std::min(size, max_thread_num);
+    std::vector<std::thread> threads(numThreads);
+    int chunkSize = size / numThreads;
+    for (int i = 0; i < numThreads; i++) {
+        threads[i] = std::thread([&, i]() {
+            int start = i * chunkSize;
+            int end = (i == numThreads - 1) ? size : start + chunkSize;
+            for (int j = start; j < end; j++) {
+                result[j] = func(a.getData()[j], b.getData()[j]);
+            }
+        });
     }
+    for (auto &t : threads) {
+        if (t.joinable())
+            t.join();
+    }
+    return {a.getWidth(), a.getHeight(), result};
+}
+SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::parallelOp2(
+    CipherMat const &a,
+    std::vector<PlainText> const &plainVector,
+    std::function<CipherText(CipherText const &, PlainText const &)> func) const {
+    if (a.getData().size() != plainVector.size()) {
+        throw std::invalid_argument("CipherMat CipherText vector size not match");
+    }
+    int size = a.getData().size();
+    std::vector<CipherText> result(size);
+    int numThreads = std::min(size, max_thread_num);
+    std::vector<std::thread> threads(numThreads);
+    int chunkSize = size / numThreads;
+    for (int i = 0; i < numThreads; i++) {
+        threads[i] = std::thread([&, i]() {
+            int start = i * chunkSize;
+            int end = (i == numThreads - 1) ? size : start + chunkSize;
+            for (int j = start; j < end; j++) {
+                result[j] = func(a.getData()[j], plainVector[j]);
+            }
+        });
+    }
+    for (auto &t : threads) {
+        if (t.joinable())
+            t.join();
+    }
+    return {a.getWidth(), a.getHeight(), result};
+}
+
+SpatialFHE::SpatialFHEManager::SpatialFHEManager() {
+    max_thread_num = 1;
+}
+
+SpatialFHE::SpatialFHEManager::SpatialFHEManager(
+    const std::string &publicKeyPath,
+    const std::string &secretKeyPath,
+    const std::string &paramsString,
+    bool isInit,
+    int max_thread_num = 1) :
+        BaseFHEManager(publicKeyPath, secretKeyPath, paramsString, isInit) {
+    this->max_thread_num = max_thread_num;
+}
 SpatialFHE::SpatialFHEManager::~SpatialFHEManager() = default;
 
-SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::encryptMat(int width, int height, const std::vector<double> &data){
+SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::encryptMat(
+    int width,
+    int height,
+    const std::vector<double> &data) {
     std::vector<PlainText> plain_vec = crypto->EncodeMany(data);
     std::vector<CipherText> cipher_vec;
     cipher_vec.reserve(plain_vec.size());
-    for(auto &plain : plain_vec){
+    for (auto &plain : plain_vec) {
         cipher_vec.emplace_back(crypto->Encrypt(plain));
     }
     return {width, height, cipher_vec};
@@ -29,7 +90,7 @@ std::vector<double> SpatialFHE::SpatialFHEManager::decryptMat(CipherMat &cipher_
     int height = cipher_mat.getHeight();
     std::vector<PlainText> plain_vec;
     plain_vec.reserve(cipher_mat.getData().size());
-    for(auto &cipher : cipher_mat.getData()){
+    for (auto &cipher : cipher_mat.getData()) {
         plain_vec.emplace_back(crypto->Decrypt(cipher));
     }
     // Decode each plaintext and store in a vector
@@ -45,59 +106,28 @@ std::vector<double> SpatialFHE::SpatialFHEManager::decryptMat(CipherMat &cipher_
 }
 
 SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::addMat(CipherMat const &a, CipherMat const &b) {
-    validateSameSize(a, b);
-    int size = a.getData().size();
-    std::vector<CipherText> result;
-    result.reserve(size);
-    for (int i = 0; i < size; i++) {
-        result.emplace_back(crypto->Add(a.getData()[i], b.getData()[i]));
-    }
-    return {a.getWidth(), a.getHeight(), result};
+    return parallelOp2(a, b, [this](CipherText const &x, CipherText const &y) { return crypto->Add(x, y); });
 }
 SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::addMatPlain(CipherMat const &a, const std::vector<double> &plain) {
     std::vector<PlainText> plain_vec = crypto->EncodeMany(plain);
-    int size = a.getData().size();
-    std::vector<CipherText> result;
-    result.reserve(size);
-    for (int i = 0; i < size; i++) {
-        result.emplace_back(crypto->AddPlain(a.getData()[i], plain_vec[i]));
-    }
-    return {a.getWidth(), a.getHeight(), result};
+    return parallelOp2(
+        a, plain_vec, [this](CipherText const &x, PlainText const &y) { return crypto->AddPlain(x, y); });
 }
 
-
 SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::subMat(CipherMat const &a, CipherMat const &b) {
-    validateSameSize(a, b);
-    int size = a.getData().size();
-    std::vector<CipherText> result;
-    result.reserve(size);
-    for (int i = 0; i < size; i++) {
-        result.emplace_back(crypto->Subtract(a.getData()[i], b.getData()[i]));
-    }
-    return {a.getWidth(), a.getHeight(), result};
+    return parallelOp2(a, b, [this](CipherText const &x, CipherText const &y) { return crypto->Subtract(x, y); });
 }
 
 SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::multiplyMat(CipherMat const &a, CipherMat const &b) {
-    validateSameSize(a, b);
-    int size = a.getData().size();
-    std::vector<CipherText> result;
-    result.reserve(size);
-    for (int i = 0; i < size; i++) {
-        result.emplace_back(crypto->Multiply(a.getData()[i], b.getData()[i]));
-    }
-    return {a.getWidth(), a.getHeight(), result};
+    return parallelOp2(a, b, [this](CipherText const &x, CipherText const &y) { return crypto->Multiply(x, y); });
 }
 
 SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::multiplyMatPlain(
-    CipherMat const &a, const std::vector<double> &plain) {
+    CipherMat const &a,
+    const std::vector<double> &plain) {
     std::vector<PlainText> plain_vec = crypto->EncodeMany(plain);
-    int size = a.getData().size();
-    std::vector<CipherText> result;
-    result.reserve(size);
-    for (int i = 0; i < size; i++) {
-        result.emplace_back(crypto->MultiplyPlain(a.getData()[i], plain_vec[i]));
-    }
-    return {a.getWidth(), a.getHeight(), result};
+    return parallelOp2(
+        a, plain_vec, [this](CipherText const &x, PlainText const &y) { return crypto->MultiplyPlain(x, y); });
 }
 
 void SpatialFHE::SpatialFHEManager::validateSameSize(SpatialFHE::CipherMat const &a, SpatialFHE::CipherMat const &b) {

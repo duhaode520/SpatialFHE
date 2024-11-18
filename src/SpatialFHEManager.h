@@ -9,13 +9,22 @@
 
 namespace SpatialFHE {
     class SpatialFHEManager : public BaseFHEManager, public MatFHEManager {
+    private:
+        int max_thread_num;
+
+        CipherMat parallelOp2(CipherMat const &a, CipherMat const &b,
+            std::function<CipherText(CipherText const&, CipherText const&)> func) const;
+        CipherMat parallelOp2(CipherMat const& a, std::vector<PlainText> const& plainVector,
+            std::function<CipherText(CipherText const&, PlainText const&)> func) const;
+
     public:
         SpatialFHEManager();
         SpatialFHEManager(
             const std::string &publicKeyPath,
             const std::string &secretKeyPath,
             const std::string &paramsString,
-            bool isInit);
+            bool isInit,
+            int max_thread_num);
         ~SpatialFHEManager() override;
 
         // MatFHEManger implementation

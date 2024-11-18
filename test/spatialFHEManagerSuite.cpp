@@ -26,7 +26,7 @@ public:
             "\"PlaintextModulus\":0,\"CoeffModulusPrimes\":[0],\"ScaleFactor\":30}";
         PUBKEY_PATH = "public.key";
         SECKEY_PATH = "secret.key";
-        manager = SpatialFHEManager(PUBKEY_PATH, SECKEY_PATH, json, true);
+        manager = SpatialFHEManager(PUBKEY_PATH, SECKEY_PATH, json, true, 1);
     }
 
     static void TearDownTestCase() {}
@@ -84,6 +84,84 @@ TEST_F(SpatialFHEManagerSuite, AddMat) {
     CipherMat mat2 = manager.encryptMat(width, height, data2);
 
     CipherMat result = manager.addMat(mat1, mat2);
+    std::vector<double> decrypted = manager.decryptMat(result);
+    ASSERT_EQ(expected.size(), decrypted.size());
+    for (int i = 0; i < expected.size(); ++i) {
+        ASSERT_NEAR(expected[i], decrypted[i], ERROR);
+    }
+}
+
+TEST_F(SpatialFHEManagerSuite, AddBigMat) {
+    int width = 100, height = 200;
+    int n = width * height;
+    std::vector<double> data1;
+    std::vector<double> data2;
+    for (int i = 0; i < n; ++i) {
+        data1.emplace_back(i+1);
+        data2.emplace_back(10*(i+1));
+    }
+    std::vector<double> expected;
+    expected.reserve(n);
+    for (int i = 0; i < n; ++i) {
+        expected.emplace_back(data1[i] + data2[i]);
+    }
+
+    CipherMat mat1 = manager.encryptMat(width, height, data1);
+    CipherMat mat2 = manager.encryptMat(width, height, data2);
+
+    CipherMat result = manager.addMat(mat1, mat2);
+    std::vector<double> decrypted = manager.decryptMat(result);
+    ASSERT_EQ(expected.size(), decrypted.size());
+    for (int i = 0; i < expected.size(); ++i) {
+        ASSERT_NEAR(expected[i], decrypted[i], ERROR);
+    }
+}
+
+TEST_F(SpatialFHEManagerSuite, AddBigMatPlain) {
+    int width = 100, height = 200;
+    int n = width * height;
+    std::vector<double> data1;
+    std::vector<double> data2;
+    for (int i = 0; i < n; ++i) {
+        data1.emplace_back(i+1);
+        data2.emplace_back(10*(i+ 1));
+    }
+    std::vector<double> expected;
+    expected.reserve(n);
+    for (int i = 0; i < n; ++i) {
+        expected.emplace_back(data1[i] + data2[i]);
+    }
+
+    CipherMat mat1 = manager.encryptMat(width, height, data1);
+
+    CipherMat result = manager.addMatPlain(mat1, data2);
+    std::vector<double> decrypted = manager.decryptMat(result);
+    ASSERT_EQ(expected.size(), decrypted.size());
+    for (int i = 0; i < expected.size(); ++i) {
+        ASSERT_NEAR(expected[i], decrypted[i], ERROR);
+    }
+}
+
+
+TEST_F(SpatialFHEManagerSuite, MultiplyBigMat) {
+    int width = 100, height = 200;
+    int n = width * height;
+    std::vector<double> data1;
+    std::vector<double> data2;
+    for (int i = 0; i < n; ++i) {
+        data1.emplace_back(i+1);
+        data2.emplace_back(10*(i+1));
+    }
+    std::vector<double> expected;
+    expected.reserve(n);
+    for (int i = 0; i < n; ++i) {
+        expected.emplace_back(data1[i] * data2[i]);
+    }
+
+    CipherMat mat1 = manager.encryptMat(width, height, data1);
+    CipherMat mat2 = manager.encryptMat(width, height, data2);
+
+    CipherMat result = manager.multiplyMat(mat1, mat2);
     std::vector<double> decrypted = manager.decryptMat(result);
     ASSERT_EQ(expected.size(), decrypted.size());
     for (int i = 0; i < expected.size(); ++i) {

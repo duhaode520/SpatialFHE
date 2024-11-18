@@ -22,7 +22,7 @@ public class FHEHelper {
     private final SpatialFHEManager manager;
     private final String publicKeyPath;
 
-    private FHEHelper(String publicKeyPath, String secretKeyPath, String confDir, boolean isInit) {
+    private FHEHelper(String publicKeyPath, String secretKeyPath, String confDir, boolean isInit, int maxThreadNum) {
         // load config
         this.publicKeyPath = publicKeyPath;
         try {
@@ -34,35 +34,35 @@ public class FHEHelper {
         }
 
         String jsonConfig = loadConfig(confDir);
-        manager = new SpatialFHEManager(publicKeyPath, secretKeyPath, jsonConfig, isInit);
+        manager = new SpatialFHEManager(publicKeyPath, secretKeyPath, jsonConfig, isInit, maxThreadNum);
     }
 
-    private FHEHelper(String publicKeyPath, String secretKeyPath, String libPath, String jsonConfig, boolean isInit) {
+    private FHEHelper(String publicKeyPath, String secretKeyPath, String libPath, String jsonConfig, boolean isInit, int maxThreadNum) {
         this.publicKeyPath = publicKeyPath;
         try {
             System.load(libPath);
         } catch (Exception e) {
             logger.error("Error loading JNI library: {}. Stacktrace: {}", e.getMessage(), e);
         }
-        manager = new SpatialFHEManager(publicKeyPath, secretKeyPath, jsonConfig, isInit);
+        manager = new SpatialFHEManager(publicKeyPath, secretKeyPath, jsonConfig, isInit, maxThreadNum);
     }
 
-    public static FHEHelper getOrCreate(String publicKeyPath, String secretKeyPath, String confDir, boolean isInit) {
+    public static FHEHelper getOrCreate(String publicKeyPath, String secretKeyPath, String confDir, boolean isInit, int maxThreadNum) {
         if (instance == null) {
             synchronized (FHEHelper.class) {
                 if (instance == null) {
-                    instance = new FHEHelper(publicKeyPath, secretKeyPath, confDir, isInit);
+                    instance = new FHEHelper(publicKeyPath, secretKeyPath, confDir, isInit, maxThreadNum);
                 }
             }
         }
         return instance;
     }
 
-    public static FHEHelper getOrCreate(String publicKeyPath, String secretKeyPath, String libPath, String jsonConfig, boolean isInit) {
+    public static FHEHelper getOrCreate(String publicKeyPath, String secretKeyPath, String libPath, String jsonConfig, boolean isInit, int maxThreadNum) {
         if (instance == null) {
             synchronized (FHEHelper.class) {
                 if (instance == null) {
-                    instance = new FHEHelper(publicKeyPath, secretKeyPath, libPath, jsonConfig, isInit);
+                    instance = new FHEHelper(publicKeyPath, secretKeyPath, libPath, jsonConfig, isInit, maxThreadNum);
                 }
             }
         }
@@ -88,7 +88,7 @@ public class FHEHelper {
         // load json config from file
         Gson gson = new Gson();
         try {
-             String fileString = new String(Files.readAllBytes(Paths.get(confDir).resolve(JSON_CONFIG_PATH)));
+            String fileString = new String(Files.readAllBytes(Paths.get(confDir).resolve(JSON_CONFIG_PATH)));
             JsonObject jsonObject = gson.fromJson(fileString, JsonObject.class);
             return jsonObject.toString();
         } catch (Exception e) {
