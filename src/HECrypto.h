@@ -1,6 +1,5 @@
 #pragma once
 
-#include <seal/seal.h>
 #include <rapidjson/document.h>
 
 #include <map>
@@ -31,7 +30,7 @@ namespace SpatialFHE {
 
         // key pair
         virtual void GenerateKeyPair(std::string const& pubKeyFilename, std::string const& secKeyFilename) = 0;
-        virtual void LoadKeyPair(std::string const& pubKeyFilename, std::string const& secKeyFilename) = 0;
+        virtual void LoadKeyPair(std::string const& pubKeyFilename, std::string const& secKeyFilename);
 
         // encode and encrypt
 
@@ -56,8 +55,8 @@ namespace SpatialFHE {
         virtual void Decode(std::vector<double>& vec, PlainText const& pt) = 0;
         virtual void Decode(std::vector<long>& vec, PlainText const& pt) = 0;
 
-        virtual PlainText Decrypt(CipherText const& ct, bool noBatching=true) = 0;
-        virtual std::string Decrypt(std::string const& sct, bool noBatching=true) = 0;
+        virtual PlainText Decrypt(CipherText const& ct, bool noBatching = true) = 0;
+        virtual std::string Decrypt(std::string const& sct, bool noBatching = true) = 0;
 
         // transform to CipherText and PlainText
 
@@ -148,7 +147,13 @@ namespace SpatialFHE {
         // static std::string HESchemeToString(HEScheme scheme);
 
         virtual CipherText buildCipherText(std::string const& str) const = 0;
-        static void ParseParams(HECrypto::CryptoParams& params, rapidjson::Document& doc, std::string const& param_string);
+
+
+    protected:
+        static void parse_params(CryptoParams& params, rapidjson::Document& doc, std::string const& param_string);
+        static HEScheme parse_HE_scheme(std::string const& scheme_string);
+
+        static std::vector<long> to_long_vec(rapidjson::Value &data);
 
     };
 

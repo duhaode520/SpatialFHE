@@ -47,7 +47,7 @@ namespace SpatialFHE {
     SEALCrypto::SEALCrypto(const std::string &params_string) : SEALCrypto() {
         CryptoParams params;
         rapidjson::Document doc;
-        ParseParams(params, doc, params_string);
+        parse_params(params, doc, params_string);
         this->update_encryption_params(params);
         this->initSealParams();
         this->sealContext = std::make_shared<seal::SEALContext>(*this->sealParams);
@@ -97,11 +97,6 @@ namespace SpatialFHE {
                 galoisKeyFS->CloseOutputStream();
             }
         }
-    }
-
-    void SEALCrypto::LoadKeyPair(std::string const &pubKeyFilename, std::string const &secKeyFilename) {
-        this->LoadPublicKey(pubKeyFilename);
-        this->LoadSecretKey(secKeyFilename);
     }
 
     void SEALCrypto::LoadPublicKey(std::string const &pubKeyFilename) {
@@ -1087,7 +1082,7 @@ namespace SpatialFHE {
             this->params->scale = pow(2.0, this->params->scaleFactor);
         }
         if (crypto_params.find("SchemeType") != crypto_params.end()) {
-            parse_scheme(crypto_params["SchemeType"].GetString());
+            this->params->schemeType = parse_HE_scheme(crypto_params["SchemeType"].GetString());
         }
         if (crypto_params.find("CoeffModulusBits") != crypto_params.end()) {
             vector<long> lvec = to_long_vec(crypto_params["CoeffModulusBits"]);
@@ -1110,16 +1105,6 @@ namespace SpatialFHE {
         }
     }
 
-    void SEALCrypto::parse_scheme(std::string const &scheme) {
-        if (scheme == "BFV") {
-            this->params->schemeType = HECrypto::HEScheme::BFV;
-        } else if (scheme == "CKKS") {
-            this->params->schemeType = HECrypto::HEScheme::CKKS;
-        } else {
-            cerr << "Invalid scheme type: " << scheme << endl;
-        }
-    }
-
     void SEALCrypto::set_encoder(HECrypto::HEScheme scheme) {
         // TODO: given that the IntegerEncoder is deprecated, we should find a way to replace it.
         if (scheme == HECrypto::HEScheme::BFV) {
@@ -1129,18 +1114,6 @@ namespace SpatialFHE {
             this->ckksEncoder = make_shared<seal::CKKSEncoder>(*this->sealContext);
             this->slot_count = this->ckksEncoder->slot_count();
         }
-    }
-
-    std::vector<long> SEALCrypto::to_long_vec(rapidjson::Value &data) {
-        std::vector<long> vec;
-        for (rapidjson::SizeType i = 0; i < data.Size(); i++) {
-            if (data[i].IsInt64())
-                vec.push_back(data[i].GetInt64());
-            else
-                throw invalid_argument("Invalid data type");
-        }
-
-        return vec;
     }
 
     void SEALCrypto::parms_unify(seal::Ciphertext &src, seal::Ciphertext &dst) {

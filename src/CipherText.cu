@@ -25,6 +25,16 @@ namespace SpatialFHE {
         this->data_source = "string";
     }
 
+    CipherText::CipherText(PhantomCiphertext const &ct) {
+        this->data = ct;
+        this->data_source = "Phantom";
+    }
+
+    void CipherText::setData(PhantomCiphertext const &ct) {
+        this->data = ct;
+        this->data_source = "Phantom";
+    }
+
     void CipherText::setData(seal::Ciphertext const &ct) {
         this->data = ct;
     }
@@ -47,7 +57,7 @@ namespace SpatialFHE {
         return this->data;
     }
 
-    CipherText& SpatialFHE::CipherText::operator=(CipherText const &other) {
+    CipherText &SpatialFHE::CipherText::operator=(CipherText const &other) {
         if (this != &other) {
             this->data = other.data;
             this->data_source = other.data_source;
@@ -55,7 +65,7 @@ namespace SpatialFHE {
         return *this;
     }
 
-    CipherText& SpatialFHE::CipherText::operator=(CipherText &&other) noexcept {
+    CipherText &SpatialFHE::CipherText::operator=(CipherText &&other) noexcept {
         if (this != &other) {
             this->data = other.data;
             this->data_source = other.data_source;

@@ -28,7 +28,17 @@ namespace SpatialFHE {
         this->data_source = "string";
     }
 
-    PlainText& PlainText::operator=(PlainText const &other) {
+    PlainText::PlainText(PhantomPlaintext const &value) {
+        this->data = value;
+        this->data_source = "Phantom";
+    }
+
+    void PlainText::setData(PhantomPlaintext const &value) {
+        this->data = value;
+        this->data_source = "Phantom";
+    }
+
+    PlainText & PlainText::operator=(PlainText const &other) {
         if (this != &other) {
             this->data = other.data;
             this->data_source = other.data_source;

@@ -79,10 +79,8 @@ namespace SpatialFHE {
         void _running_sum(seal::Ciphertext& result, seal::Ciphertext const& ct);
 
         void update_encryption_params(CryptoParams& params);
-        static std::vector<long> to_long_vec(rapidjson::Value& data);
 
         static seal::scheme_type set_fhe_scheme(HECrypto::HEScheme scheme);
-        void parse_scheme(std::string const& scheme);
 
         void set_encoder(HECrypto::HEScheme scheme);
         void parms_unify(seal::Ciphertext& src, seal::Ciphertext& dst);
@@ -97,7 +95,6 @@ namespace SpatialFHE {
         // context
         // TODO: 把KeyGen和运算分开
         void GenerateKeyPair(std::string const& pubKeyFilename, std::string const& secKeyFilename) override;
-        void LoadKeyPair(std::string const& pubKeyFilename, std::string const& secKeyFilename) override;
 
         // encode and encrypt
 

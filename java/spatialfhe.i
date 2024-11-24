@@ -9,6 +9,7 @@
     #include "BaseFHEManager.h"
     #include "MatFHEManager.h"
     #include "SpatialFHEManager.h"
+    #include "PhantomCrypto.cuh"
 %}
 
 %include "std_vector.i"
@@ -32,6 +33,7 @@ namespace std {
 %include "PlainText.h"
 %include "HECrypto.h"
 %include "SealCrypto.h"
+%include "PhantomCrypto.cuh"
 %include "CipherMat.h"
 %include "BaseFHEManager.h"
 %include "MatFHEManager.h"

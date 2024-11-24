@@ -17,7 +17,7 @@ enable_testing()
 
 
 #这里创建了一个TestAll选项
-FILE(GLOB_RECURSE CURRENT_TEST *.cpp)
+FILE(GLOB_RECURSE CURRENT_TEST "*.cpp" "*.cu")
 add_executable(testAll ${CURRENT_TEST})
 target_link_libraries(testAll PRIVATE gtest_main)
 target_link_libraries(testAll PRIVATE SpatialFHE)
