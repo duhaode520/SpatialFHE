@@ -21,10 +21,10 @@ namespace SpatialFHE {
         std::shared_ptr<PhantomEncryptionParams> params;
         std::shared_ptr<phantom::EncryptionParameters> phantomParams;
         std::shared_ptr<PhantomContext> context;
-        PhantomPublicKey publicKey;
-        PhantomSecretKey secretKey;
-        PhantomRelinKey relinKey;
-        PhantomGaloisKey galoisKeys;
+        std::shared_ptr<PhantomPublicKey> publicKey;
+        std::shared_ptr<PhantomSecretKey> secretKey;
+        std::shared_ptr<PhantomRelinKey> relinKey;
+        std::shared_ptr<PhantomGaloisKey> galoisKeys;
         std::shared_ptr<PhantomCKKSEncoder> ckksEncoder;
         std::shared_ptr<PhantomBatchEncoder> batchEncoder;
         size_t slot_count{};
@@ -104,8 +104,8 @@ namespace SpatialFHE {
         void Decode(std::vector<double> &vec, const PlainText &pt) override;
         void Decode(std::vector<long> &vec, const PlainText &pt) override;
 
-        PlainText Decrypt(const CipherText &ct, bool noBatching) override;
-        std::string Decrypt(const std::string &sct, bool noBatching) override;
+        PlainText Decrypt(const CipherText &ct, bool noBatching=true) override;
+        std::string Decrypt(const std::string &sct, bool noBatching=true) override;
 
         CipherText toCipherText(const std::string &str) override;
         std::vector<CipherText> toCipherText(const std::vector<std::string> &strs) override;

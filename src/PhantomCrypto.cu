@@ -91,11 +91,11 @@ namespace SpatialFHE {
     }
 
     void PhantomCrypto::_encrypt(PhantomCiphertext &ct, PhantomPlaintext const &pt) {
-        publicKey.encrypt_asymmetric(*context, pt, ct);
+        publicKey->encrypt_asymmetric(*context, pt, ct);
     }
 
     void PhantomCrypto::_decrypt(PhantomPlaintext &pt, PhantomCiphertext const &ct) {
-        secretKey.decrypt(*context, ct, pt);
+        secretKey->decrypt(*context, ct, pt);
     }
 
     void PhantomCrypto::_encode(PhantomPlaintext &pt, double d) {
@@ -137,7 +137,7 @@ namespace SpatialFHE {
     }
 
     void PhantomCrypto::_multiply(PhantomCiphertext &ct_1, PhantomCiphertext const &ct_2) {
-        phantom::multiply_and_relin_inplace(*context, ct_1, ct_2, relinKey);
+        phantom::multiply_and_relin_inplace(*context, ct_1, ct_2, *relinKey);
         if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
             phantom::rescale_to_next_inplace(*context, ct_1);
         }
@@ -147,7 +147,7 @@ namespace SpatialFHE {
         PhantomCiphertext &result,
         PhantomCiphertext const &ct_1,
         PhantomCiphertext const &ct_2) {
-        result = phantom::multiply_and_relin(*context, ct_1, ct_2, relinKey);
+        result = phantom::multiply_and_relin(*context, ct_1, ct_2, *relinKey);
         if (this->params->schemeType == HECrypto::HEScheme::CKKS) {
             phantom::rescale_to_next_inplace(*context, result);
         }
@@ -161,7 +161,7 @@ namespace SpatialFHE {
     }
 
     void PhantomCrypto::_square(PhantomCiphertext &result, PhantomCiphertext const &ct) {
-        result = phantom::multiply_and_relin(*context, ct, ct, relinKey);
+        result = phantom::multiply_and_relin(*context, ct, ct, *relinKey);
         if (this->params->schemeType == HEScheme::CKKS) {
             phantom::rescale_to_next_inplace(*context, result);
         }
@@ -172,7 +172,7 @@ namespace SpatialFHE {
     }
 
     void PhantomCrypto::_rotate(PhantomCiphertext &result, PhantomCiphertext const &ct, int const &step) {
-        result = phantom::rotate(*context, ct, step, galoisKeys);
+        result = phantom::rotate(*context, ct, step, *galoisKeys);
     }
 
     void PhantomCrypto::_rotate_columns(PhantomCiphertext &result, PhantomCiphertext const &ct) {
@@ -239,10 +239,10 @@ namespace SpatialFHE {
     }
 
     PhantomCrypto::PhantomCrypto() {
-        this->publicKey = PhantomPublicKey();
-        this->secretKey = PhantomSecretKey();
-        this->relinKey = PhantomRelinKey();
-        this->galoisKeys = PhantomGaloisKey();
+        this->publicKey = nullptr;
+        this->secretKey = nullptr;
+        this->relinKey = nullptr;
+        this->galoisKeys = nullptr;
 
         // Pointers
         this->phantomParams = nullptr;
@@ -270,43 +270,46 @@ namespace SpatialFHE {
     PhantomCrypto::~PhantomCrypto() = default;
 
     void PhantomCrypto::GenerateKeyPair(const std::string &pubKeyFilename, const std::string &secKeyFilename) {
-        this->secretKey = PhantomSecretKey(*this->context);
-        this->publicKey = this->secretKey.gen_publickey(*this->context);
-        this->relinKey = this->secretKey.gen_relinkey(*this->context);
-        this->galoisKeys = this->secretKey.create_galois_keys(*this->context);
+        this->secretKey = make_shared<PhantomSecretKey>(*this->context);
+        this->publicKey = make_shared<PhantomPublicKey>(this->secretKey->gen_publickey(*this->context));
+        this->relinKey = make_shared<PhantomRelinKey>(this->secretKey->gen_relinkey(*this->context));
+        this->galoisKeys = make_shared<PhantomGaloisKey>(this->secretKey->create_galois_keys(*this->context));
 
         // save keys to file
         const std::shared_ptr<FSManager> secretKeyFS = FSManager::createFSManager(secKeyFilename);
         const std::shared_ptr<FSManager> publicKeyFS = FSManager::createFSManager(pubKeyFilename);
         publicKeyFS->OpenOutputStream();
         secretKeyFS->OpenOutputStream();
-        this->publicKey.save(publicKeyFS->GetOutputStream());
-        this->secretKey.save(secretKeyFS->GetOutputStream());
+        this->publicKey->save(publicKeyFS->GetOutputStream());
+        this->secretKey->save(secretKeyFS->GetOutputStream());
         publicKeyFS->CloseOutputStream();
         secretKeyFS->CloseOutputStream();
 
         const std::shared_ptr<FSManager> relinKeyFS = FSManager::createFSManager(pubKeyFilename + ".relin");
         relinKeyFS->OpenOutputStream();
-        this->relinKey.save(relinKeyFS->GetOutputStream());
+        this->relinKey->save(relinKeyFS->GetOutputStream());
         relinKeyFS->CloseOutputStream();
         const std::shared_ptr<FSManager> galoisKeyFS = FSManager::createFSManager(pubKeyFilename + ".galois");
         galoisKeyFS->OpenOutputStream();
-        this->galoisKeys.save(galoisKeyFS->GetOutputStream());
+        this->galoisKeys->save(galoisKeyFS->GetOutputStream());
         galoisKeyFS->CloseOutputStream();
     }
 
     void PhantomCrypto::LoadPublicKey(const std::string &pubKeyFilename) {
         const std::shared_ptr<FSManager> publicKeyFS = FSManager::createFSManager(pubKeyFilename);
+        this->publicKey = make_shared<PhantomPublicKey>();
+        this->relinKey = make_shared<PhantomRelinKey>();
+        this->galoisKeys = make_shared<PhantomGaloisKey>();
         publicKeyFS->OpenInputStream();
-        this->publicKey.load(publicKeyFS->GetInputStream());
+        this->publicKey->load(publicKeyFS->GetInputStream());
         publicKeyFS->CloseInputStream();
         const std::shared_ptr<FSManager> relinKeyFS = FSManager::createFSManager(pubKeyFilename + ".relin");
         relinKeyFS->OpenInputStream();
-        this->relinKey.load(relinKeyFS->GetInputStream());
+        this->relinKey->load(relinKeyFS->GetInputStream());
         relinKeyFS->CloseInputStream();
         const std::shared_ptr<FSManager> galoisKeyFS = FSManager::createFSManager(pubKeyFilename + ".galois");
         galoisKeyFS->OpenInputStream();
-        this->galoisKeys.load(galoisKeyFS->GetInputStream());
+        this->galoisKeys->load(galoisKeyFS->GetInputStream());
         galoisKeyFS->CloseInputStream();
     }
 
@@ -396,8 +399,9 @@ namespace SpatialFHE {
 
     void PhantomCrypto::LoadSecretKey(const std::string &secKeyFilename) {
         const std::shared_ptr<FSManager> secretKeyFS = FSManager::createFSManager(secKeyFilename);
+        this->secretKey = make_shared<PhantomSecretKey>();
         secretKeyFS->OpenInputStream();
-        this->secretKey.load(secretKeyFS->GetInputStream());
+        this->secretKey->load(secretKeyFS->GetInputStream());
         secretKeyFS->CloseInputStream();
     }
 
