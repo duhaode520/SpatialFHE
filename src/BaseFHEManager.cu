@@ -4,6 +4,7 @@
 
 #include "BaseFHEManager.h"
 #include "SealCrypto.h"
+#include "PhantomCrypto.cuh"
 
 using namespace  SpatialFHE;
 
@@ -15,8 +16,15 @@ BaseFHEManager::BaseFHEManager(
     const std::string &publicKeyPath,
     const std::string &secretKeyPath,
     const std::string &paramsString,
+    const HECrypto::HELibrary heLibrary,
     bool isInit) {
-    this->crypto = std::make_shared<SEALCrypto>(paramsString);
+    if (heLibrary == HECrypto::HELibrary::SEAL) {
+        this->crypto = std::make_shared<SEALCrypto>(paramsString);
+    } else if (heLibrary == HECrypto::HELibrary::Phantom) {
+        this->crypto = std::make_shared<PhantomCrypto>(paramsString);
+    } else {
+        throw std::invalid_argument("Unsupported HE library");
+    }
     if (isInit) {
         crypto->GenerateKeyPair(publicKeyPath, secretKeyPath);
     } else {

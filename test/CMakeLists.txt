@@ -17,28 +17,19 @@ enable_testing()
 
 
 #这里创建了一个TestAll选项
-add_executable(seal_test InitSuite.cu FsManagerSuite.cpp SealCryptoSuite.cu SpatialFHEManagerSuite.cu)
-target_link_libraries(seal_test PRIVATE gtest_main)
-target_link_libraries(seal_test PRIVATE SpatialFHE)
-
-target_link_libraries(seal_test PRIVATE SEAL::seal)
-target_link_libraries(seal_test PRIVATE ZLIB::ZLIB)
-target_link_libraries(seal_test PRIVATE zstd::libzstd)
-target_link_libraries(seal_test PRIVATE unofficial::b64::b64)
-target_link_libraries(seal_test PRIVATE rapidjson)
+add_executable(seal_test InitSuite.cu FsManagerSuite.cpp SealCryptoSuite.cu)
+target_link_libraries(seal_test PRIVATE gtest_main SpatialFHE SEAL::seal ZLIB::ZLIB zstd::libzstd unofficial::b64::b64 rapidjson)
 
 add_executable(phantom_test PhantomCryptoSuite.cu)
-
-target_link_libraries(phantom_test PRIVATE gtest_main)
-target_link_libraries(phantom_test PRIVATE SEAL::seal)
-target_link_libraries(phantom_test PRIVATE SpatialFHE)
-target_link_libraries(phantom_test PRIVATE ZLIB::ZLIB)
-target_link_libraries(phantom_test PRIVATE zstd::libzstd)
-target_link_libraries(phantom_test PRIVATE unofficial::b64::b64)
-target_link_libraries(phantom_test PRIVATE rapidjson)
-
+target_link_libraries(phantom_test PRIVATE gtest_main SpatialFHE SEAL::seal ZLIB::ZLIB zstd::libzstd unofficial::b64::b64 rapidjson)
 target_compile_options(phantom_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--default-stream per-thread>)
 target_compile_options(phantom_test PRIVATE $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:CUDA>>:-G;-src-in-ptx>)
+
+#add_executable(spatialfhe_test SealSpatialFHEManagerSuite.cu PhantomSpatialFHEManagerSuite.cu)
+add_executable(spatialfhe_test PhantomSpatialFHEManagerSuite.cu)
+target_link_libraries(spatialfhe_test PRIVATE gtest_main SpatialFHE SEAL::seal ZLIB::ZLIB zstd::libzstd unofficial::b64::b64 rapidjson)
+target_compile_options(spatialfhe_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--default-stream per-thread>)
+target_compile_options(spatialfhe_test PRIVATE $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:CUDA>>:-G;-src-in-ptx>)
 #####
 #
 # 这里追加新的Unit Test
@@ -47,5 +38,5 @@ target_compile_options(phantom_test PRIVATE $<$<AND:$<CONFIG:Debug>,$<COMPILE_LA
 #gtest register
 include(GoogleTest)
 gtest_discover_tests(
-	seal_test phantom_test
+	seal_test phantom_test spatialfhe_test
 )

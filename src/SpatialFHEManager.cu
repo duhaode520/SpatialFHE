@@ -12,6 +12,14 @@ SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::parallelOp2(
     int size = a.getData().size();
     std::vector<CipherText> result(size);
     int numThreads = std::min(size, max_thread_num);
+
+    if (numThreads == 1) {
+        for (int i = 0; i < size; i++) {
+            result[i] = func(a.getData()[i], b.getData()[i]);
+        }
+        return {a.getWidth(), a.getHeight(), result};
+    }
+
     std::vector<std::thread> threads(numThreads);
     int chunkSize = size / numThreads;
     for (int i = 0; i < numThreads; i++) {
@@ -39,6 +47,14 @@ SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::parallelOp2(
     int size = a.getData().size();
     std::vector<CipherText> result(size);
     int numThreads = std::min(size, max_thread_num);
+
+    if (numThreads == 1) {
+        for (int i = 0; i < size; i++) {
+            result[i] = func(a.getData()[i], plainVector[i]);
+        }
+        return {a.getWidth(), a.getHeight(), result};
+    }
+
     std::vector<std::thread> threads(numThreads);
     int chunkSize = size / numThreads;
     for (int i = 0; i < numThreads; i++) {
@@ -65,9 +81,10 @@ SpatialFHE::SpatialFHEManager::SpatialFHEManager(
     const std::string &publicKeyPath,
     const std::string &secretKeyPath,
     const std::string &paramsString,
+    const HECrypto::HELibrary heLibrary,
     bool isInit,
     int max_thread_num = 1) :
-        BaseFHEManager(publicKeyPath, secretKeyPath, paramsString, isInit) {
+        BaseFHEManager(publicKeyPath, secretKeyPath, paramsString, heLibrary, isInit) {
     this->max_thread_num = max_thread_num;
 }
 SpatialFHE::SpatialFHEManager::~SpatialFHEManager() = default;

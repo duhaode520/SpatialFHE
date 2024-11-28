@@ -25,7 +25,8 @@ public:
             "\"PlaintextModulus\":0,\"CoeffModulusPrimes\":[0],\"ScaleFactor\":30}";
         PUBKEY_PATH = "public.key";
         SECKEY_PATH = "secret.key";
-        manager = SpatialFHEManager(PUBKEY_PATH, SECKEY_PATH, json, true, 1);
+        manager = SpatialFHEManager(PUBKEY_PATH, SECKEY_PATH, json,
+            HECrypto::HELibrary::SEAL, true,  1);
     }
 
     static void TearDownTestCase() {}

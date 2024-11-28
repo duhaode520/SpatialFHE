@@ -23,6 +23,7 @@ namespace SpatialFHE {
             const std::string &publicKeyPath,
             const std::string &secretKeyPath,
             const std::string &paramsString,
+            const HECrypto::HELibrary heLibrary,
             bool isInit,
             int max_thread_num);
         ~SpatialFHEManager() override;

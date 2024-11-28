@@ -13,12 +13,12 @@ namespace SpatialFHE {
         std::string publicKeyPath;
 
     public:
-        // TODO: 后面可以再加上 HELibrary，现在只用 SEAL
         BaseFHEManager();
         BaseFHEManager(
             const std::string& publicKeyPath,
             const std::string& secretKeyPath,
             const std::string& paramsString,
+            const HECrypto::HELibrary heLibrary,
             bool isInit);
         virtual ~BaseFHEManager() = default;
 
