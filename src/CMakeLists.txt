@@ -23,6 +23,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE unofficial::b64::b64)
 target_link_libraries(${PROJECT_NAME} PRIVATE rapidjson)
 target_link_libraries(${PROJECT_NAME} PRIVATE libhdfs3.so)
 target_link_libraries(${PROJECT_NAME} PRIVATE libPhantom.so)
+target_link_libraries(${PROJECT_NAME} PRIVATE CUDA::cudart)
 
 target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--default-stream per-thread>)
 target_compile_options(${PROJECT_NAME} PRIVATE $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:CUDA>>:-G;-src-in-ptx>)
