@@ -8,11 +8,46 @@ project(${PROJECT_NAME} VERSION 0.1.0 LANGUAGES CUDA CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CUDA_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# set cmake linker to lld if which lld is available
+find_program(LLD_FOUND lld)
+if (LLD_FOUND)
+    message(STATUS "LLD found: ${LLD_FOUND}")
+    set(CMAKE_LINKER ${LLD_FOUND})
+endif()
 
 option(BUILD_JAVA "Build Java Library" ON)
 
+# Phantom
 set(Phantom_DIR /cmake/phantom)
 include_directories(/phantom)
+
+# ----------------------------------------
+# Concrete
+# ----------------------------------------
+# concrete-compiler
+set(CONCRETE_DIR /home/ubuntu/github/concrete)
+set(CONCRETE_COMPILER_DIR ${CONCRETE_DIR}/compilers/concrete-compiler/compiler)
+set(CONCRETE_COMPILER_BUILD_DIR ${CONCRETE_COMPILER_DIR}/build_Debug)
+include_directories(${CONCRETE_COMPILER_BUILD_DIR}/install/concretecompiler/include)
+link_directories(${CONCRETE_COMPILER_BUILD_DIR}/install/concretecompiler/lib)
+# concrete-protocol
+set(CONCRETE_PROTOCOL_DIR ${CONCRETE_COMPILER_BUILD_DIR}/tools/concretelang/concrete-protocol)
+include_directories(${CONCRETE_PROTOCOL_DIR})
+include_directories(${CONCRETE_PROTOCOL_DIR}/capnp_src_dir/c++/src)
+# concrete-optimizer
+set(CONCRETE_OPTIMIZER_DIR ${CONCRETE_DIR}/compilers/concrete-optimizer)
+include_directories(${CONCRETE_OPTIMIZER_DIR}/concrete-optimizer-cpp/src/cpp)
+# llvm
+include_directories(${CONCRETE_COMPILER_BUILD_DIR}/include) # for llvm-config.h
+include_directories(${CONCRETE_COMPILER_DIR}/../llvm-project/llvm/include) # for some .def files
+# concrete-cpu
+include_directories(${CONCRETE_DIR}/backends/concrete-cpu/implementation/include)
+set(CONCRETE_CPU_STATIC_LIB ${CONCRETE_DIR}/backends/concrete-cpu/implementation/target/release/libconcrete_cpu.a)
+set(CONCRETE_CPU_NOISE_MODEL_STATIC_LIB ${CONCRETE_DIR}/backends/concrete-cpu/noise-model/target/release/libconcrete_cpu_noise_model.a)
+link_directories(${CONCRETE_DIR}/backends/concrete-cpu/implementation/target/release)
+link_directories(${CONCRETE_DIR}/backends/concrete-cpu/noise-model/target/release)
+
+
 # CUDA
 enable_language(CUDA)
 include(CheckLanguage)
