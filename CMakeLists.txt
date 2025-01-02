@@ -47,6 +47,13 @@ set(CONCRETE_CPU_NOISE_MODEL_STATIC_LIB ${CONCRETE_DIR}/backends/concrete-cpu/no
 link_directories(${CONCRETE_DIR}/backends/concrete-cpu/implementation/target/release)
 link_directories(${CONCRETE_DIR}/backends/concrete-cpu/noise-model/target/release)
 
+# ----------------------------------------
+# TFHE-rs
+# ----------------------------------------
+set(TFHE_C_API "/home/ubuntu/github/tfhe-rs/target/release")
+include_directories(${TFHE_C_API})
+add_library(tfhe SHARED IMPORTED)
+set_target_properties(tfhe PROPERTIES IMPORTED_LOCATION ${TFHE_C_API}/libtfhe.so)
 
 # CUDA
 enable_language(CUDA)
