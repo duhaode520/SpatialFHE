@@ -8,12 +8,9 @@
 #include <concretelang/ServerLib/ServerLib.h>
 #include <concretelang/ClientLib/ClientLib.h>
 #include <tfhe.h>
+#include <concrete-cpu.h>
 
-
-
-class ConcreteDemoSuite : public testing::Test {
-
-};
+class ConcreteDemoSuite : public testing::Test {};
 
 TEST_F(ConcreteDemoSuite, LoadAdd) {
     std::string ARTIFACT_PATH = "/share/add-compile";
@@ -25,7 +22,8 @@ TEST_F(ConcreteDemoSuite, LoadAdd) {
     auto secCsprng = concretelang::csprng::SecretCSPRNG(0);
     auto encCsprng = concretelang::csprng::EncryptionCSPRNG(0);
     // Generate keyset
-    concretelang::keysets::Keyset keyset(Message<concreteprotocol::KeysetInfo>(programInfo.asReader().getKeyset()), secCsprng, encCsprng);
+    concretelang::keysets::Keyset keyset(
+        Message<concreteprotocol::KeysetInfo>(programInfo.asReader().getKeyset()), secCsprng, encCsprng);
     std::cout << "Generate keyset" << std::endl;
 
     // Setup ServerProgram
@@ -34,20 +32,23 @@ TEST_F(ConcreteDemoSuite, LoadAdd) {
     if (!serverResult.has_value()) {
         std::cout << serverResult.error().mesg << std::endl;
     }
-    concretelang::serverlib::ServerProgram server
-        = concretelang::serverlib::ServerProgram::load(programInfo, lib.getSharedLibraryPath(), false).value();
+    concretelang::serverlib::ServerProgram server =
+        concretelang::serverlib::ServerProgram::load(programInfo, lib.getSharedLibraryPath(), false).value();
     std::cout << "Setup ServerProgram" << std::endl;
 
     // Setup ClientProgram
-    auto clientProgram = concretelang::clientlib::ClientProgram::createEncrypted(
-    programInfo, keyset.client,
-     std::make_shared<concretelang::csprng::EncryptionCSPRNG>(concretelang::csprng::EncryptionCSPRNG(0))).value();
+    auto clientProgram =
+        concretelang::clientlib::ClientProgram::createEncrypted(
+            programInfo,
+            keyset.client,
+            std::make_shared<concretelang::csprng::EncryptionCSPRNG>(concretelang::csprng::EncryptionCSPRNG(0)))
+            .value();
     std::cout << "Setup ClientProgram" << std::endl;
 
     auto clientCircuit = clientProgram.getClientCircuit("add").value();
     std::cout << "Get ClientCircuit" << std::endl;
     // Encrypt
-    auto arg0 = clientCircuit.prepareInput(Tensor<uint64_t>(1) ,0).value();
+    auto arg0 = clientCircuit.prepareInput(Tensor<uint64_t>(1), 0).value();
     auto arg1 = clientCircuit.prepareInput(Tensor<uint64_t>(2), 1).value();
     std::cout << "Encrypt" << std::endl;
 
@@ -63,7 +64,6 @@ TEST_F(ConcreteDemoSuite, LoadAdd) {
 
     // Check the result
     EXPECT_EQ(decrypted_0.getTensor<uint64_t>().value()[0], 3);
-
 }
 
 TEST_F(ConcreteDemoSuite, TFHE_RS_DEMO) {
@@ -91,9 +91,9 @@ TEST_F(ConcreteDemoSuite, TFHE_RS_DEMO) {
     FheUint128 *rhs = NULL;
     FheUint128 *result = NULL;
     // A 128-bit unsigned integer containing value: 20 << 64 | 10
-    U128 clear_lhs = { .w0 = 10, .w1 = 20 };
+    U128 clear_lhs = {.w0 = 10, .w1 = 20};
     // A 128-bit unsigned integer containing value: 2 << 64 | 1
-    U128 clear_rhs = { .w0 = 1, .w1 = 2 };
+    U128 clear_rhs = {.w0 = 1, .w1 = 2};
 
     ok = fhe_uint128_try_encrypt_with_client_key_u128(clear_lhs, client_key, &lhs);
     assert(ok == 0);
@@ -124,4 +124,70 @@ TEST_F(ConcreteDemoSuite, TFHE_RS_DEMO) {
     server_key_destroy(server_key);
 
     printf("FHE computation successful!\n");
+}
+
+TEST_F(ConcreteDemoSuite, SharedKeys) {
+    // Generate the shared keys
+    ShortintClientKey *shortint_client_key = NULL;
+    ShortintServerKey *shortint_server_key = NULL;
+    ShortintPBSParameters params = SHORTINT_PARAM_MESSAGE_2_CARRY_3_KS_PBS;
+    int ok = 0;
+    ok = shortint_gen_keys_with_parameters(params, &shortint_client_key, &shortint_server_key);
+    assert(ok == 0);
+
+    // get lwe_key from shortint_client_key
+    uint64_t *lwe_key = NULL;
+    ok = shortint_client_key_get_lwe_key(shortint_client_key, &lwe_key);
+    assert(ok == 0);
+
+    // change TFHE-rs keys to concrete keys
+    std::string ARTIFACT_PATH = "/share/compute-share-compile";
+    // Get program info using the Library or unserialize yourself manually
+    mlir::concretelang::CompilerEngine::Library lib(ARTIFACT_PATH);
+    auto programInfo = lib.getProgramInfo().value();
+    std::cout << "Get program info" << std::endl;
+    auto keyinfos = programInfo.asReader().getKeyset().getLweSecretKeys();
+    auto keyinfo_reader = keyinfos[1];
+    auto lwe_key_size = keyinfo_reader.getParams().getLweDimension();
+    auto secCsprng = concretelang::csprng::SecretCSPRNG(0);
+    auto encCsprng = concretelang::csprng::EncryptionCSPRNG(0);
+
+    // build key_map from lwe_key
+    auto lwe_key_map = std::map<uint32_t, LweSecretKey>();
+    auto lwe_key_buffer = std::make_shared<std::vector<uint64_t>>(lwe_key, lwe_key + lwe_key_size);
+    // build Message<LweSecreteKeyInfo> from keyinfo_reader
+    capnp::MallocMessageBuilder message_builder;
+    auto lweSecretKeyInfo = message_builder.initRoot<concreteprotocol::LweSecretKeyInfo>();
+    // Copy the content from reader to lweSecretKeyInfo
+    lweSecretKeyInfo.setParams(keyinfo_reader.getParams());
+    lweSecretKeyInfo.setId(keyinfo_reader.getId());
+    lwe_key_map.insert({1, LweSecretKey(lwe_key_buffer, Message<concreteprotocol::LweSecretKeyInfo>(lweSecretKeyInfo))});
+
+    // Generate keyset
+    concretelang::keysets::Keyset keyset(
+        Message<concreteprotocol::KeysetInfo>(programInfo.asReader().getKeyset()), secCsprng, encCsprng, lwe_key_map);
+    std::cout << "Generate keyset" << std::endl;
+
+    // Setup ServerProgram
+    auto libPath = lib.getSharedLibraryPath();
+    auto serverResult = concretelang::serverlib::ServerProgram::load(programInfo, libPath, false);
+    if (!serverResult.has_value()) {
+        std::cout << serverResult.error().mesg << std::endl;
+    }
+    concretelang::serverlib::ServerProgram server =
+        concretelang::serverlib::ServerProgram::load(programInfo, lib.getSharedLibraryPath(), false).value();
+    std::cout << "Setup ServerProgram" << std::endl;
+
+    // Setup ClientProgram
+    auto clientProgram =
+        concretelang::clientlib::ClientProgram::createEncrypted(
+            programInfo,
+            keyset.client,
+            std::make_shared<concretelang::csprng::EncryptionCSPRNG>(concretelang::csprng::EncryptionCSPRNG(0)))
+            .value();
+    std::cout << "Setup ClientProgram" << std::endl;
+
+    // clear
+    shortint_destroy_client_key(shortint_client_key);
+    shortint_destroy_server_key(shortint_server_key);
 }

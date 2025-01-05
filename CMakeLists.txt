@@ -50,7 +50,7 @@ link_directories(${CONCRETE_DIR}/backends/concrete-cpu/noise-model/target/releas
 # ----------------------------------------
 # TFHE-rs
 # ----------------------------------------
-set(TFHE_C_API "/home/ubuntu/github/tfhe-rs/target/release")
+set(TFHE_C_API "/home/ubuntu/github/tfhe-rs/target/debug")
 include_directories(${TFHE_C_API})
 add_library(tfhe SHARED IMPORTED)
 set_target_properties(tfhe PROPERTIES IMPORTED_LOCATION ${TFHE_C_API}/libtfhe.so)
