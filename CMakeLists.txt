@@ -22,35 +22,9 @@ set(Phantom_DIR /cmake/phantom)
 include_directories(/phantom)
 
 # ----------------------------------------
-# Concrete
-# ----------------------------------------
-# concrete-compiler
-set(CONCRETE_DIR /home/ubuntu/github/concrete)
-set(CONCRETE_COMPILER_DIR ${CONCRETE_DIR}/compilers/concrete-compiler/compiler)
-set(CONCRETE_COMPILER_BUILD_DIR ${CONCRETE_COMPILER_DIR}/build_Debug)
-include_directories(${CONCRETE_COMPILER_BUILD_DIR}/install/concretecompiler/include)
-link_directories(${CONCRETE_COMPILER_BUILD_DIR}/install/concretecompiler/lib)
-# concrete-protocol
-set(CONCRETE_PROTOCOL_DIR ${CONCRETE_COMPILER_BUILD_DIR}/tools/concretelang/concrete-protocol)
-include_directories(${CONCRETE_PROTOCOL_DIR})
-include_directories(${CONCRETE_PROTOCOL_DIR}/capnp_src_dir/c++/src)
-# concrete-optimizer
-set(CONCRETE_OPTIMIZER_DIR ${CONCRETE_DIR}/compilers/concrete-optimizer)
-include_directories(${CONCRETE_OPTIMIZER_DIR}/concrete-optimizer-cpp/src/cpp)
-# llvm
-include_directories(${CONCRETE_COMPILER_BUILD_DIR}/include) # for llvm-config.h
-include_directories(${CONCRETE_COMPILER_DIR}/../llvm-project/llvm/include) # for some .def files
-# concrete-cpu
-include_directories(${CONCRETE_DIR}/backends/concrete-cpu/implementation/include)
-set(CONCRETE_CPU_STATIC_LIB ${CONCRETE_DIR}/backends/concrete-cpu/implementation/target/release/libconcrete_cpu.a)
-set(CONCRETE_CPU_NOISE_MODEL_STATIC_LIB ${CONCRETE_DIR}/backends/concrete-cpu/noise-model/target/release/libconcrete_cpu_noise_model.a)
-link_directories(${CONCRETE_DIR}/backends/concrete-cpu/implementation/target/release)
-link_directories(${CONCRETE_DIR}/backends/concrete-cpu/noise-model/target/release)
-
-# ----------------------------------------
 # TFHE-rs
 # ----------------------------------------
-set(TFHE_C_API "/home/ubuntu/github/tfhe-rs/target/debug")
+set(TFHE_C_API "/home/ubuntu/github/tfhe-rs/target/release")
 include_directories(${TFHE_C_API})
 add_library(tfhe SHARED IMPORTED)
 set_target_properties(tfhe PROPERTIES IMPORTED_LOCATION ${TFHE_C_API}/libtfhe.so)
