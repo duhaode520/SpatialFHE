@@ -2,13 +2,17 @@
 // Created by ubuntu on 1/6/25.
 //
 #include <gtest/gtest.h>
-#include <memory>
 #include "tfhe.h"
+#include "TFHEBool.h"
+#include "TFHEInt32.h"
+
+using namespace SpatialFHE;
 
 class TfhersDemo : public testing::Test {
 protected:
     static ClientKey *client_key;
     static ServerKey *server_key;
+    static PublicKey *public_key;
 
     // 判断点 (x, y) 是否在以 (x1, y1) 和 (x2, y2) 为端点的线段上
     static bool onSegment(int x1, int y1, int x2, int y2, int x, int y) {
@@ -66,12 +70,14 @@ protected:
         generate_keys(config, &client_key, &server_key);
         // Set the server key for the current thread
         set_server_key(server_key);
+        public_key_new(client_key, &public_key);
     }
 
     static void TearDownTestCase() {
         // Destroy the keys
         client_key_destroy(client_key);
         server_key_destroy(server_key);
+        public_key_destroy(public_key);
     }
 
 
@@ -236,10 +242,45 @@ protected:
 
         return result;
     }
+
+    // SpatialFHE 版本的 onSegment
+    static TFHEBool spatial_onSegement(TFHEInt32 x1, TFHEInt32 y1,
+                                        TFHEInt32 x2, TFHEInt32 y2,
+                                        TFHEInt32 x, TFHEInt32 y) {
+        TFHEBool result = x <= TFHEInt32::max(x1, x2) && x >= TFHEInt32::min(x1, x2) &&
+                              y <= TFHEInt32::max(y1, y2) && y >= TFHEInt32::min(y1, y2);
+        return result;
+    }
+
+    static TFHEInt32 spatial_orientation(TFHEInt32 x1, TFHEInt32 y1,
+                                         TFHEInt32 x2, TFHEInt32 y2,
+                                         TFHEInt32 x3, TFHEInt32 y3) {
+        TFHEInt32 val = (y2 - y1) * (x3 - x2) - (x2 - x1) * (y3 - y2);
+        TFHEInt32 zero(public_key, 0);
+        return TFHEInt32(val > zero) - TFHEInt32(val < zero);
+    }
+
+    static TFHEBool spatial_doIntersect(TFHEInt32 x_a1, TFHEInt32 y_a1,
+                                        TFHEInt32 x_a2, TFHEInt32 y_a2,
+                                        TFHEInt32 x_b1, TFHEInt32 y_b1,
+                                        TFHEInt32 x_b2, TFHEInt32 y_b2) {
+        TFHEInt32 o1 = spatial_orientation(x_a1, y_a1, x_a2, y_a2, x_b1, y_b1);
+        TFHEInt32 o2 = spatial_orientation(x_a1, y_a1, x_a2, y_a2, x_b2, y_b2);
+        TFHEInt32 o3 = spatial_orientation(x_b1, y_b1, x_b2, y_b2, x_a1, y_a1);
+        TFHEInt32 o4 = spatial_orientation(x_b1, y_b1, x_b2, y_b2, x_a2, y_a2);
+
+        TFHEBool result = (o1 != o2) && (o3 != o4);
+        TFHEInt32 zero(public_key, 0);
+        return result || (o1 == zero && spatial_onSegement(x_a1, y_a1, x_a2, y_a2, x_b1, y_b1)) ||
+               (o2 == zero && spatial_onSegement(x_a1, y_a1, x_a2, y_a2, x_b2, y_b2)) ||
+               (o3 == zero && spatial_onSegement(x_b1, y_b1, x_b2, y_b2, x_a1, y_a1)) ||
+               (o4 == zero && spatial_onSegement(x_b1, y_b1, x_b2, y_b2, x_a2, y_a2));
+        }
 };
 
 ClientKey *TfhersDemo::client_key = nullptr;
 ServerKey *TfhersDemo::server_key = nullptr;
+PublicKey *TfhersDemo::public_key = nullptr;
 
 TEST_F(TfhersDemo, IntersectTestInPlain) {
     // Case 1: General case, lines intersect
@@ -397,4 +438,14 @@ TEST_F(TfhersDemo, IntersectTestInFHE) {
         fhe_int32_destroy(y_b1);
         fhe_int32_destroy(x_b2);
         fhe_int32_destroy(y_b2);
+}
+
+TEST_F(TfhersDemo, IntersectTestSpatialFHE) {
+    TFHEBool result 
+        = spatial_doIntersect(TFHEInt32(public_key, 1), TFHEInt32(public_key, 1), 
+                            TFHEInt32(public_key, 10), TFHEInt32(public_key, 10), 
+                            TFHEInt32(public_key, 10), TFHEInt32(public_key, 1), 
+                            TFHEInt32(public_key, 1), TFHEInt32(public_key, 10));
+    EXPECT_TRUE(result.decrypt(client_key));
+
 }

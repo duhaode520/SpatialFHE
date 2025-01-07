@@ -33,7 +33,7 @@ target_compile_options(spatialfhe_test PRIVATE $<$<AND:$<CONFIG:Debug>,$<COMPILE
 
 add_executable(tfhers_demo TfhersDemo.cpp)
 
-target_link_libraries(tfhers_demo PRIVATE gtest_main)
+target_link_libraries(tfhers_demo PRIVATE gtest_main SpatialFHE SEAL::seal ZLIB::ZLIB zstd::libzstd unofficial::b64::b64 rapidjson)
 
 target_link_libraries(tfhers_demo PRIVATE tfhe)
 #####
