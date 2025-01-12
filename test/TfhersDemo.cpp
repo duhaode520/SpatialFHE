@@ -10,9 +10,7 @@ using namespace SpatialFHE;
 
 class TfhersDemo : public testing::Test {
 protected:
-    static ClientKey *client_key;
-    static ServerKey *server_key;
-    static PublicKey *public_key;
+    static std::unique_ptr<TFHEContext> context;
 
     // 判断点 (x, y) 是否在以 (x1, y1) 和 (x2, y2) 为端点的线段上
     static bool onSegment(int x1, int y1, int x2, int y2, int x, int y) {
@@ -56,28 +54,11 @@ protected:
     }
 
     static void SetUpTestCase() {
-        // 初始化 TFHE 库
-        ConfigBuilder *builder;
-        Config *config;
-
-        // Put the builder in a default state without any types enabled
-        config_builder_default(&builder);
-        // Use the small LWE key for encryption
-        config_builder_default_with_small_encryption(&builder);
-        // Populate the config
-        config_builder_build(builder, &config);
-        // Generate the keys using the config
-        generate_keys(config, &client_key, &server_key);
-        // Set the server key for the current thread
-        set_server_key(server_key);
-        public_key_new(client_key, &public_key);
+        context = std::make_unique<TFHEContext>();
     }
 
     static void TearDownTestCase() {
-        // Destroy the keys
-        client_key_destroy(client_key);
-        server_key_destroy(server_key);
-        public_key_destroy(public_key);
+
     }
 
 
@@ -139,7 +120,7 @@ protected:
         fhe_int32_sub(y2_minus_y1_mul_x3_minus_x2, x2_minus_x1_mul_y3_minus_y2, &val);
 
         FheInt32 *fhe_int32_zero = nullptr;
-        fhe_int32_try_encrypt_with_client_key_i32(0, client_key, &fhe_int32_zero);
+        fhe_int32_try_encrypt_with_client_key_i32(0, context->getClientKey(), &fhe_int32_zero);
         FheInt8 *fhe_int8_zero = nullptr;
         fhe_int32_cast_into_fhe_int8(fhe_int32_zero, &fhe_int8_zero);
 
@@ -191,7 +172,7 @@ protected:
         fhe_bool_bitand(o1_ne_o2, o3_ne_o4, &result);
 
         FheInt8 *fhe_int8_zero = nullptr;
-        fhe_int8_try_encrypt_with_client_key_i8(0, client_key, &fhe_int8_zero);
+        fhe_int8_try_encrypt_with_client_key_i8(0, context->getClientKey(), &fhe_int8_zero);
 
         FheBool* o1_eq_0 = nullptr;
         fhe_int8_eq(o1, fhe_int8_zero, &o1_eq_0);
@@ -244,33 +225,33 @@ protected:
     }
 
     // SpatialFHE 版本的 onSegment
-    static TFHEBool spatial_onSegement(TFHEInt32 x1, TFHEInt32 y1,
-                                        TFHEInt32 x2, TFHEInt32 y2,
-                                        TFHEInt32 x, TFHEInt32 y) {
+    static TFHEBool spatial_onSegement(const TFHEInt32& x1, const TFHEInt32& y1,
+                                        const TFHEInt32& x2, const TFHEInt32& y2,
+                                        const TFHEInt32& x, const TFHEInt32& y) {
         TFHEBool result = x <= TFHEInt32::max(x1, x2) && x >= TFHEInt32::min(x1, x2) &&
                               y <= TFHEInt32::max(y1, y2) && y >= TFHEInt32::min(y1, y2);
         return result;
     }
 
-    static TFHEInt32 spatial_orientation(TFHEInt32 x1, TFHEInt32 y1,
-                                         TFHEInt32 x2, TFHEInt32 y2,
-                                         TFHEInt32 x3, TFHEInt32 y3) {
+    static TFHEInt32 spatial_orientation(const TFHEInt32& x1, const TFHEInt32& y1,
+                                         const TFHEInt32& x2, const TFHEInt32& y2,
+                                         const TFHEInt32& x3, const TFHEInt32& y3) {
         TFHEInt32 val = (y2 - y1) * (x3 - x2) - (x2 - x1) * (y3 - y2);
-        TFHEInt32 zero(public_key, 0);
+        TFHEInt32 zero(0);
         return TFHEInt32(val > zero) - TFHEInt32(val < zero);
     }
 
-    static TFHEBool spatial_doIntersect(TFHEInt32 x_a1, TFHEInt32 y_a1,
-                                        TFHEInt32 x_a2, TFHEInt32 y_a2,
-                                        TFHEInt32 x_b1, TFHEInt32 y_b1,
-                                        TFHEInt32 x_b2, TFHEInt32 y_b2) {
+    static TFHEBool spatial_doIntersect(const TFHEInt32& x_a1, const TFHEInt32& y_a1,
+                                        const TFHEInt32& x_a2, const TFHEInt32& y_a2,
+                                        const TFHEInt32& x_b1, const TFHEInt32& y_b1,
+                                        const TFHEInt32& x_b2, const TFHEInt32& y_b2) {
         TFHEInt32 o1 = spatial_orientation(x_a1, y_a1, x_a2, y_a2, x_b1, y_b1);
         TFHEInt32 o2 = spatial_orientation(x_a1, y_a1, x_a2, y_a2, x_b2, y_b2);
         TFHEInt32 o3 = spatial_orientation(x_b1, y_b1, x_b2, y_b2, x_a1, y_a1);
         TFHEInt32 o4 = spatial_orientation(x_b1, y_b1, x_b2, y_b2, x_a2, y_a2);
 
         TFHEBool result = (o1 != o2) && (o3 != o4);
-        TFHEInt32 zero(public_key, 0);
+        TFHEInt32 zero(0);
         return result || (o1 == zero && spatial_onSegement(x_a1, y_a1, x_a2, y_a2, x_b1, y_b1)) ||
                (o2 == zero && spatial_onSegement(x_a1, y_a1, x_a2, y_a2, x_b2, y_b2)) ||
                (o3 == zero && spatial_onSegement(x_b1, y_b1, x_b2, y_b2, x_a1, y_a1)) ||
@@ -278,9 +259,7 @@ protected:
         }
 };
 
-ClientKey *TfhersDemo::client_key = nullptr;
-ServerKey *TfhersDemo::server_key = nullptr;
-PublicKey *TfhersDemo::public_key = nullptr;
+std::unique_ptr<TFHEContext> TfhersDemo::context;
 
 TEST_F(TfhersDemo, IntersectTestInPlain) {
     // Case 1: General case, lines intersect
@@ -309,6 +288,7 @@ TEST_F(TfhersDemo, IntersectTestInPlain) {
 }
 
 TEST_F(TfhersDemo, IntersectTestInFHE) {
+        ClientKey* client_key = context->getClientKey();
         // Case 1: General case, lines intersect
         FheInt32 *x_a1 = nullptr;
         fhe_int32_try_encrypt_with_client_key_i32(1, client_key, &x_a1);
@@ -442,10 +422,10 @@ TEST_F(TfhersDemo, IntersectTestInFHE) {
 
 TEST_F(TfhersDemo, IntersectTestSpatialFHE) {
     TFHEBool result 
-        = spatial_doIntersect(TFHEInt32(public_key, 1), TFHEInt32(public_key, 1), 
-                            TFHEInt32(public_key, 10), TFHEInt32(public_key, 10), 
-                            TFHEInt32(public_key, 10), TFHEInt32(public_key, 1), 
-                            TFHEInt32(public_key, 1), TFHEInt32(public_key, 10));
-    EXPECT_TRUE(result.decrypt(client_key));
+        = spatial_doIntersect(TFHEInt32(1), TFHEInt32(1),
+                            TFHEInt32(10), TFHEInt32(10),
+                            TFHEInt32(10), TFHEInt32(1),
+                            TFHEInt32(1), TFHEInt32(10));
+    EXPECT_TRUE(result.decrypt());
 
 }

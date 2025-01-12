@@ -5,10 +5,12 @@
 #include "TFHEInt32.h"
 #include "tfhe.h"
 
+#include <c++/9/stdexcept>
+
 namespace SpatialFHE {
-    TFHEInt32::TFHEInt32(PublicKey *public_key, int32_t value) {
+    TFHEInt32::TFHEInt32(int32_t value) {
         data = nullptr;
-        fhe_int32_try_encrypt_with_public_key_i32(value, public_key, &data);
+        fhe_int32_try_encrypt_with_public_key_i32(value, context->getPublicKey(), &data);
     }
     TFHEInt32::TFHEInt32(FheInt32 *data) : data(data){}
     TFHEInt32::TFHEInt32() : data(nullptr) {}
@@ -18,6 +20,7 @@ namespace SpatialFHE {
     }
     TFHEInt32::TFHEInt32(TFHEInt32 &&other) noexcept {
         data = other.data;
+        other.data = nullptr;
     }
     TFHEInt32 &TFHEInt32::operator=(const TFHEInt32 &other) {
         if (this == &other)
@@ -29,102 +32,215 @@ namespace SpatialFHE {
         if (this == &other)
             return *this;
         data = other.data;
+        other.data = nullptr;
         return *this;
+    }
+    bool TFHEInt32::isNull() const {
+        return data == nullptr;
     }
 
     TFHEInt32::~TFHEInt32() {
-        fhe_int32_destroy(data);
+        if (data != nullptr) {
+            fhe_int32_destroy(data);
+        }
+    }
+    int TFHEInt32::decrypt() {
+        int result;
+        if (context->getClientKey() != nullptr) {
+            fhe_int32_decrypt(data, context->getClientKey(), &result);
+        } else {
+            throw std::logic_error("Remote decryption is not supported");
+        }
+
+        return result;
     }
 
-    TFHEInt32 TFHEInt32::operator+(const TFHEInt32 &other) {
+    TFHEInt32 TFHEInt32::operator+(const TFHEInt32 &other) const {
         TFHEInt32 result;
         fhe_int32_add(data, other.data, &result.data);
         return result;
     }
 
-    TFHEInt32 TFHEInt32::operator-(const TFHEInt32 &other) {
+    TFHEInt32 TFHEInt32::operator-(const TFHEInt32 &other) const {
         TFHEInt32 result;
         fhe_int32_sub(data, other.data, &result.data);
         return result;
     }
 
-    TFHEInt32 TFHEInt32::operator*(const TFHEInt32 &other) {
+    TFHEInt32 TFHEInt32::operator*(const TFHEInt32 &other) const {
         TFHEInt32 result;
         fhe_int32_mul(data, other.data, &result.data);
         return result;
     }
 
-    TFHEInt32 TFHEInt32::operator/(const TFHEInt32 &other) {
+    TFHEInt32 TFHEInt32::operator/(const TFHEInt32 &other) const {
         TFHEInt32 result;
         fhe_int32_div(data, other.data, &result.data);
         return result;
     }
 
-    TFHEInt32 TFHEInt32::operator%(const TFHEInt32 &other) {
+    TFHEInt32 TFHEInt32::operator%(const TFHEInt32 &other) const {
         TFHEInt32 result;
         fhe_int32_rem(data, other.data, &result.data);
         return result;
     }
 
-    TFHEBool TFHEInt32::operator==(const TFHEInt32 &other) {
+    TFHEBool TFHEInt32::operator==(const TFHEInt32 &other) const {
         TFHEBool result;
         fhe_int32_eq(data, other.data, &result.data);
         return result;
     }
 
-    TFHEBool TFHEInt32::operator!=(const TFHEInt32 &other) {
+    TFHEBool TFHEInt32::operator!=(const TFHEInt32 &other) const {
         TFHEBool result;
         fhe_int32_ne(data, other.data, &result.data);
         return result;
     }
 
-    TFHEBool TFHEInt32::operator>(const TFHEInt32 &other) {
+    TFHEBool TFHEInt32::operator>(const TFHEInt32 &other) const {
         TFHEBool result;
         fhe_int32_gt(data, other.data, &result.data);
         return result;
     }
 
-    TFHEBool TFHEInt32::operator<(const TFHEInt32 &other) {
+    TFHEBool TFHEInt32::operator<(const TFHEInt32 &other) const {
         TFHEBool result;
         fhe_int32_lt(data, other.data, &result.data);
         return result;
     }
 
-    TFHEBool TFHEInt32::operator>=(const TFHEInt32 &other) {
+    TFHEBool TFHEInt32::operator>=(const TFHEInt32 &other) const {
         TFHEBool result;
         fhe_int32_ge(data, other.data, &result.data);
         return result;
     }
 
-    TFHEBool TFHEInt32::operator<=(const TFHEInt32 &other) {
+    TFHEBool TFHEInt32::operator<=(const TFHEInt32 &other) const {
         TFHEBool result;
         fhe_int32_le(data, other.data, &result.data);
         return result;
     }
 
-    TFHEInt32 TFHEInt32::operator&(const TFHEInt32 &other) {
+    TFHEInt32 TFHEInt32::operator&(const TFHEInt32 &other) const {
         TFHEInt32 result;
         fhe_int32_bitand(data, other.data, &result.data);
         return result;
     }
 
-    TFHEInt32 TFHEInt32::operator|(const TFHEInt32 &other) {
+    TFHEInt32 TFHEInt32::operator|(const TFHEInt32 &other) const {
         TFHEInt32 result;
         fhe_int32_bitor(data, other.data, &result.data);
         return result;
     }
 
-    TFHEInt32 TFHEInt32::operator^(const TFHEInt32 &other) {
+    TFHEInt32 TFHEInt32::operator^(const TFHEInt32 &other) const {
         TFHEInt32 result;
         fhe_int32_bitxor(data, other.data, &result.data);
         return result;
     }
 
-    TFHEInt32 TFHEInt32::operator~() {
+    TFHEInt32 TFHEInt32::operator~() const {
         TFHEInt32 result;
         fhe_int32_not(data, &result.data);
         return result;
     }
+
+    TFHEInt32 TFHEInt32::operator+(int32_t other) const {
+        TFHEInt32 result;
+        fhe_int32_scalar_add(data, other, &result.data);
+        return result;
+    }
+
+    TFHEInt32 TFHEInt32::operator-(int32_t other) const {
+        TFHEInt32 result;
+        fhe_int32_scalar_sub(data, other, &result.data);
+        return result;
+    }
+
+    TFHEInt32 TFHEInt32::operator*(int32_t other) const {
+        TFHEInt32 result;
+        fhe_int32_scalar_mul(data, other, &result.data);
+        return result;
+    }
+
+    TFHEInt32 TFHEInt32::operator/(int32_t other) const {
+        TFHEInt32 result;
+        fhe_int32_scalar_div(data, other, &result.data);
+        return result;
+    }
+
+    TFHEInt32 TFHEInt32::operator%(int32_t other) const {
+        TFHEInt32 result;
+        fhe_int32_scalar_rem(data, other, &result.data);
+        return result;
+    }
+
+    TFHEBool TFHEInt32::operator==(int32_t other) const {
+        TFHEBool result;
+        fhe_int32_scalar_eq(data, other, &result.data);
+        return result;
+    }
+
+    TFHEBool TFHEInt32::operator!=(int32_t other) const {
+        TFHEBool result;
+        fhe_int32_scalar_ne(data, other, &result.data);
+        return result;
+    }
+
+    TFHEBool TFHEInt32::operator>(int32_t other) const {
+        TFHEBool result;
+        fhe_int32_scalar_gt(data, other, &result.data);
+        return result;
+    }
+
+    TFHEBool TFHEInt32::operator<(int32_t other) const {
+        TFHEBool result;
+        fhe_int32_scalar_lt(data, other, &result.data);
+        return result;
+    }
+
+    TFHEBool TFHEInt32::operator>=(int32_t other) const {
+        TFHEBool result;
+        fhe_int32_scalar_ge(data, other, &result.data);
+        return result;
+    }
+
+    TFHEBool TFHEInt32::operator<=(int32_t other) const {
+        TFHEBool result;
+        fhe_int32_scalar_le(data, other, &result.data);
+        return result;
+    }
+
+    TFHEInt32 TFHEInt32::operator&(int32_t other) const {
+        TFHEInt32 result;
+        fhe_int32_scalar_bitand(data, other, &result.data);
+        return result;
+    }
+
+    TFHEInt32 TFHEInt32::operator|(int32_t other) const {
+        TFHEInt32 result;
+        fhe_int32_scalar_bitor(data, other, &result.data);
+        return result;
+    }
+
+    TFHEInt32 TFHEInt32::operator^(int32_t other) const {
+        TFHEInt32 result;
+        fhe_int32_scalar_bitxor(data, other, &result.data);
+        return result;
+    }
+
+    TFHEInt32 TFHEInt32::operator<<(int32_t other) const {
+        TFHEInt32 result;
+        fhe_int32_scalar_shl(data, other, &result.data);
+        return result;
+    }
+
+    TFHEInt32 TFHEInt32::operator>>(int32_t other) const {
+        TFHEInt32 result;
+        fhe_int32_scalar_shr(data, other, &result.data);
+        return result;
+    }
+
     //
     // TFHEInt32 TFHEInt32::operator<<(const TFHEInt32 &other) {
     //     TFHEInt32 result;

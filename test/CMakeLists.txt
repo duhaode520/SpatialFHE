@@ -32,10 +32,12 @@ target_compile_options(spatialfhe_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--defa
 target_compile_options(spatialfhe_test PRIVATE $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:CUDA>>:-G;-src-in-ptx>)
 
 add_executable(tfhers_demo TfhersDemo.cpp)
-
 target_link_libraries(tfhers_demo PRIVATE gtest_main SpatialFHE SEAL::seal ZLIB::ZLIB zstd::libzstd unofficial::b64::b64 rapidjson)
-
 target_link_libraries(tfhers_demo PRIVATE tfhe)
+
+add_executable(tfhers_test TFHEBasicSuite.cpp)
+target_link_libraries(tfhers_test PRIVATE gtest_main SpatialFHE SEAL::seal ZLIB::ZLIB zstd::libzstd unofficial::b64::b64 rapidjson)
+target_link_libraries(tfhers_test PRIVATE tfhe)
 #####
 #
 # 这里追加新的Unit Test
@@ -44,5 +46,5 @@ target_link_libraries(tfhers_demo PRIVATE tfhe)
 #gtest register
 include(GoogleTest)
 gtest_discover_tests(
-	seal_test phantom_test spatialfhe_test tfhers_demo
+	seal_test phantom_test spatialfhe_test tfhers_demo tfhers_test
 )
