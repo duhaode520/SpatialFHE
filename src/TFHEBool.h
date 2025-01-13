@@ -54,7 +54,7 @@ namespace SpatialFHE {
         static TFHEBool tfhe_false;
         static void init();
 
-        static void registerContext(TFHEContext* ctx) override;
+        static void registerContext(TFHEContext* ctx) ;
     };
 
 }  // namespace SpatialFHE
