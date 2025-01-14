@@ -1,7 +1,7 @@
 #ifndef TFHELINESTRING_H
 #define TFHELINESTRING_H
-#include "tfhe_geos/TFHECoordinateSequence.h"
-#include "tfhe_geos/TFHEGeometry.h"
+#include "TFHECoordinateSequence.h"
+#include "TFHEGeometry.h"
 
 
 namespace SpatialFHE::geom {

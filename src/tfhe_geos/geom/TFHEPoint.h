@@ -1,7 +1,7 @@
 #ifndef TFHEPOINT_H
 #define TFHEPOINT_H
-#include "tfhe_geos/TFHEGeometry.h"
-#include "tfhe_geos/TFHECoordinateSequence.h"
+#include "TFHEGeometry.h"
+#include "TFHECoordinateSequence.h"
 
 namespace SpatialFHE::geom {
 

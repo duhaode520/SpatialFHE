@@ -3,7 +3,7 @@
 //
 
 #include "TFHEPolygon.h"
-#include "tfhe_geos/TFHEGeometryFactory.h"
+#include "TFHEGeometryFactory.h"
 #include <stdexcept>
 #include <cassert>
 

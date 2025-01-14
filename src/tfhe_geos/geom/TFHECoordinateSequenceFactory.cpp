@@ -2,7 +2,7 @@
 // Created by ubuntu on 1/13/25.
 //
 
-#include "tfhe_geos/TFHECoordinateSequenceFactory.h"
+#include "TFHECoordinateSequenceFactory.h"
 
 #include <memory>
 #include "TFHECoordinateSequence.h"

@@ -2,8 +2,8 @@
 // Created by ubuntu on 1/7/25.
 //
 
-#include "tfhe_geos/TFHEGeometry.h"
-#include "tfhe_geos/TFHEGeometryFactory.h"
+#include "TFHEGeometry.h"
+#include "TFHEGeometryFactory.h"
 
 namespace SpatialFHE::geom {
 

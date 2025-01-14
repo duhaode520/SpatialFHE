@@ -4,7 +4,7 @@
 
 #ifndef TFHEENVELOPE_H
 #define TFHEENVELOPE_H
-#include "tfhe_geos/TFHECoordinate.h"
+#include "TFHECoordinate.h"
 #include <TFHEInt32.h>
 
 namespace SpatialFHE::geom {

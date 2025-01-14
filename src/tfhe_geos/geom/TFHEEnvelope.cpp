@@ -5,7 +5,6 @@
 #include "TFHEEnvelope.h"
 
 #include <cassert>
-#include <memory>
 
 namespace SpatialFHE::geom {
     void TFHEEnvelope::init(const TFHEInt32 &x1, const TFHEInt32 &x2, const TFHEInt32 &y1, const TFHEInt32 &y2) {

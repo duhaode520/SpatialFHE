@@ -5,9 +5,9 @@
 #ifndef TFHEGEOMETRY_H
 #define TFHEGEOMETRY_H
 #include <algorithm>
-#include <tfhe_geos/TFHEEnvelope.h>
-#include <tfhe_geos/TFHEIntersectionMatrix.h>
-#include <tfhe_geos/enums.h>
+#include "TFHEEnvelope.h"
+#include "TFHEIntersectionMatrix.h"
+#include "enums.h"
 #include <string>
 #include <memory>
 #include <vector>

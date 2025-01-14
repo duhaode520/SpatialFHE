@@ -5,7 +5,7 @@
 #ifndef TFHELINEARRING_H
 #define TFHELINEARRING_H
 
-#include "tfhe_geos/TFHELineString.h"
+#include "TFHELineString.h"
 
 namespace SpatialFHE::geom {
 

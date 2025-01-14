@@ -4,8 +4,8 @@
 
 #ifndef TFHEPOLYGON_H
 #define TFHEPOLYGON_H
-#include "tfhe_geos/TFHEGeometry.h"
-#include "tfhe_geos/TFHELinearRing.h"
+#include "TFHEGeometry.h"
+#include "TFHELinearRing.h"
 
 namespace SpatialFHE::geom {
 

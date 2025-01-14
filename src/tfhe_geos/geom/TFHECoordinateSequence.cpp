@@ -5,7 +5,7 @@
 #include "TFHECoordinateSequence.h"
 
 #include <memory>
-#include "tfhe_geos/TFHEEnvelope.h"
+#include "TFHEEnvelope.h"
 
 
 namespace SpatialFHE::geom {

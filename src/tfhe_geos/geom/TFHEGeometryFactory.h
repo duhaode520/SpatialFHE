@@ -7,11 +7,10 @@
 
 #include <memory>
 #include <vector>
-#include "tfhe_geos/TFHEGeometry.h"
-#include "tfhe_geos/TFHEPoint.h"
-#include "tfhe_geos/TFHELineString.h"
-#include "tfhe_geos/TFHECircularString.h"
-#include "tfhe_geos/TFHEPolygon.h"
+#include "TFHEGeometry.h"
+#include "TFHEPoint.h"
+#include "TFHELineString.h"
+#include "TFHEPolygon.h"
 
 namespace SpatialFHE::geom {
 

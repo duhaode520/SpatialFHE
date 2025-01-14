@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <cassert>
 #include "TFHELineString.h"
-#include "tfhe_geos/TFHEGeometryFactory.h"
+#include "TFHEGeometryFactory.h"
 
 
 namespace SpatialFHE::geom {
