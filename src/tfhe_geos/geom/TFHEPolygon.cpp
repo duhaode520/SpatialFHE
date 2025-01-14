@@ -3,10 +3,11 @@
 //
 
 #include "TFHEPolygon.h"
-#include "TFHEGeometryFactory.h"
-#include <stdexcept>
-#include <cassert>
 
+#include <cassert>
+#include <stdexcept>
+
+#include "TFHEGeometryFactory.h"
 
 namespace SpatialFHE::geom {
     std::unique_ptr<TFHEEnvelope> TFHEPolygon::computeEnvelopeInternal() const {
@@ -16,11 +17,9 @@ namespace SpatialFHE::geom {
     TFHEPolygon *TFHEPolygon::cloneInternal() const {
         return new TFHEPolygon(*this);
     }
-    TFHEPolygon::TFHEPolygon(const TFHEPolygon &other) :
-        TFHEGeometry(other),
-        shell(std::make_unique<TFHELinearRing>(*other.shell)),
-        holes(other.holes.size()){
 
+    TFHEPolygon::TFHEPolygon(const TFHEPolygon &other) :
+            TFHEGeometry(other), shell(std::make_unique<TFHELinearRing>(*other.shell)), holes(other.holes.size()) {
         for (std::size_t i = 0; i < other.holes.size(); i++) {
             holes[i] = std::make_unique<TFHELinearRing>(*other.holes[i]);
         }
@@ -29,8 +28,8 @@ namespace SpatialFHE::geom {
     TFHEPolygon::TFHEPolygon(
         TFHELinearRing *shell,
         std::vector<TFHELinearRing *> *holes,
-        const TFHEGeometryFactory *factory) : TFHEGeometry(factory){
-
+        const TFHEGeometryFactory *factory) :
+            TFHEGeometry(factory) {
         if (shell == nullptr) {
             this->shell = getFactory()->createLinearRing();
         } else {
@@ -44,16 +43,15 @@ namespace SpatialFHE::geom {
             if (hasNullElements(holes)) {
                 throw std::invalid_argument("holes contains null elements");
             }
-            for (const auto& hole: *holes) {
+            for (const auto &hole : *holes) {
                 this->holes.emplace_back(hole);
             }
             delete holes;
         }
     }
 
-    TFHEPolygon::TFHEPolygon(std::unique_ptr<TFHELinearRing> shell, const TFHEGeometryFactory &factory):
-        TFHEGeometry(&factory), shell(std::move(shell)) {
-
+    TFHEPolygon::TFHEPolygon(std::unique_ptr<TFHELinearRing> shell, const TFHEGeometryFactory &factory) :
+            TFHEGeometry(&factory), shell(std::move(shell)) {
         if (this->shell == nullptr) {
             this->shell = getFactory()->createLinearRing();
         }
@@ -63,8 +61,7 @@ namespace SpatialFHE::geom {
         std::unique_ptr<TFHELinearRing> shell,
         std::vector<std::unique_ptr<TFHELinearRing>> holes,
         const TFHEGeometryFactory &factory) :
-        TFHEGeometry(&factory), shell(std::move(shell)), holes(std::move(holes)){
-
+            TFHEGeometry(&factory), shell(std::move(shell)), holes(std::move(holes)) {
         if (this->shell == nullptr) {
             this->shell = getFactory()->createLinearRing();
         }
@@ -111,7 +108,6 @@ namespace SpatialFHE::geom {
 
         // must decrypt the result here as isRectangle is used for branching
         return result.decrypt();
-        
     }
 
     const TFHELinearRing *TFHEPolygon::getExteriorRing() const {
@@ -147,7 +143,7 @@ namespace SpatialFHE::geom {
         shellCoords->toVector(cl);
 
         // Add hole points
-        for (const auto& hole: holes) {
+        for (const auto &hole : holes) {
             const TFHECoordinateSequence *holeCoords = hole->getCoordinatesRO();
             holeCoords->toVector(cl);
         }
@@ -157,7 +153,7 @@ namespace SpatialFHE::geom {
 
     std::size_t TFHEPolygon::getNumPoints() const {
         std::size_t numPoints = shell->getNumPoints();
-        for (const auto& hole: holes) {
+        for (const auto &hole : holes) {
             numPoints += hole->getNumPoints();
         }
         return numPoints;
@@ -179,5 +175,4 @@ namespace SpatialFHE::geom {
         return std::unique_ptr<TFHEPolygon>(cloneInternal());
     }
 
-} // geom
-// SpatialFHE
+}  // namespace SpatialFHE::geom

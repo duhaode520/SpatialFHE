@@ -12,11 +12,13 @@ namespace SpatialFHE::geom {
     class TFHELinearRing : public TFHELineString {
     private:
         void validateConstruction();
+
     protected:
         TFHELinearRing* cloneInternal() const override;
+
     public:
         static const size_t MINIMUM_VALID_SIZE = 3;
-        TFHELinearRing(const TFHELinearRing &other);
+        TFHELinearRing(const TFHELinearRing& other);
         TFHELinearRing(TFHECoordinateSequence* points, const TFHEGeometryFactory* factory);
         TFHELinearRing(TFHECoordinateSequence::Ptr&& points, const TFHEGeometryFactory& factory);
         TFHELinearRing(std::vector<TFHECoordinate>&& pts, const TFHEGeometryFactory& factory);
@@ -33,7 +35,8 @@ namespace SpatialFHE::geom {
         void setPoints(const TFHECoordinateSequence* points);
     };
 
-} // geom
+}  // namespace SpatialFHE::geom
+
 // SpatialFHE
 
-#endif //TFHELINEARRING_H
+#endif  // TFHELINEARRING_H

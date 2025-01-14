@@ -7,8 +7,7 @@
 namespace SpatialFHE::geom {
     class TFHECoordinateSequence;
     class TFHECoordinate;
-}
-
+}  // namespace SpatialFHE::geom
 
 namespace SpatialFHE::geom {
 
@@ -27,9 +26,8 @@ namespace SpatialFHE::geom {
         ~TFHECoordinateSequenceFactory() = default;
 
         static const TFHECoordinateSequenceFactory* instance();
-
     };
 
-} // geom
-// SpatialFHE
+}  // namespace SpatialFHE::geom
 
+// SpatialFHE

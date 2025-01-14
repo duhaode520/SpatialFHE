@@ -1,13 +1,7 @@
 #pragma once
 
-
 namespace SpatialFHE::geom {
-    enum class Location {
-        NONE = -1,
-        INTERIOR = 0,
-        BOUNDARY = 1,
-        EXTERIOR = 2
-    };
+    enum class Location { NONE = -1, INTERIOR = 0, BOUNDARY = 1, EXTERIOR = 2 };
 
     class Dimension {
     public:
@@ -19,8 +13,9 @@ namespace SpatialFHE::geom {
             TRUE = -2,
             DONTCARE = -1,
         };
-//        static char toDimensionSymbol(int dimensionValue);
-//        static int toDimensionValue(char dimensionSymbol);
+
+        //        static char toDimensionSymbol(int dimensionValue);
+        //        static int toDimensionValue(char dimensionSymbol);
     };
 
-}
+}  // namespace SpatialFHE::geom

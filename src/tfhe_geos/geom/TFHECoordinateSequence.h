@@ -1,18 +1,20 @@
 #ifndef TFHECOORDINATESEQUENCE_H
 #define TFHECOORDINATESEQUENCE_H
-#include <vector>
-#include "TFHECoordinate.h"
-
 #include <memory>
+#include <vector>
+
+#include "TFHECoordinate.h"
 
 namespace SpatialFHE::geom {
     class TFHEEnvelope;
 }
+
 namespace SpatialFHE::geom {
 
     class TFHECoordinateSequence {
     private:
         std::vector<TFHECoordinate> vect;
+
     public:
         using Ptr = std::unique_ptr<TFHECoordinateSequence>;
 
@@ -62,8 +64,8 @@ namespace SpatialFHE::geom {
         [[nodiscard]] TFHEBool haveRepeatedPoints() const;
 
         static TFHEBool equals(const TFHECoordinateSequence* s1, const TFHECoordinateSequence* s2);
-        TFHEBool operator ==(const TFHECoordinateSequence& other) const;
-        TFHEBool operator !=(const TFHECoordinateSequence& other) const;
+        TFHEBool operator==(const TFHECoordinateSequence& other) const;
+        TFHEBool operator!=(const TFHECoordinateSequence& other) const;
 
         void add(const TFHECoordinate& c);
         void add(const TFHECoordinateSequence& cs);
@@ -71,11 +73,10 @@ namespace SpatialFHE::geom {
         void closeRing();
 
         Ptr clone() const;
-
-
     };
 
-} // geom
+}  // namespace SpatialFHE::geom
+
 // SpatialFHE
 
-#endif //TFHECOORDINATESEQUENCE_H
+#endif  // TFHECOORDINATESEQUENCE_H

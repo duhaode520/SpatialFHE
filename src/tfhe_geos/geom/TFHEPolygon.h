@@ -54,6 +54,7 @@ namespace SpatialFHE::geom {
     };
 
 }  // namespace SpatialFHE::geom
+
 // SpatialFHE
 
 #endif  // TFHEPOLYGON_H

@@ -20,10 +20,7 @@ namespace SpatialFHE::geom {
         TFHEBool operator!=(const TFHECoordinate &other) const;
 
         [[nodiscard]] bool isNull() const;
-
     };
-} // namespace SpatialFHE::geom
-
-
+}  // namespace SpatialFHE::geom
 
 #endif  // TFHECOORDINATE_H

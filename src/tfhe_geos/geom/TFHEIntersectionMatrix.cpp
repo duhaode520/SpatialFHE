@@ -4,7 +4,4 @@
 
 #include "TFHEIntersectionMatrix.h"
 
-namespace SpatialFHE {
-namespace geom {
-} // geom
-} // SpatialFHE
+namespace SpatialFHE::geom {}  // namespace SpatialFHE::geom

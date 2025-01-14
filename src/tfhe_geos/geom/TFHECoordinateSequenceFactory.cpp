@@ -5,8 +5,8 @@
 #include "TFHECoordinateSequenceFactory.h"
 
 #include <memory>
-#include "TFHECoordinateSequence.h"
 
+#include "TFHECoordinateSequence.h"
 
 namespace SpatialFHE::geom {
     static TFHECoordinateSequenceFactory defaultInstance;
@@ -38,5 +38,6 @@ namespace SpatialFHE::geom {
         return &defaultInstance;
     }
 
-} // geom
+}  // namespace SpatialFHE::geom
+
 // SpatialFHE

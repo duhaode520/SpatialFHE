@@ -2,11 +2,12 @@
 // Created by ubuntu on 1/12/25.
 //
 
-#include <stdexcept>
-#include <cassert>
 #include "TFHELineString.h"
-#include "TFHEGeometryFactory.h"
 
+#include <cassert>
+#include <stdexcept>
+
+#include "TFHEGeometryFactory.h"
 
 namespace SpatialFHE::geom {
     std::unique_ptr<TFHEEnvelope> TFHELineString::computeEnvelopeInternal() const {
@@ -35,21 +36,18 @@ namespace SpatialFHE::geom {
         }
     }
 
-    TFHELineString::TFHELineString(const TFHELineString &other)
-        : TFHEGeometry(other), points(other.points->clone()) {}
+    TFHELineString::TFHELineString(const TFHELineString &other) : TFHEGeometry(other), points(other.points->clone()) {}
 
-    TFHELineString::TFHELineString(TFHECoordinateSequence *pts, const TFHEGeometryFactory *factory)
-        : TFHEGeometry(factory), points(pts) {
+    TFHELineString::TFHELineString(TFHECoordinateSequence *pts, const TFHEGeometryFactory *factory) :
+            TFHEGeometry(factory), points(pts) {}
 
-    }
-
-    TFHELineString::TFHELineString(TFHECoordinateSequence::Ptr &&pts, const TFHEGeometryFactory &factory)
-        : TFHEGeometry(&factory), points(std::move(pts)) {
+    TFHELineString::TFHELineString(TFHECoordinateSequence::Ptr &&pts, const TFHEGeometryFactory &factory) :
+            TFHEGeometry(&factory), points(std::move(pts)) {
         validateConstruction();
     }
 
-    TFHELineString::TFHELineString(std::vector<TFHECoordinate> &&pts, const TFHEGeometryFactory &factory)
-        : TFHEGeometry(&factory), points(new TFHECoordinateSequence(std::move(pts))) {
+    TFHELineString::TFHELineString(std::vector<TFHECoordinate> &&pts, const TFHEGeometryFactory &factory) :
+            TFHEGeometry(&factory), points(new TFHECoordinateSequence(std::move(pts))) {
         validateConstruction();
     }
 
@@ -69,6 +67,7 @@ namespace SpatialFHE::geom {
         assert(points.get());
         return points->clone();
     }
+
     const TFHECoordinateSequence *TFHELineString::getCoordinatesRO() const {
         assert(points.get());
         return points.get();
@@ -90,6 +89,7 @@ namespace SpatialFHE::geom {
     Dimension::DimensionType TFHELineString::getDimension() const {
         return Dimension::L;
     }
+
     std::unique_ptr<TFHEPoint> TFHELineString::getPointN(std::size_t n) const {
         assert(getFactory());
         assert(points.get());
@@ -122,5 +122,6 @@ namespace SpatialFHE::geom {
         return isClosed();
     }
 
-} // geom
+}  // namespace SpatialFHE::geom
+
 // SpatialFHE

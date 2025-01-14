@@ -27,7 +27,7 @@ AllowShortLoopsOnASingleLine: false
 # 总是在返回类型后换行: None, All, TopLevel(顶级函数，不包括在类中的函数),  # AllDefinitions(所有的定义，不包括声明), TopLevelDefinitions(所有的顶级函数的定义)
 AlwaysBreakAfterReturnType: None
 # 总是在template声明后换行
-AlwaysBreakTemplateDeclarations: true
+AlwaysBreakTemplateDeclarations: false
 # false表示函数实参要么都在同一行，要么都各自一行
 BinPackArguments: false
 # false表示所有形参要么都在同一行，要么都各自一行
@@ -70,6 +70,9 @@ PenaltyReturnTypeOnItsOwnLine: 400
 # 指针和引用的对齐: Left, Right, Middle
 PointerAlignment: Right
 # 允许排序#include
-SortIncludes: false
+SortIncludes: true
 # 连续宏定义的值对齐
 AlignConsecutiveMacros: true
+# 函数后换行
+SeparateDefinitionBlocks: Always
+

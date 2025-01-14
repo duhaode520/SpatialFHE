@@ -3,11 +3,11 @@
 //
 
 #include "TFHECoordinate.h"
+
 #include <utility>
 
 namespace SpatialFHE::geom {
-    TFHECoordinate::TFHECoordinate(TFHEInt32 x, TFHEInt32 y) :
-            x(std::move(x)), y(std::move(y)) {}
+    TFHECoordinate::TFHECoordinate(TFHEInt32 x, TFHEInt32 y) : x(std::move(x)), y(std::move(y)) {}
 
     TFHECoordinate::TFHECoordinate(const TFHECoordinate &other) {
         x = other.x;
@@ -34,6 +34,7 @@ namespace SpatialFHE::geom {
     TFHEBool TFHECoordinate::operator!=(const TFHECoordinate &other) const {
         return x != other.x || y != other.y;
     }
+
     bool TFHECoordinate::isNull() const {
         return x.isNull() && y.isNull();
     }

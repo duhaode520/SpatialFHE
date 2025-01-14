@@ -4,8 +4,9 @@
 
 #ifndef TFHEENVELOPE_H
 #define TFHEENVELOPE_H
-#include "TFHECoordinate.h"
 #include <TFHEInt32.h>
+
+#include "TFHECoordinate.h"
 
 namespace SpatialFHE::geom {
 
@@ -13,15 +14,16 @@ namespace SpatialFHE::geom {
     private:
         TFHEInt32 minx, miny, maxx, maxy;
         void init(const TFHEInt32 &x1, const TFHEInt32 &x2, const TFHEInt32 &y1, const TFHEInt32 &y2);
+
     public:
         TFHEEnvelope();
         TFHEEnvelope(const TFHEInt32 &x1, const TFHEInt32 &x2, const TFHEInt32 &y1, const TFHEInt32 &y2);
-        TFHEEnvelope(const TFHECoordinate& p1, const TFHECoordinate& p2);
-        explicit TFHEEnvelope(const TFHECoordinate& p);
+        TFHEEnvelope(const TFHECoordinate &p1, const TFHECoordinate &p2);
+        explicit TFHEEnvelope(const TFHECoordinate &p);
         TFHEEnvelope(const TFHEEnvelope &other);
         TFHEEnvelope(TFHEEnvelope &&other) noexcept;
-        TFHEEnvelope& operator=(const TFHEEnvelope &other);
-        TFHEEnvelope& operator=(TFHEEnvelope &&other) noexcept;
+        TFHEEnvelope &operator=(const TFHEEnvelope &other);
+        TFHEEnvelope &operator=(TFHEEnvelope &&other) noexcept;
         ~TFHEEnvelope() = default;
 
         bool isNull() const;
@@ -53,6 +55,6 @@ namespace SpatialFHE::geom {
         void expandToInclude(const TFHEEnvelope &other);
     };
 
-} // SpatialFHE
+}  // namespace SpatialFHE::geom
 
-#endif //TFHEENVELOPE_H
+#endif  // TFHEENVELOPE_H

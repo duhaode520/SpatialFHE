@@ -3,17 +3,18 @@
 //
 
 #include "TFHEPoint.h"
-#include <stdexcept>
 
+#include <stdexcept>
 
 namespace SpatialFHE::geom {
     std::unique_ptr<TFHEEnvelope> TFHEPoint::computeEnvelopeInternal() const {
         if (isEmpty()) {
-             return std::make_unique<TFHEEnvelope>();
+            return std::make_unique<TFHEEnvelope>();
         } else {
             return std::make_unique<TFHEEnvelope>(coordinates.getAt(0));
         }
     }
+
     TFHEPoint *TFHEPoint::cloneInternal() const {
         return new TFHEPoint(*this);
     }
@@ -25,15 +26,16 @@ namespace SpatialFHE::geom {
     TFHEPoint::TFHEPoint(const TFHECoordinate &c, const TFHEGeometryFactory *newFactory) : TFHEGeometry(newFactory) {
         coordinates.add(c);
     }
+
     TFHEPoint::TFHEPoint(TFHECoordinateSequence &&c, const TFHEGeometryFactory *newFactory) :
             TFHEGeometry(newFactory), coordinates(c) {
         if (c.size() != 1) {
             throw std::invalid_argument("Point must have exactly one coordinate");
         }
     }
-    TFHEPoint::TFHEPoint(TFHECoordinateSequence *newCoords, const TFHEGeometryFactory *newFactory) :
-        TFHEGeometry(newFactory) {
 
+    TFHEPoint::TFHEPoint(TFHECoordinateSequence *newCoords, const TFHEGeometryFactory *newFactory) :
+            TFHEGeometry(newFactory) {
         std::unique_ptr<TFHECoordinateSequence> coords(newCoords);
         if (coords == nullptr || coords->isEmpty()) {
             coordinates = TFHECoordinateSequence();
@@ -55,6 +57,7 @@ namespace SpatialFHE::geom {
     const TFHECoordinate *TFHEPoint::getCoordinate() const {
         return isEmpty() ? nullptr : &coordinates.front();
     }
+
     std::unique_ptr<TFHECoordinateSequence> TFHEPoint::getCoordinates() const {
         if (isEmpty()) {
             return std::make_unique<TFHECoordinateSequence>();
@@ -90,5 +93,4 @@ namespace SpatialFHE::geom {
     TFHEInt32 TFHEPoint::getY() const {
         return coordinates.getAt(0).y;
     }
-} // geom
-// SpatialFHE
+}  // namespace SpatialFHE::geom

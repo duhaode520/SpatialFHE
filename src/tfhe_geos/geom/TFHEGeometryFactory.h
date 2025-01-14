@@ -3,13 +3,13 @@
 #ifndef TFHEGEOMETRYFACTORY_H
 #define TFHEGEOMETRYFACTORY_H
 
-#include "TFHECoordinateSequenceFactory.h"
-
 #include <memory>
 #include <vector>
+
+#include "TFHECoordinateSequenceFactory.h"
 #include "TFHEGeometry.h"
-#include "TFHEPoint.h"
 #include "TFHELineString.h"
+#include "TFHEPoint.h"
 #include "TFHEPolygon.h"
 
 namespace SpatialFHE::geom {
@@ -17,11 +17,13 @@ namespace SpatialFHE::geom {
     class TFHEGeometryFactory {
     private:
         friend class TFHEGeometry;
+
         struct TFHEGeometryFactoryDeleter {
             void operator()(TFHEGeometryFactory* gf) const {
                 gf->destroy();
             }
         };
+
         mutable int refCount = 0;
         const TFHECoordinateSequenceFactory* csFactory = TFHECoordinateSequenceFactory::instance();
         bool autoDestroy;
@@ -85,6 +87,7 @@ namespace SpatialFHE::geom {
     };
 
 }  // namespace SpatialFHE::geom
+
 // SpatialFHE
 
 #endif  // TFHEGEOMETRYFACTORY_H

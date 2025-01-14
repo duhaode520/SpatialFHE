@@ -3,6 +3,7 @@
 //
 
 #include "TFHEGeometryFactory.h"
+
 #include <cassert>
 #include <stdexcept>
 
@@ -71,9 +72,9 @@ namespace SpatialFHE::geom {
         std::vector<TFHECoordinate> &&coordinates) const {
         return std::unique_ptr<TFHELineString>(new TFHELineString(std::move(coordinates), *this));
     }
+
     std::unique_ptr<TFHELineString> TFHEGeometryFactory::createLineString(
         const TFHECoordinateSequence &fromCoords) const {
-
         auto newCoords = fromCoords.clone();
         return std::unique_ptr<TFHELineString>(new TFHELineString(newCoords.get(), this));
     }
@@ -102,7 +103,6 @@ namespace SpatialFHE::geom {
 
     std::unique_ptr<TFHELinearRing> TFHEGeometryFactory::createLinearRing(
         const TFHECoordinateSequence &fromCoords) const {
-
         auto newCoords = fromCoords.clone();
         return std::make_unique<TFHELinearRing>(newCoords.get(), this);
     }
@@ -117,11 +117,9 @@ namespace SpatialFHE::geom {
         return std::unique_ptr<TFHEPolygon>(new TFHEPolygon(poly));
     }
 
-
     std::unique_ptr<TFHEPolygon> TFHEGeometryFactory::createPolygon(
         TFHELinearRing *shell,
         std::vector<TFHELinearRing *> *holes) const {
-
         return std::unique_ptr<TFHEPolygon>(new TFHEPolygon(shell, holes, this));
     }
 
@@ -136,7 +134,6 @@ namespace SpatialFHE::geom {
     }
 
     std::unique_ptr<TFHEPolygon> TFHEGeometryFactory::createPolygon(std::vector<TFHECoordinate> &&coords) const {
-
         auto cs = csFactory->create(std::move(coords));
         auto lr = createLinearRing(std::move(cs));
         return createPolygon(std::move(lr));
@@ -169,10 +166,10 @@ namespace SpatialFHE::geom {
         }
     }
 
-    TFHEGeometryFactory::TFHEGeometryFactory() :
-        refCount(0), autoDestroy(false){}
+    TFHEGeometryFactory::TFHEGeometryFactory() : refCount(0), autoDestroy(false) {}
 
     TFHEGeometryFactory::TFHEGeometryFactory(const TFHEGeometryFactory &gf) = default;
 
-} // geom
+}  // namespace SpatialFHE::geom
+
 // SpatialFHE

@@ -1,7 +1,7 @@
 #ifndef TFHEPOINT_H
 #define TFHEPOINT_H
-#include "TFHEGeometry.h"
 #include "TFHECoordinateSequence.h"
+#include "TFHEGeometry.h"
 
 namespace SpatialFHE::geom {
 
@@ -16,9 +16,9 @@ namespace SpatialFHE::geom {
         std::unique_ptr<TFHEEnvelope> computeEnvelopeInternal() const override;
         [[nodiscard]] TFHEPoint *cloneInternal() const override;
 
-        TFHEPoint(const TFHECoordinate& c, const TFHEGeometryFactory *newFactory);
-        TFHEPoint(TFHECoordinateSequence&& c, const TFHEGeometryFactory *newFactory);
-        TFHEPoint(TFHECoordinateSequence* coords, const TFHEGeometryFactory *newFactory);
+        TFHEPoint(const TFHECoordinate &c, const TFHEGeometryFactory *newFactory);
+        TFHEPoint(TFHECoordinateSequence &&c, const TFHEGeometryFactory *newFactory);
+        TFHEPoint(TFHECoordinateSequence *coords, const TFHEGeometryFactory *newFactory);
         TFHEPoint(const TFHEPoint &p);
 
     public:
@@ -49,6 +49,5 @@ namespace SpatialFHE::geom {
     };
 
 }  // namespace SpatialFHE::geom
-// SpatialFHE
 
 #endif  // TFHEPOINT_H

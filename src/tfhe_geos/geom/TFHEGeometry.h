@@ -5,16 +5,18 @@
 #ifndef TFHEGEOMETRY_H
 #define TFHEGEOMETRY_H
 #include <algorithm>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "TFHEEnvelope.h"
 #include "TFHEIntersectionMatrix.h"
 #include "enums.h"
-#include <string>
-#include <memory>
-#include <vector>
 
 namespace SpatialFHE::geom {
     class TFHECoordinateSequence;
 }
+
 namespace SpatialFHE::geom {
     // Forward declarations
     class TFHEGeometryFactory;
@@ -32,13 +34,14 @@ namespace SpatialFHE::geom {
     class TFHEGeometry {
     protected:
         mutable std::unique_ptr<TFHEEnvelope> envelope;
-        const TFHEGeometryFactory* factory;
+        const TFHEGeometryFactory *factory;
 
-        TFHEGeometry(const TFHEGeometry& geom);
-        explicit TFHEGeometry(const TFHEGeometryFactory* factory);
+        TFHEGeometry(const TFHEGeometry &geom);
+        explicit TFHEGeometry(const TFHEGeometryFactory *factory);
 
         virtual std::unique_ptr<TFHEEnvelope> computeEnvelopeInternal() const = 0;
         [[nodiscard]] virtual TFHEGeometry *cloneInternal() const = 0;
+
     public:
         friend class TFHEGeometryFactory;
 
@@ -48,7 +51,7 @@ namespace SpatialFHE::geom {
         // virtual bool isSimple() = 0;
 
         // Returns a vertex of the geometry, or nullptr if the geometry is empty.
-        virtual const TFHECoordinate* getCoordinate() const = 0;
+        virtual const TFHECoordinate *getCoordinate() const = 0;
 
         virtual std::unique_ptr<TFHECoordinateSequence> getCoordinates() const = 0;
 
@@ -61,7 +64,9 @@ namespace SpatialFHE::geom {
         virtual TFHEGeometryTypeId getGeometryTypeId() const = 0;
 
         // Polygon overrides to check for rectangle
-        virtual bool isRectangle() const {return false;}
+        virtual bool isRectangle() const {
+            return false;
+        }
 
         // Returns the dimension of the geometry.
         virtual Dimension::DimensionType getDimension() const = 0;
@@ -72,7 +77,7 @@ namespace SpatialFHE::geom {
 
         virtual const TFHEEnvelope *getEnvelope() const {
             if (!envelope) {
-                 envelope = computeEnvelopeInternal();
+                envelope = computeEnvelopeInternal();
             }
             return envelope.get();
         }
@@ -81,10 +86,9 @@ namespace SpatialFHE::geom {
             return std::unique_ptr<TFHEGeometry>(cloneInternal());
         }
 
-        [[nodiscard]] const TFHEGeometryFactory* getFactory() const {
+        [[nodiscard]] const TFHEGeometryFactory *getFactory() const {
             return factory;
         }
-
 
         virtual TFHEBool intersects(const TFHEGeometry *geom) const;
         virtual TFHEBool contains(const TFHEGeometry *geom) const;
@@ -100,7 +104,6 @@ namespace SpatialFHE::geom {
         virtual TFHEBool relate(const TFHEGeometry *geom, const std::string &pattern) const;
         virtual std::shared_ptr<TFHEIntersectionMatrix> relate(const TFHEGeometry *geom);
 
-
         // virtual TFHEGeometry* buffer(double distance) const = 0;
         // virtual TFHEGeometry* convexHull() const = 0;
         // virtual TFHEGeometry* intersection(const TFHEGeometry &geom) const = 0;
@@ -109,23 +112,18 @@ namespace SpatialFHE::geom {
         // virtual TFHEGeometry* symDifference(const TFHEGeometry &geom) const = 0;
 
         /// Returns true if the array contains any non-empty Geometrys.
-        template<typename T>
-        static bool hasNonEmptyElements(const std::vector<T>* geometries) {
-            return std::any_of(geometries->begin(), geometries->end(), [](const T& g) { return !g->isEmpty(); });
+        template <typename T> static bool hasNonEmptyElements(const std::vector<T> *geometries) {
+            return std::any_of(geometries->begin(), geometries->end(), [](const T &g) { return !g->isEmpty(); });
         }
 
         /// Returns true if the CoordinateSequence contains any null elements.
-        static bool hasNullElements(const TFHECoordinateSequence* list);
+        static bool hasNullElements(const TFHECoordinateSequence *list);
 
         /// Returns true if the vector contains any null elements.
-        template<typename T>
-        static bool hasNullElements(const std::vector<T>* geometries) {
-            return std::any_of(geometries->begin(), geometries->end(), [](const T& g) { return g == nullptr; });
+        template <typename T> static bool hasNullElements(const std::vector<T> *geometries) {
+            return std::any_of(geometries->begin(), geometries->end(), [](const T &g) { return g == nullptr; });
         }
-
     };
-}
+}  // namespace SpatialFHE::geom
 
-
-
-#endif //TFHEGEOMETRY_H
+#endif  // TFHEGEOMETRY_H

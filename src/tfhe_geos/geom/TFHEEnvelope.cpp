@@ -197,9 +197,11 @@ namespace SpatialFHE::geom {
             maxy = TFHEInt32::max(maxy, y);
         }
     }
+
     void TFHEEnvelope::expandToInclude(const TFHECoordinate &p) {
         expandToInclude(p.x, p.y);
     }
+
     void TFHEEnvelope::expandToInclude(const TFHEEnvelope &other) {
         if (isNull()) {
             minx = other.minx;
@@ -214,4 +216,4 @@ namespace SpatialFHE::geom {
         }
     }
 
-} // SpatialFHE
+}  // namespace SpatialFHE::geom

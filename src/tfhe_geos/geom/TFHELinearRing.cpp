@@ -3,6 +3,7 @@
 //
 
 #include "TFHELinearRing.h"
+
 #include <sstream>
 
 namespace SpatialFHE::geom {
@@ -13,10 +14,9 @@ namespace SpatialFHE::geom {
 
         // Do not check isClosed() here, because it returns ciphered value
 
-        if(points->size() < MINIMUM_VALID_SIZE) {
+        if (points->size() < MINIMUM_VALID_SIZE) {
             std::ostringstream os;
-            os << "Invalid number of points in LinearRing found "
-               << points->size() << " - must be 0 or >= 4";
+            os << "Invalid number of points in LinearRing found " << points->size() << " - must be 0 or >= 4";
             throw std::invalid_argument(os.str());
         }
     }
@@ -37,8 +37,8 @@ namespace SpatialFHE::geom {
         validateConstruction();
     }
 
-    TFHELinearRing::TFHELinearRing(std::vector<TFHECoordinate> &&pts, const TFHEGeometryFactory &factory)
-            : TFHELineString(std::move(pts), factory) {
+    TFHELinearRing::TFHELinearRing(std::vector<TFHECoordinate> &&pts, const TFHEGeometryFactory &factory) :
+            TFHELineString(std::move(pts), factory) {
         validateConstruction();
     }
 

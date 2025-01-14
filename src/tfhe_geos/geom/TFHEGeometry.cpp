@@ -3,6 +3,7 @@
 //
 
 #include "TFHEGeometry.h"
+
 #include "TFHEGeometryFactory.h"
 
 namespace SpatialFHE::geom {
@@ -44,6 +45,7 @@ namespace SpatialFHE::geom {
         // checkNotGeometryCollection(geom);
         // chekcNotGeometryCollection(*this);
     }
+
     bool TFHEGeometry::hasNullElements(const TFHECoordinateSequence *list) {
         std::size_t npts = list->size();
         for (std::size_t i = 0; i < npts; i++) {

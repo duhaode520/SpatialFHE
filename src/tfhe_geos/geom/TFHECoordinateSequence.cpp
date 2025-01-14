@@ -5,8 +5,8 @@
 #include "TFHECoordinateSequence.h"
 
 #include <memory>
-#include "TFHEEnvelope.h"
 
+#include "TFHEEnvelope.h"
 
 namespace SpatialFHE::geom {
     TFHECoordinateSequence::TFHECoordinateSequence(std::size_t size) : vect(size) {}
@@ -77,6 +77,7 @@ namespace SpatialFHE::geom {
         }
         return result;
     }
+
     TFHEBool TFHECoordinateSequence::equals(const TFHECoordinateSequence *s1, const TFHECoordinateSequence *s2) {
         if (s1 == s2) {
             return TFHEBool::tfhe_true;
@@ -90,7 +91,7 @@ namespace SpatialFHE::geom {
         }
         TFHEBool result = TFHEBool::tfhe_true;
         for (std::size_t i = 0; i < s1_size; i++) {
-                result = result && (s1->getAt(i) == s2->getAt(i));
+            result = result && (s1->getAt(i) == s2->getAt(i));
         }
         return result;
     }
@@ -123,8 +124,10 @@ namespace SpatialFHE::geom {
             add(getAt(0));
         }
     }
+
     TFHECoordinateSequence::Ptr TFHECoordinateSequence::clone() const {
         return std::make_unique<TFHECoordinateSequence>(*this);
     }
-} // geom
+}  // namespace SpatialFHE::geom
+
 // SpatialFHE

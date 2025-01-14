@@ -3,7 +3,6 @@
 #include "TFHECoordinateSequence.h"
 #include "TFHEGeometry.h"
 
-
 namespace SpatialFHE::geom {
 
     class TFHELineString : public TFHEGeometry {
@@ -13,8 +12,8 @@ namespace SpatialFHE::geom {
         TFHELineString(const TFHELineString& other);
 
         TFHELineString(TFHECoordinateSequence* pts, const TFHEGeometryFactory* factory);
-        TFHELineString(TFHECoordinateSequence::Ptr &&pts, const TFHEGeometryFactory& factory);
-        TFHELineString(std::vector<TFHECoordinate> &&pts, const TFHEGeometryFactory& factory);
+        TFHELineString(TFHECoordinateSequence::Ptr&& pts, const TFHEGeometryFactory& factory);
+        TFHELineString(std::vector<TFHECoordinate>&& pts, const TFHEGeometryFactory& factory);
 
         TFHECoordinateSequence::Ptr points;
 
@@ -25,7 +24,7 @@ namespace SpatialFHE::geom {
         ~TFHELineString() override = default;
 
         [[nodiscard]] bool isEmpty() const override;
-        [[nodiscard]] const TFHECoordinate *getCoordinate() const override;
+        [[nodiscard]] const TFHECoordinate* getCoordinate() const override;
         [[nodiscard]] std::unique_ptr<TFHECoordinateSequence> getCoordinates() const override;
 
         /// Returns a read-only pointer to internal coordinates
@@ -49,7 +48,8 @@ namespace SpatialFHE::geom {
         void validateConstruction();
     };
 
-} // geom
+}  // namespace SpatialFHE::geom
+
 // SpatialFHE
 
-#endif //TFHELINESTRING_H
+#endif  // TFHELINESTRING_H
