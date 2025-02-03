@@ -11,6 +11,7 @@
 
 #include "TFHEEnvelope.h"
 #include "TFHEIntersectionMatrix.h"
+#include "TFHECoordinateSequence.h"
 #include "enums.h"
 
 namespace SpatialFHE::geom {
@@ -90,7 +91,7 @@ namespace SpatialFHE::geom {
             return factory;
         }
 
-        virtual TFHEBool intersects(const TFHEGeometry *geom) const;
+        virtual TFHEBool intersects(const TFHEGeometry *g) const;
         virtual TFHEBool contains(const TFHEGeometry *geom) const;
         virtual TFHEBool within(const TFHEGeometry *geom) const;
         virtual TFHEBool touches(const TFHEGeometry *geom) const;
@@ -102,7 +103,8 @@ namespace SpatialFHE::geom {
         virtual TFHEBool coveredBy(const TFHEGeometry *geom) const;
 
         virtual TFHEBool relate(const TFHEGeometry *geom, const std::string &pattern) const;
-        virtual std::shared_ptr<TFHEIntersectionMatrix> relate(const TFHEGeometry *geom);
+        virtual std::unique_ptr<TFHEIntersectionMatrix> relate(const TFHEGeometry *geom);
+        virtual std::unique_ptr<TFHEIntersectionMatrix> relate(const TFHEGeometry& geom);
 
         // virtual TFHEGeometry* buffer(double distance) const = 0;
         // virtual TFHEGeometry* convexHull() const = 0;

@@ -114,7 +114,7 @@ namespace SpatialFHE::geom {
         if (isEmpty()) {
             return TFHEBool::tfhe_false;
         }
-        return points.get()->getAt(0) == points.get()->getAt(getNumPoints());
+        return points.get()->getAt(0).equals(points.get()->getAt(getNumPoints()));
     }
 
     TFHEBool TFHELineString::isRing() const {

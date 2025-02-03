@@ -82,7 +82,6 @@ namespace SpatialFHE {
         public_buffer.length = public_key_size;
         fread((void*)public_buffer.pointer, 1, public_key_size, public_key_file);
         fclose(public_key_file);
-
         public_key_deserialize(public_buffer, &public_key);
         free((void*)public_buffer.pointer);
 

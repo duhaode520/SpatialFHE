@@ -55,6 +55,8 @@ namespace SpatialFHE {
         static void init();
 
         static void registerContext(TFHEContext* ctx) ;
+        static bool isLocalTrue(const TFHEBool &other);
+        static bool isLocalFalse(const TFHEBool &other);
     };
 
 }  // namespace SpatialFHE

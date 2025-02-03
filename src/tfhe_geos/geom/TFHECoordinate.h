@@ -1,10 +1,18 @@
 #ifndef TFHECOORDINATE_H
 #define TFHECOORDINATE_H
+#include <map>
+#include <set>
+
 #include "TFHEInt32.h"
 
 namespace SpatialFHE::geom {
+    struct TFHECoordinateLessThan;
+
     class TFHECoordinate {
     public:
+        typedef std::set<const TFHECoordinate*, TFHECoordinateLessThan> ConstSet;
+        typedef std::map<const TFHECoordinate*, int, TFHECoordinateLessThan> ConstIntMap;
+
         TFHECoordinate() = default;
         TFHECoordinate(TFHEInt32 x, TFHEInt32 y);
         TFHECoordinate(const TFHECoordinate &other);
@@ -16,10 +24,31 @@ namespace SpatialFHE::geom {
         TFHEInt32 x;
         TFHEInt32 y;
 
-        TFHEBool operator==(const TFHECoordinate &other) const;
-        TFHEBool operator!=(const TFHECoordinate &other) const;
+        TFHEBool equals(const TFHECoordinate &other) const;
+        TFHEInt32 distanceSquared(const TFHECoordinate& p) const;
+
+        bool operator==(const TFHECoordinate &other) const;
 
         [[nodiscard]] bool isNull() const;
+
+        // This comparison might be expensive, as it requires decryption
+        TFHEInt32 compareTo(const TFHECoordinate& other) const;
+    };
+    struct TFHECoordinateLessThan {
+        bool operator()(const TFHECoordinate &lhs, const TFHECoordinate &rhs) const {
+            return compare(&lhs, &rhs);
+        }
+
+        bool operator()(const TFHECoordinate *lhs, const TFHECoordinate *rhs) const {
+            return compare(lhs, rhs);
+        }
+
+        static bool compare(const TFHECoordinate *lhs, const TFHECoordinate *rhs) {
+            TFHEBool encrypted = lhs->x < rhs->x || (lhs->x == rhs->x && lhs->y < rhs->y);
+            // TODO: add cache to avoid re-encryption
+            return encrypted.decrypt();
+        }
+
     };
 }  // namespace SpatialFHE::geom
 

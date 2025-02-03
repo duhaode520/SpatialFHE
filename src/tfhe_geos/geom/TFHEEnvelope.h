@@ -39,20 +39,30 @@ namespace SpatialFHE::geom {
 
         [[nodiscard]] TFHEBool intersects(const TFHEEnvelope &other) const;
         [[nodiscard]] TFHEBool intersects(const TFHECoordinate &p) const;
+        [[nodiscard]] TFHEBool intersects(const TFHEEnvelope *other) const;
         [[nodiscard]] TFHEBool intersects(const TFHEInt32 &x, const TFHEInt32 &y) const;
         [[nodiscard]] TFHEBool disjoint(const TFHEEnvelope &other) const;
+        [[nodiscard]] TFHEBool disjoint(const TFHEEnvelope *other) const;
         [[nodiscard]] TFHEBool contains(const TFHEEnvelope &other) const;
         [[nodiscard]] TFHEBool contains(const TFHECoordinate &p) const;
         [[nodiscard]] TFHEBool contains(const TFHEInt32 &x, const TFHEInt32 &y) const;
+        TFHEBool contains(const TFHEEnvelope *other) const;
         [[nodiscard]] TFHEBool covers(const TFHEEnvelope &other) const;
         [[nodiscard]] TFHEBool covers(const TFHECoordinate &p) const;
         [[nodiscard]] TFHEBool covers(const TFHEInt32 &x, const TFHEInt32 &y) const;
+        TFHEBool covers(const TFHEEnvelope *other) const;
 
         TFHEBool operator==(const TFHEEnvelope &other) const;
 
         void expandToInclude(TFHEInt32 x, TFHEInt32 y);
         void expandToInclude(const TFHECoordinate &p);
         void expandToInclude(const TFHEEnvelope &other);
+
+        static TFHEBool intersects(
+            const TFHECoordinate &p1,
+            const TFHECoordinate &p2,
+            const TFHECoordinate &q1,
+            const TFHECoordinate &q2);
     };
 
 }  // namespace SpatialFHE::geom

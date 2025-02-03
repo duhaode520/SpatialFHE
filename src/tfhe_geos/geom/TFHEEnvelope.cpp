@@ -126,6 +126,10 @@ namespace SpatialFHE::geom {
         return intersects(p.x, p.y);
     }
 
+    TFHEBool TFHEEnvelope::intersects(const TFHEEnvelope *other) const {
+        return intersects(*other);
+    }
+
     TFHEBool TFHEEnvelope::intersects(const TFHEInt32 &x, const TFHEInt32 &y) const {
         if (this->isNull()) {
             return TFHEBool::tfhe_false;
@@ -142,6 +146,10 @@ namespace SpatialFHE::geom {
         }
     }
 
+    TFHEBool TFHEEnvelope::disjoint(const TFHEEnvelope *other) const {
+        return disjoint(*other);
+    }
+
     TFHEBool TFHEEnvelope::contains(const TFHEEnvelope &other) const {
         return covers(other);
     }
@@ -152,6 +160,14 @@ namespace SpatialFHE::geom {
 
     TFHEBool TFHEEnvelope::contains(const TFHEInt32 &x, const TFHEInt32 &y) const {
         return covers(x, y);
+    }
+
+    TFHEBool TFHEEnvelope::contains(const TFHEEnvelope *other) const {
+        return covers(other);
+    }
+
+    TFHEBool TFHEEnvelope::covers(const TFHEEnvelope *other) const {
+        return covers(*other);
     }
 
     TFHEBool TFHEEnvelope::covers(const TFHEEnvelope &other) const {
@@ -214,6 +230,22 @@ namespace SpatialFHE::geom {
             miny = TFHEInt32::min(miny, other.miny);
             maxy = TFHEInt32::max(maxy, other.maxy);
         }
+    }
+
+    TFHEBool TFHEEnvelope::intersects(
+        const TFHECoordinate &p1,
+        const TFHECoordinate &p2,
+        const TFHECoordinate &q1,
+        const TFHECoordinate &q2) {
+        TFHEInt32 minqx = TFHEInt32::min(q1.x, q2.x);
+        TFHEInt32 maxqx = TFHEInt32::max(q1.x, q2.x);
+        TFHEInt32 minpx = TFHEInt32::min(p1.x, p2.x);
+        TFHEInt32 maxpx = TFHEInt32::max(p1.x, p2.x);
+        TFHEInt32 minqy = TFHEInt32::min(q1.y, q2.y);
+        TFHEInt32 maxqy = TFHEInt32::max(q1.y, q2.y);
+        TFHEInt32 minpy = TFHEInt32::min(p1.y, p2.y);
+        TFHEInt32 maxpy = TFHEInt32::max(p1.y, p2.y);
+        return (maxqx >= minpx && minqx <= maxpx && maxqy >= minpy && minqy <= maxpy);
     }
 
 }  // namespace SpatialFHE::geom

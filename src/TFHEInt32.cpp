@@ -145,6 +145,46 @@ namespace SpatialFHE {
         return result;
     }
 
+    TFHEInt32 TFHEInt32::operator+=(const TFHEInt32 &other) {
+        fhe_int32_add_assign(data, other.data);
+        return *this;
+    }
+
+    TFHEInt32 TFHEInt32::operator-=(const TFHEInt32 &other) {
+        fhe_int32_sub_assign(data, other.data);
+        return *this;
+    }
+
+    TFHEInt32 TFHEInt32::operator*=(const TFHEInt32 &other) {
+        fhe_int32_mul_assign(data, other.data);
+        return *this;
+    }
+
+    TFHEInt32 TFHEInt32::operator/=(const TFHEInt32 &other) {
+        fhe_int32_div_assign(data, other.data);
+        return *this;
+    }
+
+    TFHEInt32 TFHEInt32::operator+=(int32_t other) {
+        fhe_int32_scalar_add_assign(data, other);
+        return *this;
+    }
+
+    TFHEInt32 TFHEInt32::operator-=(int32_t other) {
+        fhe_int32_scalar_sub_assign(data, other);
+        return *this;
+    }
+
+    TFHEInt32 TFHEInt32::operator*=(int32_t other) {
+        fhe_int32_scalar_mul_assign(data, other);
+        return *this;
+    }
+
+    TFHEInt32 TFHEInt32::operator/=(int32_t other) {
+        fhe_int32_scalar_div_assign(data, other);
+        return *this;
+    }
+
     TFHEInt32 TFHEInt32::operator+(int32_t other) const {
         TFHEInt32 result;
         fhe_int32_scalar_add(data, other, &result.data);

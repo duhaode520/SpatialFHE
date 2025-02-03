@@ -42,7 +42,7 @@ namespace SpatialFHE::geom {
         if (size() < 4) {
             return TFHEBool::tfhe_false;
         }
-        return getAt(0) == getAt(size() - 1);
+        return getAt(0).equals(getAt(size() - 1));
     }
 
     bool TFHECoordinateSequence::isEmpty() const {
@@ -69,9 +69,9 @@ namespace SpatialFHE::geom {
         vect[pos] = c;
     }
 
-    TFHEBool TFHECoordinateSequence::haveRepeatedPoints() const {
+    TFHEBool TFHECoordinateSequence::hasRepeatedPoints() const {
         const std::size_t p_size = size();
-        TFHEBool result = getAt(0) == getAt(1);
+        TFHEBool result = getAt(0).equals(getAt(1));
         for (std::size_t i = 2; i < p_size; i++) {
             result = result && (getAt(i) == getAt(i - 1));
         }
@@ -127,6 +127,14 @@ namespace SpatialFHE::geom {
 
     TFHECoordinateSequence::Ptr TFHECoordinateSequence::clone() const {
         return std::make_unique<TFHECoordinateSequence>(*this);
+    }
+
+    void TFHECoordinateSequence::reverse() {
+        auto last = size() - 1;
+        auto mid = size() / 2;
+        for (size_t i = 0; i < mid; i++) {
+            std::swap(vect[i], vect[last - i]);
+        }
     }
 }  // namespace SpatialFHE::geom
 

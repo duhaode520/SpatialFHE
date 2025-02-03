@@ -36,8 +36,8 @@ target_link_libraries(tfhers_demo PRIVATE gtest_main SpatialFHE SEAL::seal ZLIB:
 target_link_libraries(tfhers_demo PRIVATE tfhe)
 
 add_executable(tfhers_test TFHEBasicSuite.cpp)
-target_link_libraries(tfhers_test PRIVATE gtest_main SpatialFHE SEAL::seal ZLIB::ZLIB zstd::libzstd unofficial::b64::b64 rapidjson)
-target_link_libraries(tfhers_test PRIVATE tfhe)
+#target_link_libraries(tfhers_test PRIVATE gtest_main SpatialFHE SEAL::seal ZLIB::ZLIB zstd::libzstd unofficial::b64::b64 rapidjson)
+target_link_libraries(tfhers_test PRIVATE tfhe gtest_main)
 #####
 #
 # 这里追加新的Unit Test

@@ -61,7 +61,7 @@ namespace SpatialFHE::geom {
 
         void setAt(const TFHECoordinate& c, std::size_t pos);
 
-        [[nodiscard]] TFHEBool haveRepeatedPoints() const;
+        [[nodiscard]] TFHEBool hasRepeatedPoints() const;
 
         static TFHEBool equals(const TFHECoordinateSequence* s1, const TFHECoordinateSequence* s2);
         TFHEBool operator==(const TFHECoordinateSequence& other) const;
@@ -73,6 +73,9 @@ namespace SpatialFHE::geom {
         void closeRing();
 
         Ptr clone() const;
+
+        // Reverse the coordinates order in the sequence
+        void reverse();
     };
 
 }  // namespace SpatialFHE::geom

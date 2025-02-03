@@ -53,6 +53,14 @@ namespace SpatialFHE {
 
     bool TFHEBool::decrypt()  {
         bool result;
+
+        // quick return for static true and false
+        if (this == &tfhe_true) {
+            return true;
+        } else if (this == &tfhe_false) {
+            return false;
+        }
+
         if (context->getClientKey() != nullptr) {
             fhe_bool_decrypt(data, context->getClientKey(), &result);
         } else {
@@ -160,5 +168,13 @@ namespace SpatialFHE {
     void TFHEBool::registerContext(TFHEContext *ctx) {
         TFHERegisteredType::registerContext(ctx);
         init();
+    }
+
+    bool TFHEBool::isLocalTrue(const TFHEBool &other) {
+        return &tfhe_true == &other;
+    }
+
+    bool TFHEBool::isLocalFalse(const TFHEBool &other) {
+        return &tfhe_false == &other;
     }
 } // SpatialFHE
