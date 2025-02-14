@@ -63,6 +63,7 @@ namespace SpatialFHE::geom {
             const TFHECoordinate &p2,
             const TFHECoordinate &q1,
             const TFHECoordinate &q2);
+        static TFHEBool intersects(const TFHECoordinate &p1, const TFHECoordinate &p2, const TFHECoordinate& q);
     };
 
 }  // namespace SpatialFHE::geom

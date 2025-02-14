@@ -15,7 +15,9 @@ namespace SpatialFHE::algorithm {
         const geom::TFHECoordinate &p0,
         const geom::TFHECoordinate &p1) {
         // ignore the envelope test cuz it's need decryption and might be slow
-
+        if (!geom::TFHEEnvelope::intersects(p0, p1, p).decrypt()) {
+            return TFHEBool::tfhe_false;
+        }
         // handle the case where p0 == p1
         if (p == p0) {
             return TFHEBool::tfhe_true;

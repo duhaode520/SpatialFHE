@@ -4,6 +4,7 @@
 
 #ifndef TFHESEGMENTINTERSECTOR_H
 #define TFHESEGMENTINTERSECTOR_H
+#include <cstddef>
 
 namespace SpatialFHE::noding {
     class TFHESegmentString;
@@ -36,9 +37,9 @@ namespace SpatialFHE::noding {
          */
         virtual void processIntersections(
             TFHESegmentString* e0,
-            size_t segIndex0,
+            std::size_t segIndex0,
             TFHESegmentString* e1,
-            size_t segIndex1) = 0;
+            std::size_t segIndex1) = 0;
 
         /**
          * \brief

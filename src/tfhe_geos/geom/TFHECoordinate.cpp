@@ -28,12 +28,15 @@ namespace SpatialFHE::geom {
     }
 
     TFHEBool TFHECoordinate::equals(const TFHECoordinate &other) const {
+        if (other.isNull()) {
+            return isNull()? TFHEBool(true) : TFHEBool(false);
+        }
         return x == other.x && y == other.y;
     }
 
     TFHEInt32 TFHECoordinate::distanceSquared(const TFHECoordinate &p) const {
         TFHEInt32 dx = x - p.x;
-        TFHEInt32 dy = x - p.y;
+        TFHEInt32 dy = y - p.y;
         return dx * dx + dy * dy;
     }
 
@@ -51,9 +54,9 @@ namespace SpatialFHE::geom {
 
     TFHEInt32 TFHECoordinate::compareTo(const TFHECoordinate &other) const {
         TFHEInt32 xLess = TFHEInt32(x < other.x);
-        TFHEInt32 yLess = TFHEInt32(x < other.y);
-        TFHEInt32 xGreater = TFHEInt32(x == other.x);
-        TFHEInt32 yGreater = TFHEInt32(y == other.y);
+        TFHEInt32 yLess = TFHEInt32(y < other.y);
+        TFHEInt32 xGreater = TFHEInt32(x > other.x);
+        TFHEInt32 yGreater = TFHEInt32(y > other.y);
         return (xGreater - xLess) * 2 + (yGreater - yLess);
     }
 

@@ -61,7 +61,9 @@ namespace SpatialFHE::operation::relateng {
         for (std::size_t i = 0; i < ring->size() - 1; i++) {
             const TFHECoordinate &p0 = ring->getAt(i);
             const TFHECoordinate &pnext = ring->getAt(i + 1);
-            if (p0 == *p) {
+            if (*p == pnext) {
+                continue;
+            } else if (p0 == *p) {
                 std::size_t iprev = i > 0 ? i - 1 : ring->size() - 2;
                 const TFHECoordinate &pprev = ring->getAt(iprev);
                 TFHENodeSection* ns = createSection(p, &pprev, &pnext);

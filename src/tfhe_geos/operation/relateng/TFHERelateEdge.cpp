@@ -5,6 +5,7 @@
 #include "TFHERelateEdge.h"
 
 #include <tfhe_geos/algorithm/TFHEPolygonNodeTopology.h>
+#include <tfhe_geos/constants.h>
 
 #include "TFHERelateNode.h"
 #include "tfhe_geos/geom/enums.h"
@@ -162,7 +163,7 @@ namespace SpatialFHE::operation::relateng {
                 return i;
             }
         }
-        return -1;
+        return INDEX_UNKNOWN;
     }
 
     void TFHERelateEdge::setAreaInterior(std::vector<std::unique_ptr<TFHERelateEdge>> &edges, bool isA) {

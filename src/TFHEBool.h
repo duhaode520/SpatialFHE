@@ -8,6 +8,9 @@ namespace SpatialFHE {
     class TFHEBool : public TFHERegisteredType<bool> {
     private:
         FheBool *data;
+#ifdef DEBUG
+        bool ori;
+#endif
 
     public:
         explicit TFHEBool(bool value);

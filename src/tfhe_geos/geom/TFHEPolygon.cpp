@@ -26,50 +26,50 @@ namespace SpatialFHE::geom {
     }
 
     TFHEPolygon::TFHEPolygon(
-        TFHELinearRing *shell,
-        std::vector<TFHELinearRing *> *holes,
-        const TFHEGeometryFactory *factory) :
-            TFHEGeometry(factory) {
-        if (shell == nullptr) {
+        TFHELinearRing *p_shell,
+        std::vector<TFHELinearRing *> *p_holes,
+        const TFHEGeometryFactory *p_factory) :
+            TFHEGeometry(p_factory) {
+        if (p_shell == nullptr) {
             this->shell = getFactory()->createLinearRing();
         } else {
-            if (holes != nullptr && shell->isEmpty() && hasNonEmptyElements(holes)) {
+            if (p_holes != nullptr && p_shell->isEmpty() && hasNonEmptyElements(p_holes)) {
                 throw std::invalid_argument("shell is empty and holes is empty");
             }
-            this->shell.reset(shell);
+            this->shell.reset(p_shell);
         }
 
-        if (holes != nullptr) {
-            if (hasNullElements(holes)) {
+        if (p_holes != nullptr) {
+            if (hasNullElements(p_holes)) {
                 throw std::invalid_argument("holes contains null elements");
             }
-            for (const auto &hole : *holes) {
+            for (const auto &hole : *p_holes) {
                 this->holes.emplace_back(hole);
             }
-            delete holes;
+            delete p_holes;
         }
     }
 
-    TFHEPolygon::TFHEPolygon(std::unique_ptr<TFHELinearRing> shell, const TFHEGeometryFactory &factory) :
-            TFHEGeometry(&factory), shell(std::move(shell)) {
+    TFHEPolygon::TFHEPolygon(std::unique_ptr<TFHELinearRing> p_shell, const TFHEGeometryFactory &p_factory) :
+            TFHEGeometry(&p_factory), shell(std::move(p_shell)) {
         if (this->shell == nullptr) {
             this->shell = getFactory()->createLinearRing();
         }
     }
 
     TFHEPolygon::TFHEPolygon(
-        std::unique_ptr<TFHELinearRing> shell,
-        std::vector<std::unique_ptr<TFHELinearRing>> holes,
-        const TFHEGeometryFactory &factory) :
-            TFHEGeometry(&factory), shell(std::move(shell)), holes(std::move(holes)) {
+        std::unique_ptr<TFHELinearRing> p_shell,
+        std::vector<std::unique_ptr<TFHELinearRing>> p_holes,
+        const TFHEGeometryFactory &p_factory) :
+            TFHEGeometry(&p_factory), shell(std::move(p_shell)), holes(std::move(p_holes)) {
         if (this->shell == nullptr) {
             this->shell = getFactory()->createLinearRing();
         }
 
-        if (shell->isEmpty() && hasNonEmptyElements(&holes)) {
+        if (this->shell->isEmpty() && hasNonEmptyElements(&this->holes)) {
             throw std::invalid_argument("shell is empty and holes is empty");
         }
-        if (hasNullElements(&holes)) {
+        if (hasNullElements(&this->holes)) {
             throw std::invalid_argument("holes contains null elements");
         }
     }

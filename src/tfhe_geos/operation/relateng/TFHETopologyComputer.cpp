@@ -4,6 +4,8 @@
 
 #include "TFHETopologyComputer.h"
 
+#include <tfhe_geos/algorithm/TFHEPolygonNodeTopology.h>
+
 #include <c++/9/stdexcept>
 
 #include "TFHERelateGeometry.h"
@@ -27,10 +29,10 @@ namespace SpatialFHE::operation::relateng {
         // P/A case: A Interior and Boundary intersect P Exterior
         else if (dimA == Dimension::P && dimB == Dimension::A) {
             updateDim(Location::EXTERIOR, Location::INTERIOR, Dimension::A);
-            updateDim(Location::EXTERIOR, Location::BOUNDARY, Dimension::A);
+            updateDim(Location::EXTERIOR, Location::BOUNDARY, Dimension::L);
         } else if (dimA == Dimension::A && dimB == Dimension::P) {
             updateDim(Location::INTERIOR, Location::EXTERIOR, Dimension::A);
-            updateDim(Location::BOUNDARY, Location::EXTERIOR, Dimension::A);
+            updateDim(Location::BOUNDARY, Location::EXTERIOR, Dimension::L);
         }
         // L/A case: A Interior and Boundary intersect L Exterior
         else if (dimA == Dimension::L && dimB == Dimension::A) {
@@ -79,7 +81,12 @@ namespace SpatialFHE::operation::relateng {
         }
     }
 
-    void TFHETopologyComputer::updateIntersectionAB(const TFHENodeSection *a, const TFHENodeSection *b) {}
+    void TFHETopologyComputer::updateIntersectionAB(const TFHENodeSection *a, const TFHENodeSection *b) {
+        if (TFHENodeSection::isAreaArea(*a, *b)) {
+            updateAreaAreaCross(a, b);
+        }
+        updateNodeLocation(a, b);
+    }
 
     void TFHETopologyComputer::addLineEndOnLine(
         bool isLineA,
@@ -196,6 +203,41 @@ namespace SpatialFHE::operation::relateng {
         }
     }
 
+    void TFHETopologyComputer::addNodeSections(TFHENodeSection *ns0, TFHENodeSection *ns1) {
+        TFHENodeSections *sections = getNodeSections(ns0->nodePt());
+        sections->addNodeSection(ns0);
+        sections->addNodeSection(ns1);
+    }
+
+    TFHENodeSections *TFHETopologyComputer::getNodeSections(const TFHECoordinate &nodePt) {
+        TFHENodeSections *ns;
+        auto result = nodeMap.find(nodePt);
+        if (result == nodeMap.end()) {
+            ns = new TFHENodeSections(&nodePt);
+            nodeSectionsStore.emplace_back(ns);
+            nodeMap[nodePt] = ns;
+        } else {
+            ns = result->second;
+        }
+        return ns;
+    }
+
+    void TFHETopologyComputer::updateAreaAreaCross(const TFHENodeSection *a, const TFHENodeSection *b) {
+        bool isProper = TFHENodeSection::isProper(*a, *b);
+        if (isProper ||
+            algorithm::TFHEPolygonNodeTopology::isCrossing(
+                &(a->nodePt()), a->getVertex(0), a->getVertex(1), b->getVertex(0), b->getVertex(1))) {
+            updateDim(Location::INTERIOR, Location::INTERIOR, Dimension::A);
+        }
+    }
+
+    void TFHETopologyComputer::updateNodeLocation(const TFHENodeSection *a, const TFHENodeSection *b) {
+        const TFHECoordinate &pt = a->nodePt();
+        Location locA = geomA.locateNode(&pt, a->getPolygonal());
+        Location locB = geomB.locateNode(&pt, b->getPolygonal());
+        updateDim(locA, locB, Dimension::P);
+    }
+
     TFHETopologyComputer::TFHETopologyComputer(
         TFHETopologyPredicate &predicate,
         TFHERelateGeometry &geomA,
@@ -243,7 +285,18 @@ namespace SpatialFHE::operation::relateng {
         predicate.finish();
     }
 
-    void TFHETopologyComputer::addIntersection(TFHENodeSection *a, TFHENodeSection *b) {}
+    void TFHETopologyComputer::addIntersection(TFHENodeSection *a, TFHENodeSection *b) {
+        // add edges to node to allow full topology evaluation later
+        // we run this first (unlike JTS) in case the subsequent test throws
+        // an exception and the NodeSection pointers are not correctly
+        // saved in the memory managed store on the NodeSections, causing
+        // a small memory leak
+        addNodeSections(a, b);
+
+        if (!a->isSameGeometry(b)) {
+            updateIntersectionAB(a, b);
+        }
+    }
 
     void TFHETopologyComputer::addPointOnPointInterior(const TFHECoordinate *pt) {
         (void)pt;  // pt is not used

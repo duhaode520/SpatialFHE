@@ -167,58 +167,47 @@ namespace SpatialFHE::geom {
     }
 
     bool TFHEIntersectionMatrix::isOverlaps(int dimensionOfGeometryA, int dimensionOfGeometryB) const {
-
-        if((dimensionOfGeometryA == Dimension::P && dimensionOfGeometryB == Dimension::P) ||
-                (dimensionOfGeometryA == Dimension::A && dimensionOfGeometryB == Dimension::A)) {
+        if ((dimensionOfGeometryA == Dimension::P && dimensionOfGeometryB == Dimension::P) ||
+            (dimensionOfGeometryA == Dimension::A && dimensionOfGeometryB == Dimension::A)) {
             return matches(get(Location::INTERIOR, Location::INTERIOR), 'T') &&
-                   matches(get(Location::INTERIOR, Location::EXTERIOR), 'T') &&
-                   matches(get(Location::EXTERIOR, Location::INTERIOR), 'T');
-                }
-        if(dimensionOfGeometryA == Dimension::L && dimensionOfGeometryB == Dimension::L) {
+                matches(get(Location::INTERIOR, Location::EXTERIOR), 'T') &&
+                matches(get(Location::EXTERIOR, Location::INTERIOR), 'T');
+        }
+        if (dimensionOfGeometryA == Dimension::L && dimensionOfGeometryB == Dimension::L) {
             return get(Location::INTERIOR, Location::INTERIOR) == 1 &&
-                   matches(get(Location::INTERIOR, Location::EXTERIOR), 'T') &&
-                   matches(get(Location::EXTERIOR, Location::INTERIOR), 'T');
+                matches(get(Location::INTERIOR, Location::EXTERIOR), 'T') &&
+                matches(get(Location::EXTERIOR, Location::INTERIOR), 'T');
         }
         return false;
     }
 
     bool TFHEIntersectionMatrix::isCovers() const {
-        bool hasPointInCommon =
-            matches(get(Location::INTERIOR, Location::INTERIOR), 'T')
-            ||
-            matches(get(Location::INTERIOR, Location::BOUNDARY), 'T')
-            ||
-            matches(get(Location::BOUNDARY, Location::INTERIOR), 'T')
-            ||
+        bool hasPointInCommon = matches(get(Location::INTERIOR, Location::INTERIOR), 'T') ||
+            matches(get(Location::INTERIOR, Location::BOUNDARY), 'T') ||
+            matches(get(Location::BOUNDARY, Location::INTERIOR), 'T') ||
             matches(get(Location::BOUNDARY, Location::BOUNDARY), 'T');
 
-        return hasPointInCommon
-               &&
-               get(Location::EXTERIOR, Location::INTERIOR) ==
-               Dimension::False
-               &&
-               get(Location::EXTERIOR, Location::BOUNDARY) ==
-               Dimension::False;
+        return hasPointInCommon && get(Location::EXTERIOR, Location::INTERIOR) == Dimension::False &&
+            get(Location::EXTERIOR, Location::BOUNDARY) == Dimension::False;
     }
 
     bool TFHEIntersectionMatrix::isCoveredBy() const {
-
-        bool hasPointInCommon =
-            matches(get(Location::INTERIOR, Location::INTERIOR), 'T')
-            ||
-            matches(get(Location::INTERIOR, Location::BOUNDARY), 'T')
-            ||
-            matches(get(Location::BOUNDARY, Location::INTERIOR), 'T')
-            ||
+        bool hasPointInCommon = matches(get(Location::INTERIOR, Location::INTERIOR), 'T') ||
+            matches(get(Location::INTERIOR, Location::BOUNDARY), 'T') ||
+            matches(get(Location::BOUNDARY, Location::INTERIOR), 'T') ||
             matches(get(Location::BOUNDARY, Location::BOUNDARY), 'T');
 
-        return
-            hasPointInCommon
-            &&
-            get(Location::INTERIOR, Location::EXTERIOR) ==
-            Dimension::False
-            &&
-            get(Location::BOUNDARY, Location::EXTERIOR) ==
-            Dimension::False;
+        return hasPointInCommon && get(Location::INTERIOR, Location::EXTERIOR) == Dimension::False &&
+            get(Location::BOUNDARY, Location::EXTERIOR) == Dimension::False;
+    }
+
+    std::string TFHEIntersectionMatrix::toString() const {
+        std::string result("");
+        for (std::size_t ai = 0; ai < firstDim; ai++) {
+            for (std::size_t bi = 0; bi < secondDim; bi++) {
+                result += Dimension::toDimensionSymbol(matrix[ai][bi]);
+            }
+        }
+        return result;
     }
 }  // namespace SpatialFHE::geom

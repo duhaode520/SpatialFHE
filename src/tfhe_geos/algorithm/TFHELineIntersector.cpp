@@ -78,8 +78,8 @@ namespace SpatialFHE::algorithm {
         } else {
             isProperVar = true;
             p = intersection(p1, p2, q1, q2);
-            intPt[0] = p;
         }
+        intPt[0] = p;
         return POINT_INTERSECTION;
     }
 

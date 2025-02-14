@@ -30,7 +30,7 @@ namespace SpatialFHE::geom {
 
         void addRef() const;
         void removeRef() const;
-        friend class Geometry;
+        friend class TFHEGeometry;
 
     public:
         using Ptr = std::unique_ptr<TFHEGeometryFactory, TFHEGeometryFactoryDeleter>;
@@ -51,6 +51,7 @@ namespace SpatialFHE::geom {
         [[nodiscard]] std::unique_ptr<TFHEPoint> createPoint(const TFHECoordinate& cs) const;
         std::unique_ptr<TFHEPoint> createPoint(TFHECoordinateSequence* coordinates) const;
         std::unique_ptr<TFHEPoint> createPoint(const TFHECoordinateSequence& fromCoords) const;
+        std::unique_ptr<TFHEPoint> createPoint(std::unique_ptr<TFHECoordinateSequence>&& coordinates) const;
 
         [[nodiscard]] std::unique_ptr<TFHELineString> createLineString() const;
         [[nodiscard]] std::unique_ptr<TFHELineString> createLineString(const TFHELineString& ls) const;

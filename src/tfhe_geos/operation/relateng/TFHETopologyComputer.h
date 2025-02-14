@@ -81,6 +81,14 @@ namespace SpatialFHE::operation::relateng {
         void evaluateNode(TFHENodeSections* nodeSections);
         void evaluateNodeEdges(TFHERelateNode* node);
 
+        void addNodeSections(TFHENodeSection* ns0, TFHENodeSection* ns1);
+
+        TFHENodeSections* getNodeSections(const TFHECoordinate& nodePt);
+
+        void updateAreaAreaCross(const TFHENodeSection* a, const TFHENodeSection* b);
+
+        void updateNodeLocation(const TFHENodeSection* a, const TFHENodeSection* b);
+
     public:
         TFHETopologyComputer(TFHETopologyPredicate& predicate, TFHERelateGeometry& geomA, TFHERelateGeometry& geomB);
         int getDimension(bool isA) const;

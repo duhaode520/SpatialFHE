@@ -51,6 +51,14 @@ namespace SpatialFHE::geom {
         return std::unique_ptr<TFHEPoint>(new TFHEPoint(newCoords.get(), this));
     }
 
+    std::unique_ptr<TFHEPoint> TFHEGeometryFactory::createPoint(
+        std::unique_ptr<TFHECoordinateSequence> &&coordinates) const {
+        if (!coordinates) {
+            return createPoint();
+        }
+        return std::unique_ptr<TFHEPoint>(new TFHEPoint(std::move(*coordinates), this));
+    }
+
     std::unique_ptr<TFHELineString> TFHEGeometryFactory::createLineString() const {
         return std::unique_ptr<TFHELineString>(new TFHELineString(nullptr, this));
     }

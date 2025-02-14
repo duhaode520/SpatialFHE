@@ -138,6 +138,11 @@ namespace SpatialFHE::geom {
         }
     }
 
+    TFHEBool TFHEEnvelope::intersects(const TFHECoordinate &p1, const TFHECoordinate &p2, const TFHECoordinate &q) {
+        TFHEEnvelope env = TFHEEnvelope(p1, p2);
+        return env.intersects(q);
+    }
+
     TFHEBool TFHEEnvelope::disjoint(const TFHEEnvelope &other) const {
         if (!this->isNull() && !other.isNull()) {
             return (maxx < other.minx || minx > other.maxx || maxy < other.miny || miny > other.maxy);

@@ -10,8 +10,8 @@ namespace SpatialFHE::noding {
     }
 
     const geom::TFHECoordinate &TFHESegmentString::prevInRing(size_t index) const {
-        size_t prevIndex = index - 1;
-        if (prevIndex == 0) {
+        size_t prevIndex;
+        if (index == 0) {
             prevIndex = size() - 2;
         } else {
             prevIndex = index - 1;

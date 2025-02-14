@@ -4,6 +4,7 @@
 
 #include "TFHERelateSegmentString.h"
 
+#include <tfhe_geos/constants.h>
 #include <tfhe_geos/geom/enums.h>
 
 #include "TFHENodeSection.h"
@@ -47,7 +48,7 @@ namespace SpatialFHE::operation::relateng {
         }
 
         // pt is the end of the segment
-        if (size() == 2 && segIndex == -1) {
+        if (size() == 2 && segIndex == INDEX_UNKNOWN) {
             const TFHECoordinate &seg = getCoordinate(0);
             return &seg;
         }

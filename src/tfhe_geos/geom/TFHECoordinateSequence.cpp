@@ -73,7 +73,7 @@ namespace SpatialFHE::geom {
         const std::size_t p_size = size();
         TFHEBool result = getAt(0).equals(getAt(1));
         for (std::size_t i = 2; i < p_size; i++) {
-            result = result && (getAt(i) == getAt(i - 1));
+            result = result || (getAt(i) == getAt(i - 1));
         }
         return result;
     }

@@ -83,13 +83,13 @@ namespace SpatialFHE::geom {
         return operation::relateng::TFHERelateNG::relate(this, geom, pattern);
     }
 
-    std::unique_ptr<TFHEIntersectionMatrix> TFHEGeometry::relate(const TFHEGeometry *geom) {
+    std::unique_ptr<TFHEIntersectionMatrix> TFHEGeometry::relate(const TFHEGeometry *geom) const {
         // checkNotGeometryCollection(geom);
         // chekcNotGeometryCollection(*this);
         return operation::relateng::TFHERelateNG::relate(this, geom);
     }
 
-    std::unique_ptr<TFHEIntersectionMatrix> TFHEGeometry::relate(const TFHEGeometry &geom) {
+    std::unique_ptr<TFHEIntersectionMatrix> TFHEGeometry::relate(const TFHEGeometry &geom) const {
         return relate(&geom);
     }
 

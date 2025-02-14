@@ -40,8 +40,26 @@ namespace SpatialFHE::geom {
             }
         }
 
-        //        static char toDimensionSymbol(int dimensionValue);
-        //        static int toDimensionValue(char dimensionSymbol);
+        static char toDimensionSymbol(int dimensionValue) {
+            switch (dimensionValue) {
+            case False:
+                return 'F';
+            case True:
+                return 'T';
+            case DONTCARE:
+                return '*';
+            case P:
+                return '0';
+            case L:
+                return '1';
+            case A:
+                return '2';
+            default:
+                std::ostringstream s;
+                s << "Unknown dimension value: " << dimensionValue << std::endl;
+                throw std::invalid_argument(s.str());
+            }
+        }
     };
 
     class Position {

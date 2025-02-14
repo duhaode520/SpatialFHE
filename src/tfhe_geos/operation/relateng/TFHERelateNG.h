@@ -7,6 +7,7 @@
 #include <tfhe_geos/geom/TFHECoordinate.h>
 #include <tfhe_geos/operation/relateng/TFHERelateGeometry.h>
 #include <tfhe_geos/noding/TFHESegmentString.h>
+#include <tfhe_geos/noding/TFHESegmentSetMutualIntersector.h>
 
 // Forward declaration
 namespace SpatialFHE::geom {
@@ -28,12 +29,13 @@ namespace SpatialFHE::operation::relateng {
         using TFHEEnvelope = geom::TFHEEnvelope;
         using TFHEIntersectionMatrix = geom::TFHEIntersectionMatrix;
         using TFHESegmentString = noding::TFHESegmentString;
+        using TFHESegmentSetMutualIntersector = noding::TFHESegmentSetMutualIntersector;
         using Dimension = geom::Dimension;
 
     private:
         TFHERelateGeometry geomA;
         // TODO: Support the following fields edgeMutualInt
-        // std::unique_ptr<TFHESegmentSetMutualIntersector> edgeMutualInt = nullptr;
+        std::unique_ptr<TFHESegmentSetMutualIntersector> edgeMutualInt = nullptr;
 
         TFHERelateNG(const TFHEGeometry* inputA, bool isPrepared);
 

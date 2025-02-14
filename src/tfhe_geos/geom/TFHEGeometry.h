@@ -103,8 +103,8 @@ namespace SpatialFHE::geom {
         virtual TFHEBool coveredBy(const TFHEGeometry *geom) const;
 
         virtual TFHEBool relate(const TFHEGeometry *geom, const std::string &pattern) const;
-        virtual std::unique_ptr<TFHEIntersectionMatrix> relate(const TFHEGeometry *geom);
-        virtual std::unique_ptr<TFHEIntersectionMatrix> relate(const TFHEGeometry& geom);
+        virtual std::unique_ptr<TFHEIntersectionMatrix> relate(const TFHEGeometry *geom) const;
+        virtual std::unique_ptr<TFHEIntersectionMatrix> relate(const TFHEGeometry& geom) const;
 
         // virtual TFHEGeometry* buffer(double distance) const = 0;
         // virtual TFHEGeometry* convexHull() const = 0;

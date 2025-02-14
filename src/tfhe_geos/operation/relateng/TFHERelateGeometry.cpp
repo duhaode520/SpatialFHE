@@ -144,7 +144,7 @@ namespace SpatialFHE::operation::relateng {
         auto ret = std::make_unique<TFHECoordinateSequence>();
         for (int i = 0; i < seq->size(); i++) {
             const TFHECoordinate &p = seq->getAt(i);
-            if (ret->isEmpty() || !(ret->getAt(i - 1) == p)) {
+            if (ret->isEmpty() || !(ret->getAt(ret->size() - 1) == p)) {
                 ret->add(p);
             }
         }
@@ -215,7 +215,9 @@ namespace SpatialFHE::operation::relateng {
         }
         if (hasRepeated) {
             auto deduped = removeRepeatedPointsInternal(seq);
-            TFHECoordinateSequence *cs = deduped.get();
+            if (isFlipped)
+                deduped->reverse();
+            TFHECoordinateSequence *cs = deduped.release();
             csStore.emplace_back(cs);
             return cs;
         }

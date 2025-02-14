@@ -12,6 +12,7 @@ namespace SpatialFHE::geom {
     public:
         typedef std::set<const TFHECoordinate*, TFHECoordinateLessThan> ConstSet;
         typedef std::map<const TFHECoordinate*, int, TFHECoordinateLessThan> ConstIntMap;
+        typedef std::set<TFHECoordinate, TFHECoordinateLessThan> Set;
 
         TFHECoordinate() = default;
         TFHECoordinate(TFHEInt32 x, TFHEInt32 y);
@@ -24,15 +25,23 @@ namespace SpatialFHE::geom {
         TFHEInt32 x;
         TFHEInt32 y;
 
-        TFHEBool equals(const TFHECoordinate &other) const;
-        TFHEInt32 distanceSquared(const TFHECoordinate& p) const;
+        [[nodiscard]] TFHEBool equals(const TFHECoordinate &other) const;
+        [[nodiscard]] TFHEInt32 distanceSquared(const TFHECoordinate& p) const;
 
         bool operator==(const TFHECoordinate &other) const;
 
         [[nodiscard]] bool isNull() const;
 
         // This comparison might be expensive, as it requires decryption
-        TFHEInt32 compareTo(const TFHECoordinate& other) const;
+        [[nodiscard]] TFHEInt32 compareTo(const TFHECoordinate& other) const;
+
+        [[nodiscard]] TFHEInt32 getX() const {
+            return x;
+        }
+
+        [[nodiscard]] TFHEInt32 getY() const {
+            return y;
+        }
     };
     struct TFHECoordinateLessThan {
         bool operator()(const TFHECoordinate &lhs, const TFHECoordinate &rhs) const {
@@ -50,6 +59,10 @@ namespace SpatialFHE::geom {
         }
 
     };
+
+    inline bool operator<(const TFHECoordinate &lhs, const TFHECoordinate &rhs) {
+        return TFHECoordinateLessThan()(lhs, rhs);
+    }
 }  // namespace SpatialFHE::geom
 
 #endif  // TFHECOORDINATE_H

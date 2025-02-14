@@ -9,6 +9,9 @@
 #include <tfhe_geos/geom/TFHELinearRing.h>
 #include <tfhe_geos/geom/TFHEPoint.h>
 #include <tfhe_geos/geom/TFHEPolygon.h>
+#include <tfhe_geos/noding/SimpleSegmentSetMutualIntersector.h>
+
+#include <memory>
 #include <stdexcept>
 
 #include "DimensionLocation.h"
@@ -247,6 +250,7 @@ namespace SpatialFHE::operation::relateng {
         } else {
             computeEdgesMutual(edgesB, &envInt, intersector);
         }
+
         if (topoComputer.isResultKnown()) {
             return;
         }
@@ -258,18 +262,28 @@ namespace SpatialFHE::operation::relateng {
         std::vector<const TFHESegmentString *> &edgesB,
         const TFHEEnvelope *envInt,
         TFHEEdgeSegmentIntersector &intersector) {
-        std::vector<const TFHESegmentString *> edgesA = geomA.extractSegmentStrings(TFHERelateGeometry::GEOM_A, envInt);
+        // std::vector<const TFHESegmentString *> edgesA = geomA.extractSegmentStrings(TFHERelateGeometry::GEOM_A, envInt);
+
+        // 把 edgesA和edgesB合并
+        std::vector<const TFHESegmentString *> edges = geomA.extractSegmentStrings(TFHERelateGeometry::GEOM_A, envInt);
+        edges.insert(edges.end(), edgesB.begin(), edgesB.end());
         // TODO: Change from GEOS. We haven't supported index yet
         // 我们没有使用 EdgeSetIntersector 和相关的逻辑, 从 EdgeSetIntersector 的 process 函数跟踪到了一个 overlapAction
         // 这个overlapAction 实际上是从 index 的节点中取出两个 SegmentString 并用 EdgeSegmentIntersector 进行计算
-        // 但是我们暂时没有实现 index, 所以这里直接使用 EdgeSegmentIntersector 进行计算
-        for (const TFHESegmentString *edgeA : edgesA) {
-            for (const TFHESegmentString *edgeB : edgesB) {
+        // // 但是我们暂时没有实现 index, 所以这里直接使用 EdgeSegmentIntersector 进行计算
+        for (int m = 0; m < edges.size(); m++) {
+            for (int n = m ; n < edges.size(); n++) {
+                const TFHESegmentString* edgeA = edges[m];
+                const TFHESegmentString* edgeB = edges[n];
+
+        // for (const TFHESegmentString *edgeA : edgesA) {
+        //     for (const TFHESegmentString *edgeB : edgesB) {
+
                 for (int i = 0; i < edgeA->size() - 1; i++) {
                     for (int j = 0; j < edgeB->size() - 1; j++) {
                         // copy
                         intersector.processIntersections(
-                            const_cast<TFHESegmentString *>(edgeA), i, const_cast<TFHESegmentString *>(edgeA), j);
+                            const_cast<TFHESegmentString *>(edgeA), i, const_cast<TFHESegmentString *>(edgeB), j);
                         if (intersector.isDone()) {
                             return;
                         }
@@ -286,10 +300,15 @@ namespace SpatialFHE::operation::relateng {
         std::vector<const TFHESegmentString *> &edgesB,
         const TFHEEnvelope *envInt,
         TFHEEdgeSegmentIntersector &intersector) {
-        /**
-        * 感觉 selfnoding 这个是针对 collections 的，但是我们暂时不支持 collections
-        */
-        throw std::runtime_error("computeEdgesMutual is not implemented yet.");
+        if (edgeMutualInt == nullptr) {
+            const TFHEEnvelope *envExtract = geomA.isPrepared() ? nullptr : envInt;
+            std::vector<const TFHESegmentString *> edgesA = geomA.extractSegmentStrings(TFHERelateGeometry::GEOM_A, envExtract);
+            edgeMutualInt = std::make_unique<noding::SimpleSegmentSetMutualIntersector>(envExtract);
+            edgeMutualInt->setBaseSegments(&edgesA);
+        }
+
+        edgeMutualInt->setSegmentIntersector(&intersector);
+        edgeMutualInt->process(&edgesB);
     }
 
     bool TFHERelateNG::hasRequiredEnvelopeInteraction(const TFHEGeometry *b, TFHETopologyPredicate &predicate) {

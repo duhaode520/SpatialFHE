@@ -17,12 +17,12 @@ namespace SpatialFHE::geom {
 
         TFHEPolygon(const TFHEPolygon& other);
 
-        TFHEPolygon(TFHELinearRing* shell, std::vector<TFHELinearRing*>* holes, const TFHEGeometryFactory* factory);
+        TFHEPolygon(TFHELinearRing* p_shell, std::vector<TFHELinearRing*>* p_holes, const TFHEGeometryFactory* p_factory);
         TFHEPolygon(std::unique_ptr<TFHELinearRing> shell, const TFHEGeometryFactory& factory);
         TFHEPolygon(
-            std::unique_ptr<TFHELinearRing> shell,
-            std::vector<std::unique_ptr<TFHELinearRing>> holes,
-            const TFHEGeometryFactory& factory);
+            std::unique_ptr<TFHELinearRing> p_shell,
+            std::vector<std::unique_ptr<TFHELinearRing>> p_holes,
+            const TFHEGeometryFactory& p_factory);
 
         std::unique_ptr<TFHELinearRing> shell;
         std::vector<std::unique_ptr<TFHELinearRing>> holes;

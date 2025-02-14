@@ -14,6 +14,10 @@ if (LLD_FOUND)
     message(STATUS "LLD found: ${LLD_FOUND}")
     set(CMAKE_LINKER ${LLD_FOUND})
 endif()
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(STATUS "Debug mode")
+    add_definitions(-DDEBUG)
+endif()
 
 option(BUILD_JAVA "Build Java Library" ON)
 

@@ -5,9 +5,11 @@
 #include "TFHEPolygonNodeConverter.h"
 
 #include <tfhe_geos/algorithm/TFHEPolygonNodeTopology.h>
+#include <tfhe_geos/constants.h>
 #include <tfhe_geos/geom/enums.h>
 
 #include <algorithm>
+
 #include "tfhe_geos/operation/relateng/TFHENodeSection.h"
 
 using SpatialFHE::algorithm::TFHEPolygonNodeTopology;
@@ -32,7 +34,7 @@ namespace SpatialFHE::operation::relateng {
 
         // find shell section
         std::size_t shellIndex = findShell(sections);
-        if (shellIndex == -1) {
+        if (shellIndex == INDEX_UNKNOWN) {
             // no shell section
             return convertHoles(sections);
         }
@@ -41,7 +43,7 @@ namespace SpatialFHE::operation::relateng {
         std::vector<std::unique_ptr<TFHENodeSection>> convertedSections;
         std::size_t nextShellIndex = shellIndex;
         do {
-            nextShellIndex = convertShellAndHoles(sections, shellIndex, convertedSections);
+            nextShellIndex = convertShellAndHoles(sections, nextShellIndex, convertedSections);
         } while (nextShellIndex != shellIndex);
         return convertedSections;
     }
@@ -108,7 +110,7 @@ namespace SpatialFHE::operation::relateng {
 
     std::size_t TFHEPolygonNodeConverter::next(std::vector<const TFHENodeSection *> &ns, std::size_t i) {
         std::size_t nxt = i;
-        if (nxt == -1)
+        if (nxt == INDEX_UNKNOWN)
             nxt = 0;
         else
             nxt = i + 1;
@@ -125,7 +127,7 @@ namespace SpatialFHE::operation::relateng {
                 return i;
             }
         }
-        return -1;
+        return INDEX_UNKNOWN;
     }
 }  // namespace SpatialFHE::operation::relateng
 

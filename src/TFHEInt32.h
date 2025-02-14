@@ -8,6 +8,9 @@ namespace SpatialFHE {
     class TFHEInt32 : public TFHERegisteredType<int> {
     private:
         FheInt32 *data;
+#ifdef DEBUG
+        int32_t ori;
+#endif
 
     public:
         explicit TFHEInt32(int32_t value);

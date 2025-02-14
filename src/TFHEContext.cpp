@@ -47,23 +47,23 @@ namespace SpatialFHE {
     }
 
     TFHEContext::TFHEContext() {
-        registerType();
         generateKey();
+        registerType();
     }
 
     TFHEContext::TFHEContext(const std::string &public_key_path, const std::string &server_key_path) {
-        registerType();
         loadPublicKey(public_key_path);
         loadServerKey(server_key_path);
+        registerType();
     }
 
     TFHEContext::TFHEContext(
         const std::string &public_key_path,
         const std::string &client_key_path,
         const std::string &server_key_path) {
-        registerType();
         generateKey();
         serializeKeys(public_key_path, client_key_path, server_key_path);
+        registerType();
     }
 
     TFHEContext::~TFHEContext() {

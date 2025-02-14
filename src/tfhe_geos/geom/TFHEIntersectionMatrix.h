@@ -226,6 +226,8 @@ namespace SpatialFHE::geom {
          * the second
          */
         bool isCoveredBy() const;
+
+        std::string toString() const;
     };
 
 }  // namespace SpatialFHE::geom

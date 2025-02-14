@@ -3,6 +3,7 @@
 //
 
 #include "TFHERelateNode.h"
+#include <tfhe_geos/constants.h>
 
 #include "TFHENodeSection.h"
 #include "TFHERelateGeometry.h"
@@ -58,7 +59,7 @@ namespace SpatialFHE::operation::relateng {
             return nullptr;
         }
 
-        std::size_t insertIndex = -1;
+        std::size_t insertIndex = INDEX_UNKNOWN;
         for (std::size_t i = 0; i < edges.size(); i++) {
             auto *e = edges[i].get();
             // 这里必须解密了
@@ -76,8 +77,8 @@ namespace SpatialFHE::operation::relateng {
 
         // create new edge
         TFHERelateEdge *newEdge = TFHERelateEdge::create(this, dirPt, isA, dim, isForward);
-        if (insertIndex == -1) {
-            edges.push_back(std::unique_ptr<TFHERelateEdge>(newEdge));
+        if (insertIndex == INDEX_UNKNOWN) {
+            edges.emplace_back(std::unique_ptr<TFHERelateEdge>(newEdge));
         } else {
             edges.insert(
                 edges.begin() + static_cast<long>(insertIndex), std::move(std::unique_ptr<TFHERelateEdge>(newEdge)));
@@ -109,7 +110,7 @@ namespace SpatialFHE::operation::relateng {
     }
 
     std::size_t TFHERelateNode::prevIndex(std::vector<std::unique_ptr<TFHERelateEdge>> &list, std::size_t index) {
-        if (index > 0 && index != -1) {
+        if (index > 0 && index != INDEX_UNKNOWN) {
             return index - 1;
         }
         //-- index == 0
@@ -117,7 +118,7 @@ namespace SpatialFHE::operation::relateng {
     }
 
     std::size_t TFHERelateNode::nextIndex(std::vector<std::unique_ptr<TFHERelateEdge>> &list, std::size_t index) {
-        if (index >= list.size() - 1 || index == -1) {
+        if (index >= list.size() - 1 || index == INDEX_UNKNOWN) {
             return 0;
         }
         return index + 1;
@@ -131,7 +132,7 @@ namespace SpatialFHE::operation::relateng {
             if (e.get() == edge)
                 return i;
         }
-        return -1;
+        return INDEX_UNKNOWN;
     }
 
     const TFHERelateNode::TFHECoordinate *TFHERelateNode::getCoordinate() const {

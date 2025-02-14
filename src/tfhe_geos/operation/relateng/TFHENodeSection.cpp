@@ -6,6 +6,8 @@
 
 #include <tfhe_geos/geom/enums.h>
 
+using namespace SpatialFHE::geom;
+
 namespace SpatialFHE::operation::relateng {
     int TFHENodeSection::compareWithNull(const TFHECoordinate *v0, const TFHECoordinate *v1) {
         if (v0 == nullptr) {
@@ -101,6 +103,22 @@ namespace SpatialFHE::operation::relateng {
             return compV0;
 
         return compareWithNull(m_v1, o.m_v1);
+    }
+
+    bool TFHENodeSection::isSameGeometry(const TFHENodeSection &ns) const {
+        return isA() == ns.isA();
+    }
+
+    bool TFHENodeSection::isProper() const {
+        return !m_isNodeAtVertex;
+    }
+
+    bool TFHENodeSection::isAreaArea(const TFHENodeSection &a, const TFHENodeSection &b) {
+        return a.dimension() == Dimension::A && b.dimension() == Dimension::A;
+    }
+
+    bool TFHENodeSection::isProper(const TFHENodeSection &a, const TFHENodeSection &b) {
+        return a.isProper() && b.isProper();
     }
 }  // namespace SpatialFHE::operation::relateng
 

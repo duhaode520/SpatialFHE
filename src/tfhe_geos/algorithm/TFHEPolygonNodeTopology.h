@@ -122,7 +122,7 @@ namespace SpatialFHE::algorithm {
          * @param q the endpoint of the vector Q
          * @return true if vector P has angle greater than Q
          */
-        static bool isAngleGreater(const TFHECoordinate* origin, const TFHECoordinate* p, const TFHECoordinate* q);
+        static TFHEBool isAngleGreater(const TFHECoordinate* origin, const TFHECoordinate* p, const TFHECoordinate* q);
 
         static int quadrant(const TFHECoordinate* origin, const TFHECoordinate* p);
 

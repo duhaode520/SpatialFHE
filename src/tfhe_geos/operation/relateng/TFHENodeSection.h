@@ -73,15 +73,15 @@ namespace SpatialFHE ::operation ::relateng {
                 m_nodePt(ns->nodePt()),
                 m_v1(ns->getVertex(1)){};
 
-        const TFHECoordinate* getVertex(int i) const;
+        [[nodiscard]] const TFHECoordinate* getVertex(int i) const;
 
-        const TFHECoordinate& nodePt() const;
+        [[nodiscard]] const TFHECoordinate& nodePt() const;
 
-        int dimension() const;
+        [[nodiscard]] int dimension() const;
 
-        int id() const;
+        [[nodiscard]] int id() const;
 
-        int ringId() const;
+        [[nodiscard]] int ringId() const;
 
         /**
          * Gets the polygon this section is part of.
@@ -89,19 +89,27 @@ namespace SpatialFHE ::operation ::relateng {
          *
          * @return the associated polygon, or null
          */
-        const TFHEGeometry* getPolygonal() const;
+        [[nodiscard]] const TFHEGeometry* getPolygonal() const;
 
-        bool isShell() const;
+        [[nodiscard]] bool isShell() const;
 
-        bool isArea() const;
+        [[nodiscard]] bool isArea() const;
 
-        bool isA() const;
+        [[nodiscard]] bool isA() const;
 
-        bool isSamePolygon(const TFHENodeSection& ns) const;
+        [[nodiscard]] bool isSamePolygon(const TFHENodeSection& ns) const;
 
-        bool isNodeAtVertex() const;
+        [[nodiscard]] bool isNodeAtVertex() const;
 
-        int compareTo(const TFHENodeSection& o) const;
+        [[nodiscard]] int compareTo(const TFHENodeSection& o) const;
+
+        [[nodiscard]] bool isSameGeometry(const TFHENodeSection& ns) const;
+
+        [[nodiscard]] bool isProper() const;
+
+        static bool isAreaArea(const TFHENodeSection& a, const TFHENodeSection& b);
+
+        static bool isProper(const TFHENodeSection& a, const TFHENodeSection& b);
     };
 
 }  // namespace SpatialFHE::operation::relateng

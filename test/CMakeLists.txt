@@ -38,6 +38,22 @@ target_link_libraries(tfhers_demo PRIVATE tfhe)
 add_executable(tfhers_test TFHEBasicSuite.cpp)
 #target_link_libraries(tfhers_test PRIVATE gtest_main SpatialFHE SEAL::seal ZLIB::ZLIB zstd::libzstd unofficial::b64::b64 rapidjson)
 target_link_libraries(tfhers_test PRIVATE tfhe gtest_main)
+
+# 抓取 tfhe_geos 中的文件
+#file(GLOB_RECURSE TFHE_GEOS_SRC_FILES ${CMAKE_CURRENT_LIST_DIR}/tfhe_geos/*.cpp)
+file (GLOB_RECURSE TFHE_GEOS_HEADER_FILES ${CMAKE_CURRENT_LIST_DIR}/tfhe_geos/*.h)
+
+
+#add_executable(tfhe_geos_test ${TFHE_GEOS_SRC_FILES})
+add_executable(tfhe_geos_test tfhe_geos/operation/relateng/TFHERelateNGTest.cpp)
+target_link_libraries(tfhe_geos_test PRIVATE gtest_main SpatialFHE)
+target_link_libraries(tfhe_geos_test PRIVATE tfhe)
+
+# 测试单个test
+add_executable(tfhe_geos_single_test tfhe_geos/algorithm/PolygonNodeTopologyTest.cpp)
+target_link_libraries(tfhe_geos_single_test PRIVATE gtest_main SpatialFHE)
+target_link_libraries(tfhe_geos_single_test PRIVATE tfhe)
+
 #####
 #
 # 这里追加新的Unit Test
@@ -46,5 +62,5 @@ target_link_libraries(tfhers_test PRIVATE tfhe gtest_main)
 #gtest register
 include(GoogleTest)
 gtest_discover_tests(
-	seal_test phantom_test spatialfhe_test tfhers_demo tfhers_test
+	seal_test phantom_test spatialfhe_test tfhers_demo tfhers_test tfhe_geos_test tfhe_geos_single_test
 )

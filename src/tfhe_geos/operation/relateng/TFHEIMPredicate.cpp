@@ -18,7 +18,7 @@ namespace SpatialFHE::operation::relateng {
     }
 
     bool TFHEIMPredicate::isIntersects(Location locA, Location locB) const {
-        return intMatrix.get(locA, locB) > Dimension::P;
+        return intMatrix.get(locA, locB) >= Dimension::P;
     }
 
     bool TFHEIMPredicate::isDimsCompatibleWithCovers(int dim0, int dim1) {
