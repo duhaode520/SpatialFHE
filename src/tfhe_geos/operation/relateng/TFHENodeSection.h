@@ -37,7 +37,7 @@ namespace SpatialFHE ::operation ::relateng {
 
         // Methods
 
-        static int compareWithNull(const TFHECoordinate* v0, const TFHECoordinate* v1);
+        static TFHEInt32 compareWithNull(const TFHECoordinate* v0, const TFHECoordinate* v1);
 
         static int compare(int a, int b);
 
@@ -101,7 +101,7 @@ namespace SpatialFHE ::operation ::relateng {
 
         [[nodiscard]] bool isNodeAtVertex() const;
 
-        [[nodiscard]] int compareTo(const TFHENodeSection& o) const;
+        [[nodiscard]] TFHEInt32 compareTo(const TFHENodeSection& o) const;
 
         [[nodiscard]] bool isSameGeometry(const TFHENodeSection& ns) const;
 

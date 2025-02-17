@@ -46,21 +46,47 @@ namespace SpatialFHE {
         destroy_dynamic_buffer(&server_buffer);
     }
 
+    void TFHEContext::rpcInit(const std::string &server_url) {
+        // split url to host and port
+        std::string host;
+        int port;
+        size_t pos = server_url.find(':');
+        if (pos == std::string::npos) {
+            host = server_url;
+            port = 8080;
+        } else {
+            host = server_url.substr(0, pos);
+            port = std::atoi(server_url.substr(pos + 1).c_str());
+        }
+        if (isClient) {
+            rpc_client = std::make_unique<rpc::client>(host, port);
+        } else {
+            rpc_server = std::make_unique<rpc::server>(host, port);
+        }
+    }
+
     TFHEContext::TFHEContext() {
+        isClient = false;
+        rpcInit("127.0.0.1:8080");
         generateKey();
         registerType();
     }
 
-    TFHEContext::TFHEContext(const std::string &public_key_path, const std::string &server_key_path) {
+    TFHEContext::TFHEContext(const std::string& server_url, const std::string &public_key_path, const std::string &server_key_path) {
+        isClient = true;
+        rpcInit(server_url);
         loadPublicKey(public_key_path);
         loadServerKey(server_key_path);
         registerType();
     }
 
     TFHEContext::TFHEContext(
+        const std::string &server_url,
         const std::string &public_key_path,
         const std::string &client_key_path,
         const std::string &server_key_path) {
+        isClient = false;
+        rpcInit(server_url);
         generateKey();
         serializeKeys(public_key_path, client_key_path, server_key_path);
         registerType();
@@ -108,6 +134,19 @@ namespace SpatialFHE {
 
     PublicKey *TFHEContext::getPublicKey() const {
         return public_key;
+    }
+
+    const std::unique_ptr<rpc::client> &TFHEContext::getRpcClient() const {
+        return rpc_client;
+    }
+
+    const std::unique_ptr<rpc::server> &TFHEContext::getRpcServer() const {
+        return rpc_server;
+    }
+
+    void TFHEContext::clear() {
+        TFHEInt32::context = nullptr;
+        TFHEBool::context = nullptr;
     }
 
 }  // namespace SpatialFHE

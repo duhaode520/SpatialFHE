@@ -18,8 +18,8 @@ namespace SpatialFHE::operation::relateng {
     std::vector<std::unique_ptr<TFHENodeSection>> TFHEPolygonNodeConverter::convert(
         std::vector<const TFHENodeSection *> &polySections) {
         auto comparator = [](const TFHENodeSection *a, const TFHENodeSection *b) {
-            int comp = TFHEPolygonNodeTopology::compareAngle(&a->nodePt(), a->getVertex(0), b->getVertex(0)).decrypt();
-            return comp < 0;
+            TFHEInt32 comp = TFHEPolygonNodeTopology::compareAngle(&a->nodePt(), a->getVertex(0), b->getVertex(0));
+            return comp.ltTrivial(0);
         };
 
         std::sort(polySections.begin(), polySections.end(), comparator);
@@ -100,7 +100,8 @@ namespace SpatialFHE::operation::relateng {
         const TFHENodeSection *lastUnique = sections[0];
         uniqueSections.push_back(lastUnique);
         for (const TFHENodeSection *ns : sections) {
-            if (lastUnique->compareTo(ns) != 0) {
+            TFHEInt32 comp = lastUnique->compareTo(ns);
+            if (comp.neTrivial(0)) {
                 uniqueSections.push_back(ns);
                 lastUnique = ns;
             }

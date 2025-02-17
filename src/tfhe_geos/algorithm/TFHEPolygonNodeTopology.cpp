@@ -59,10 +59,9 @@ namespace SpatialFHE::algorithm {
          * that determines the ordering
          */
         if (quadrantP > quadrantQ)
-            // TODO: this can be trivial
-            return TFHEInt32(1);
+            return TFHEInt32(1, true);
         if (quadrantP < quadrantQ)
-            return TFHEInt32(-1);
+            return TFHEInt32(-1, true);
         // P > Q if P is CCW of Q
         TFHEInt32 orient = TFHEOrientation::index(*origin, *q, *p);
         // 直接return orient，orient 这里恰好是 CCW = 1, CW = -1
@@ -81,12 +80,12 @@ namespace SpatialFHE::algorithm {
         const TFHECoordinate *e0,
         const TFHECoordinate *e1) {
         TFHEInt32 comp0 = compareAngle(origin, p, e0);
-        if ((comp0 == 0).decrypt())
+        if (comp0.eqTrivial(0))
             return 0;
         TFHEInt32 comp1 = compareAngle(origin, p, e1);
-        if ((comp1 == 0).decrypt())
+        if (comp1.eqTrivial(0))
             return 0;
-        if ((comp0 > 0 && comp1 < 0).decrypt())
+        if (comp0.gtTrivial(0) && comp1.ltTrivial(0))
             return 1;
         return -1;
     }

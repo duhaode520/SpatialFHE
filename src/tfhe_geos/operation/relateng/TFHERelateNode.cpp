@@ -62,13 +62,13 @@ namespace SpatialFHE::operation::relateng {
         std::size_t insertIndex = INDEX_UNKNOWN;
         for (std::size_t i = 0; i < edges.size(); i++) {
             auto *e = edges[i].get();
-            // 这里必须解密了
-            int comp = e->compareToEdge(dirPt).decrypt();
-            if (comp == 0) {
+            // 这里必须解密了, 但是TFHEBool的解密速度要快的多
+            TFHEInt32 comp = e->compareToEdge(dirPt);
+            if ((comp == 0).decrypt()) {
                 e->merge(isA, dim, isForward);
                 return e;
             }
-            if (comp > 0) {
+            if ((comp > 0).decrypt()) {
                 // found insertion point
                 insertIndex = i;
                 break;

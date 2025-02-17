@@ -11,17 +11,58 @@
 #include "tfhe.h"
 
 namespace SpatialFHE {
-    TFHEInt32::TFHEInt32(int32_t value) {
-        data = nullptr;
-#ifdef DEBUG
-        fhe_int32_try_encrypt_trivial_i32(value, &data);
-        ori = value;
-#else
-        fhe_int32_try_encrypt_with_public_key_i32(value, context->getPublicKey(), &data);
-#endif
+    // std::vector<int32_t> TFHEInt32::doDecryptComparison(std::vector<std::vector<std::byte>> &data) {
+    //     std::vector<FheInt32*> fhe_data(data.size());
+    //     for(int i = 0; i < data.size(); i++) {
+    //         fhe_int32_deserialize(vectorToDynamicBufferView(data[i]), &fhe_data[i]);
+    //     }
+    //
+    //     std::vector<int32_t> result;
+    //     for (const auto & e : fhe_data) {
+    //         int32_t r;
+    //         fhe_int32_decrypt(e, context->getClientKey(), &r);
+    //         result.push_back(r);
+    //     }
+    //     return result;
+    // }
+
+    // int32_t TFHEInt32::remoteDecrypt() {
+    //     int choice = std::rand() % 3;
+    //     TFHEInt32 confused1 = *this % 3;
+    //
+    //
+    // }
+
+    void TFHEInt32::registerContext(TFHEContext *ctx) {
+        TFHERegisteredType::registerContext(ctx);
+        // if (context->getRpcServer() != nullptr) {
+        //     context->getRpcServer()->bind("decryptComparison", &TFHEInt32::doDecryptComparison);
+        // }
     }
 
-    TFHEInt32::TFHEInt32(FheInt32 *data) : data(data) {}
+    TFHEInt32::TFHEInt32(int32_t value, bool trivial) {
+        data = nullptr;
+#ifdef DEBUG
+        trivial = true;
+        ori = value;
+#else
+        this->trivial = trivial;
+
+#endif
+        if (trivial) {
+            fhe_int32_try_encrypt_trivial_i32(value, &data);
+        } else {
+            fhe_int32_try_encrypt_with_public_key_i32(value, context->getPublicKey(), &data);
+        }
+    }
+
+    TFHEInt32::TFHEInt32(FheInt32 *data) : data(data) {
+#ifdef DEBUG
+        ori = 0;
+        this->trivial = true;
+#endif
+
+    }
 
     TFHEInt32::TFHEInt32() : data(nullptr) {
 #ifdef DEBUG
@@ -29,9 +70,10 @@ namespace SpatialFHE {
 #endif
     }
 
-    TFHEInt32::TFHEInt32(const TFHEInt32 &other) {
+    TFHEInt32::TFHEInt32(const TFHEInt32 &other)  : TFHERegisteredType(other) {
         data = nullptr;
         fhe_int32_clone(other.data, &data);
+        trivial = other.trivial;
 #ifdef DEBUG
         ori = other.ori;
 #endif
@@ -40,6 +82,7 @@ namespace SpatialFHE {
     TFHEInt32::TFHEInt32(TFHEInt32 &&other) noexcept {
         data = other.data;
         other.data = nullptr;
+        trivial = other.trivial;
 #ifdef DEBUG
         ori = other.ori;
 #endif
@@ -49,6 +92,7 @@ namespace SpatialFHE {
         if (this == &other)
             return *this;
         fhe_int32_clone(other.data, &data);
+        trivial = other.trivial;
 #ifdef DEBUG
         ori = other.ori;
 #endif
@@ -60,6 +104,7 @@ namespace SpatialFHE {
             return *this;
         data = other.data;
         other.data = nullptr;
+        trivial = other.trivial;
 #ifdef DEBUG
         ori = other.ori;
 #endif
@@ -76,16 +121,17 @@ namespace SpatialFHE {
         }
     }
 
-    int TFHEInt32::decrypt() {
+    int TFHEInt32::decrypt() const {
         int result;
-        if (context->getClientKey() != nullptr) {
-#ifdef DEBUG
+        if (trivial) {
             fhe_int32_try_decrypt_trivial(data, &result);
-#else
-            fhe_int32_decrypt(data, context->getSecretKey(), &result);
-#endif
         } else {
-            throw std::logic_error("Remote decryption is not supported");
+            if (context->getClientKey() != nullptr) {
+                fhe_int32_decrypt(data, context->getClientKey(), &result);
+
+            } else {
+                throw std::logic_error("Remote decryption is not supported");
+            }
         }
 
         return result;
@@ -226,6 +272,15 @@ namespace SpatialFHE {
         return result;
     }
 
+    TFHEInt32 TFHEInt32::operator-() const {
+        TFHEInt32 result;
+        fhe_int32_neg(data, &result.data);
+#ifdef DEBUG
+        result.ori = -ori;
+#endif
+        return result;
+    }
+
     TFHEInt32 TFHEInt32::operator+=(const TFHEInt32 &other) {
         fhe_int32_add_assign(data, other.data);
 #ifdef DEBUG
@@ -288,6 +343,48 @@ namespace SpatialFHE {
         ori /= other;
 #endif
         return *this;
+    }
+
+    bool TFHEInt32::eqTrivial(int32_t other) const {
+        if (this->isTrivial()) {
+            return decrypt() == other;
+        }
+        return (*this == other).decrypt();
+    }
+
+    bool TFHEInt32::gtTrivial(int32_t other) const {
+        if (this->isTrivial()) {
+            return decrypt() > other;
+        }
+        return (*this > other).decrypt();
+    }
+
+    bool TFHEInt32::geTrivial(int32_t other) const {
+        if (this->isTrivial()) {
+            return decrypt() >= other;
+        }
+        return (*this >= other).decrypt();
+    }
+
+    bool TFHEInt32::ltTrivial(int32_t other) const {
+        if (this->isTrivial()) {
+            return decrypt() < other;
+        }
+        return (*this < other).decrypt();
+    }
+
+    bool TFHEInt32::leTrivial(int32_t other) const {
+        if (this->isTrivial()) {
+            return decrypt() <= other;
+        }
+        return (*this <= other).decrypt();
+    }
+
+    bool TFHEInt32::neTrivial(int32_t other) const {
+        if (this->isTrivial()) {
+            return decrypt() != other;
+        }
+        return (*this != other).decrypt();
     }
 
     TFHEInt32 TFHEInt32::operator+(int32_t other) const {

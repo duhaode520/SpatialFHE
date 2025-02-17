@@ -58,6 +58,13 @@ protected:
         context = std::make_unique<SpatialFHE::TFHEContext>();
     }
 
+    void TearDown() override {
+        factory_.reset();
+        context->clear();
+        context.reset();
+
+    }
+
     void checkPrepared(const TFHEGeometry* a, const TFHEGeometry* b) {
         // std::cout << "checkPrepared is disabled as prepared geometry and indices have not been implemented" << std::endl;
         // auto prep_a = TFHERelateNG::prepare(a);
@@ -129,8 +136,8 @@ protected:
     void checkPredicate(TFHETopologyPredicate& pred, const std::string& wkta, const std::string& wktb, bool expectedValue) {
         std::unique_ptr<TFHEGeometry> a = r.read(wkta);
         std::unique_ptr<TFHEGeometry> b = r.read(wktb);
-        bool actualVal = TFHERelateNG::relate(a.get(), b.get(), pred).decrypt();
-        EXPECT_EQ(actualVal, expectedValue) << "checkPredicate " << pred.name();
+        SpatialFHE::TFHEBool actualVal = TFHERelateNG::relate(a.get(), b.get(), pred);
+        EXPECT_EQ(actualVal.decrypt(), expectedValue) << "checkPredicate " << pred.name();
         checkPrepared(a.get(), b.get());
     }
 };

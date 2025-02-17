@@ -10,7 +10,8 @@
 namespace SpatialFHE::operation::relateng {
     void TFHENodeSections::prepareSections() {
         auto comparator = [](const std::unique_ptr<TFHENodeSection> &a, const std::unique_ptr<TFHENodeSection> &b) {
-            return a->compareTo(*b) < 0;
+            TFHEInt32 comp = a->compareTo(*b);
+            return comp.ltTrivial(0);
         };
 
         std::sort(sections.begin(), sections.end(), comparator);

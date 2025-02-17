@@ -57,6 +57,7 @@ find_package(zstd CONFIG REQUIRED)
 find_package(unofficial-b64 CONFIG REQUIRED)
 find_package(RapidJSON CONFIG REQUIRED)
 find_package(Phantom CONFIG REQUIRED)
+find_package(rpclib CONFIG REQUIRED)
 
 add_definitions(-DBUFFERSIZE=65536)
 

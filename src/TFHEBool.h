@@ -12,8 +12,18 @@ namespace SpatialFHE {
         bool ori;
 #endif
 
+        /**
+         * Decrypt data from remote
+         * @param data 0-1 balanced serialized TFHEBool, each element is a vector of bytes.
+         * Shortest vector should have two elements, which are TFHEBool(0) and TFHEBool(1)
+         * @return decrypted data
+         */
+        static std::vector<bool> doDecrypt(std::vector<std::vector<uint8_t>> &data);
+
+        bool remoteDecrypt() const;
+
     public:
-        explicit TFHEBool(bool value);
+        explicit TFHEBool(bool value, bool trivial = false);
         explicit TFHEBool(FheBool *data);
         TFHEBool();
         ~TFHEBool() override;
@@ -27,7 +37,7 @@ namespace SpatialFHE {
 
         TFHEBool &operator=(TFHEBool &&other) noexcept;
 
-        bool decrypt() override;
+        bool decrypt() const override;
 
         // redefine the operator
         TFHEBool operator&(const TFHEBool &other) const;

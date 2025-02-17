@@ -4,7 +4,10 @@
 
 #ifndef TFHECRYPTO_H
 #define TFHECRYPTO_H
+#include <rpc/client.h>
+#include <rpc/server.h>
 #include <tfhe.h>
+
 #include <string>
 
 namespace SpatialFHE {
@@ -16,8 +19,13 @@ namespace SpatialFHE {
         PublicKey* public_key = nullptr;
         ServerKey* server_key = nullptr;
         ClientKey* client_key = nullptr;
+
+        bool isClient;
         // OTClient
+        std::unique_ptr<rpc::client> rpc_client;
+
         // OTServer
+        std::unique_ptr<rpc::server> rpc_server;
 
         void registerType();
         void generateKey();
@@ -25,10 +33,17 @@ namespace SpatialFHE {
             const std::string& public_key_path,
             const std::string& client_key_path,
             const std::string& server_key_path) const;
+
+        void rpcInit(const std::string& server_url);
+
     public:
         TFHEContext();
-        TFHEContext(const std::string &public_key_path, const std::string &server_key_path);
         TFHEContext(
+            const std::string& server_url,
+            const std::string& public_key_path,
+            const std::string& server_key_path);
+        TFHEContext(
+            const std::string& server_url,
             const std::string& public_key_path,
             const std::string& client_key_path,
             const std::string& server_key_path);
@@ -41,11 +56,13 @@ namespace SpatialFHE {
         [[nodiscard]] ClientKey* getClientKey() const;
         [[nodiscard]] PublicKey* getPublicKey() const;
 
-        // remote decryption
+        [[nodiscard]] const std::unique_ptr<rpc::client>& getRpcClient() const;
+        [[nodiscard]] const std::unique_ptr<rpc::server>& getRpcServer() const;
 
-
+        // only for test
+        void clear();
     };
 
-} // SpatialFHE
+}  // namespace SpatialFHE
 
-#endif //TFHECRYPTO_H
+#endif  // TFHECRYPTO_H

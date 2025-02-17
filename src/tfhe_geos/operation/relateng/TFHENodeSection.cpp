@@ -9,19 +9,19 @@
 using namespace SpatialFHE::geom;
 
 namespace SpatialFHE::operation::relateng {
-    int TFHENodeSection::compareWithNull(const TFHECoordinate *v0, const TFHECoordinate *v1) {
+    TFHEInt32 TFHENodeSection::compareWithNull(const TFHECoordinate *v0, const TFHECoordinate *v1) {
         if (v0 == nullptr) {
             if (v1 == nullptr) {
-                return 0;
+                return TFHEInt32(0, true);
             }
             // null is lower than any non-null
-            return -1;
+            return TFHEInt32(-1, true);
         }
         if (v1 == nullptr) {
             // non-null is higher than null
-            return 1;
+            return TFHEInt32(1, true);
         }
-        return v0->compareTo(*v1).decrypt();
+        return v0->compareTo(*v1);
     }
 
     int TFHENodeSection::compare(int a, int b) {
@@ -76,30 +76,30 @@ namespace SpatialFHE::operation::relateng {
         return m_isNodeAtVertex;
     }
 
-    int TFHENodeSection::compareTo(const TFHENodeSection &o) const {
+    TFHEInt32 TFHENodeSection::compareTo(const TFHENodeSection &o) const {
         // sort A before B
         if (m_isA != o.m_isA) {
             if (m_isA)
-                return -1;
-            return 1;
+                return TFHEInt32(-1, true);
+            return TFHEInt32(1, true);
         }
         //-- sort on dimensions
         int compDim = compare(m_dim, o.m_dim);
         if (compDim != 0)
-            return compDim;
+            return TFHEInt32(compDim, true);
 
         //-- sort on id and ring id
         int compId = compare(m_id, o.m_id);
         if (compId != 0)
-            return compId;
+            return TFHEInt32(compId, true);
 
         int compRingId = compare(m_ringId, o.m_ringId);
         if (compRingId != 0)
-            return compRingId;
+            return TFHEInt32(compRingId, true);
 
         //-- sort on edge coordinates
-        int compV0 = compareWithNull(m_v0, o.m_v0);
-        if (compV0 != 0)
+        TFHEInt32 compV0 = compareWithNull(m_v0, o.m_v0);
+        if (compV0.neTrivial(0))
             return compV0;
 
         return compareWithNull(m_v1, o.m_v1);

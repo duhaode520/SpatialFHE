@@ -70,8 +70,8 @@ namespace SpatialFHE::algorithm {
         bool p1_p_p2 = (p1.y > point.y && p2.y <= point.y).decrypt();
         bool p2_p_p1 = (p2.y > point.y && p1.y <= point.y).decrypt();
         if (p1_p_p2 || p2_p_p1) {
-            int sign = TFHEOrientation::index(p1, p2, point).decrypt();  // 这里需要直接解密，因为后面的判断比较多
-            if (sign == 0) {
+            TFHEInt32 sign = TFHEOrientation::index(p1, p2, point);  // 这里不解密的原因是 TFHEInt32 的远程解密开销大
+            if ((sign == 0).decrypt()) {
                 isPointOnSegment = true;
                 return;
             }
@@ -80,7 +80,7 @@ namespace SpatialFHE::algorithm {
             }
 
             // The segment crosses the ray if the sign is strictly positive.
-            if (sign > 0) {
+            if ((sign > 0).decrypt()) {
                 crossingCount++;
             }
         }

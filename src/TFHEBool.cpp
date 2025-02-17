@@ -13,20 +13,57 @@ namespace SpatialFHE {
     TFHEBool TFHEBool::tfhe_true;
     TFHEBool TFHEBool::tfhe_false;
 
-    TFHEBool::TFHEBool(bool value) {
+    std::vector<bool> TFHEBool::doDecrypt(std::vector<std::vector<uint8_t>> &data) {
+        std::vector<FheBool *> fhe_data(data.size());
+        for (int i = 0; i < data.size(); i++) {
+            fhe_bool_deserialize(vectorToDynamicBufferView(data[i]), &fhe_data[i]);
+        }
+        std::vector<bool> result(data.size());
+        for (int i = 0; i < data.size(); i++) {
+            bool tmp;
+            fhe_bool_decrypt(fhe_data[i], context->getClientKey(), &tmp);
+            result[i] = tmp;
+        }
+        return result;
+    }
+
+    bool TFHEBool::remoteDecrypt() const {
+        TFHEBool confused = !(*this);
+        int choice = std::rand() % 2;
+
+        std::vector<DynamicBuffer> buffers(2);
+        fhe_bool_serialize(data, &(buffers[choice]));
+        fhe_bool_serialize(confused.data, &(buffers[1 - choice]));
+        std::vector<std::vector<uint8_t>> data(buffers.size());
+        for (int i = 0; i < buffers.size(); i++) {
+            data[i] = dynamicBufferToVector(buffers[i]);
+        }
+
+        auto result = context->getRpcClient()->call("decryptBool", data);
+        auto decrypted = result.as<std::vector<bool>>();
+        return decrypted[choice];
+    }
+
+    TFHEBool::TFHEBool(bool value, bool trivial) {
         data = nullptr;
 #ifdef DEBUG
-        fhe_bool_try_encrypt_trivial_bool(value, &data);;
+        this->trivial = true;
         ori = value;
 #else
-        fhe_bool_try_encrypt_with_public_key_bool(value, context->getPublicKey(), &data);
+        this->trivial = trivial;
 #endif
+        if (trivial) {
+            fhe_bool_try_encrypt_trivial_bool(value, &data);
+        } else {
+            fhe_bool_try_encrypt_with_public_key_bool(value, context->getPublicKey(), &data);
+        }
     }
 
     TFHEBool::TFHEBool(FheBool *data) : data(data) {}
 
     TFHEBool::TFHEBool() : data(nullptr) {
 #ifdef DEBUG
+        this->trivial = true;
         ori = false;
 #endif
     }
@@ -43,6 +80,7 @@ namespace SpatialFHE {
         if (this == &tfhe_false || this == &tfhe_true) {
             return;
         }
+        trivial = other.trivial;
         data = nullptr;
 
         fhe_bool_clone(other.data, &data);
@@ -55,6 +93,7 @@ namespace SpatialFHE {
 #endif
         if (&other != &tfhe_false && &other != &tfhe_true) {
             other.data = nullptr;
+            trivial = other.trivial;
         }
     }
 
@@ -72,6 +111,7 @@ namespace SpatialFHE {
             return *this;
         }
         fhe_bool_clone(other.data, &data);
+        trivial = other.trivial;
         return *this;
     }
 
@@ -84,6 +124,7 @@ namespace SpatialFHE {
 #endif
         if (&other != &tfhe_false && &other != &tfhe_true) {
             other.data = nullptr;
+            trivial = other.trivial;
         }
         return *this;
     }
@@ -94,7 +135,7 @@ namespace SpatialFHE {
         }
     }
 
-    bool TFHEBool::decrypt() {
+    bool TFHEBool::decrypt() const {
         bool result;
 
         // quick return for static true and false
@@ -104,16 +145,18 @@ namespace SpatialFHE {
             return false;
         }
 
-        if (context->getClientKey() != nullptr) {
-#ifdef DEBUG
+        if (trivial) {
             fhe_bool_try_decrypt_trivial(data, &result);
-#else
-            fhe_bool_decrypt(data, context->getClientKey(), &result);
-#endif
-
         } else {
-            // TODO: Implement decrypting through OT.
-            throw std::logic_error("Decrypting without local client key is not implemented");
+#ifdef DEBUG
+            throw std::runtime_error("all should be trivial in debug");
+#endif
+            if (context->getClientKey() != nullptr) {
+                fhe_bool_decrypt(data, context->getClientKey(), &result);
+            }
+            else {
+                result = remoteDecrypt();
+            }
         }
         return result;
     }
@@ -244,10 +287,13 @@ namespace SpatialFHE {
 
     void TFHEBool::init() {
         if (tfhe_true.isNull()) {
-            tfhe_true = TFHEBool(true);
+            tfhe_true = TFHEBool(true, true);
         }
         if (tfhe_false.isNull()) {
-            tfhe_false = TFHEBool(false);
+            tfhe_false = TFHEBool(false, true);
+        }
+        if (context->getRpcServer() != nullptr) {
+            context->getRpcServer()->bind("decryptBool", &TFHEBool::doDecrypt);
         }
     }
 
