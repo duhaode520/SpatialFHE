@@ -122,6 +122,11 @@ namespace SpatialFHE::geom {
         return isClosed();
     }
 
+    std::unique_ptr<TFHEGeometry> TFHELineString::getBoundary() const {
+        // TODO: fix this when implenment MultiPoints
+        return getPointN(0);
+    }
+
 }  // namespace SpatialFHE::geom
 
 // SpatialFHE

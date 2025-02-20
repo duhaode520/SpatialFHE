@@ -6,6 +6,8 @@
 
 #include <stdexcept>
 
+#include "TFHEGeometryFactory.h"
+
 namespace SpatialFHE::geom {
     std::unique_ptr<TFHEEnvelope> TFHEPoint::computeEnvelopeInternal() const {
         if (isEmpty()) {
@@ -80,6 +82,10 @@ namespace SpatialFHE::geom {
 
     Dimension::DimensionType TFHEPoint::getDimension() const {
         return Dimension::P;
+    }
+
+    std::unique_ptr<TFHEGeometry> TFHEPoint::getBoundary() const {
+        return factory->createEmptyGeometry(TFHEGeometryTypeId::TFHE_POINT);
     }
 
     void TFHEPoint::setXY(TFHEInt32 x, TFHEInt32 y) {

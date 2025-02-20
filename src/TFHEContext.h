@@ -19,6 +19,9 @@ namespace SpatialFHE {
         PublicKey* public_key = nullptr;
         ServerKey* server_key = nullptr;
         ClientKey* client_key = nullptr;
+#ifdef WITH_FEATURE_GPU
+        CudaServerKey* cuda_server_key = nullptr;
+#endif
 
         bool isClient;
         // OTClient

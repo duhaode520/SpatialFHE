@@ -41,7 +41,7 @@ namespace SpatialFHE::geom {
         TFHEGeometryTypeId getGeometryTypeId() const override;
 
         Dimension::DimensionType getDimension() const override;
-
+        std::unique_ptr<TFHEGeometry> getBoundary() const override;
         ~TFHEPolygon() override = default;
 
         std::unique_ptr<TFHEPolygon> clone() const;

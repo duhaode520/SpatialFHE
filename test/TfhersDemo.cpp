@@ -429,3 +429,11 @@ TEST_F(TfhersDemo, IntersectTestSpatialFHE) {
     EXPECT_TRUE(result.decrypt());
 
 }
+
+TEST_F(TfhersDemo, DivisionGPU) {
+    // TFHEInt32 a(10);
+    // TFHEInt32 b(3);
+    // TFHEInt32 c = a / b;
+    // EXPECT_EQ(c.decrypt(), 10 / 3);
+
+}

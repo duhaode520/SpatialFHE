@@ -171,6 +171,15 @@ namespace SpatialFHE::geom {
         return Dimension::A;
     }
 
+    std::unique_ptr<TFHEGeometry> TFHEPolygon::getBoundary() const {
+        const TFHEGeometryFactory *factory = getFactory();
+        if (isEmpty()) {
+            return factory->createLineString();
+        }
+        // FIXME: fix this when implement multi line string
+        return factory->createLineString(*shell);
+    }
+
     std::unique_ptr<TFHEPolygon> TFHEPolygon::clone() const {
         return std::unique_ptr<TFHEPolygon>(cloneInternal());
     }

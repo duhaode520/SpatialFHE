@@ -14,9 +14,19 @@ namespace SpatialFHE {
 
     void TFHEContext::generateKey() {
         config_builder_default(&configBuilder);
+#ifndef WITH_FEATURE_GPU
+        // config_builder_use_custom_parameters(&configBuilder, SHORTINT_V0_11_PARAM_MESSAGE_2_CARRY_2_KS_PBS_GAUSSIAN_2M64);
         config_builder_default_with_small_encryption(&configBuilder);
+#endif
         config_builder_build(configBuilder, &config);
         generate_keys(config, &client_key, &server_key);
+#ifdef WITH_FEATURE_GPU
+        CompressedServerKey *compressedServerKey;
+        compressed_server_key_new(client_key, &compressedServerKey);
+        compressed_server_key_decompress_to_gpu(compressedServerKey, &cuda_server_key);
+        set_cuda_server_key(cuda_server_key);
+        compressed_server_key_destroy(compressedServerKey);
+#endif
         set_server_key(server_key);
         public_key_new(client_key, &public_key);
     }
@@ -58,11 +68,11 @@ namespace SpatialFHE {
             host = server_url.substr(0, pos);
             port = std::atoi(server_url.substr(pos + 1).c_str());
         }
-        if (isClient) {
-            rpc_client = std::make_unique<rpc::client>(host, port);
-        } else {
+        if (!isClient) {
             rpc_server = std::make_unique<rpc::server>(host, port);
+            rpc_server->async_run(1);
         }
+        rpc_client = std::make_unique<rpc::client>(host, port);
     }
 
     TFHEContext::TFHEContext() {
@@ -93,9 +103,15 @@ namespace SpatialFHE {
     }
 
     TFHEContext::~TFHEContext() {
+        if (rpc_server != nullptr) {
+            rpc_server->stop();
+        }
         client_key_destroy(client_key);
         server_key_destroy(server_key);
         public_key_destroy(public_key);
+#ifdef WITH_FEATURE_GPU
+        cuda_server_key_destroy(cuda_server_key);
+#endif
     }
 
     void TFHEContext::loadPublicKey(const std::string &public_key_path) {

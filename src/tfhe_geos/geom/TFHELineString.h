@@ -41,6 +41,7 @@ namespace SpatialFHE::geom {
         virtual std::unique_ptr<TFHEPoint> getEndPoint() const;
         virtual TFHEBool isClosed() const;
         virtual TFHEBool isRing() const;
+        std::unique_ptr<TFHEGeometry> getBoundary() const override;
 
         [[nodiscard]] Ptr clone() const;
 

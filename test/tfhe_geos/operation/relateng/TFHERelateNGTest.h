@@ -7,15 +7,16 @@
 // geos
 #include <tfhe_geos/algorithm/BoundaryNodeRule.h>
 #include <tfhe_geos/geom/TFHEGeometry.h>
-#include <tfhe_geos/operation/relateng/TFHERelateNG.h>
-#include <tfhe_geos/operation/relateng/TFHERelatePredicate.h>
-#include <tfhe_geos/operation/relateng/TFHERelateMatrixPredicate.h>
 #include <tfhe_geos/geom/TFHEGeometryFactory.h>
 #include <tfhe_geos/io/WKTReader.h>
+#include <tfhe_geos/operation/relateng/TFHERelateMatrixPredicate.h>
+#include <tfhe_geos/operation/relateng/TFHERelateNG.h>
+#include <tfhe_geos/operation/relateng/TFHERelatePredicate.h>
 
 // std
-#include <memory>
 #include <gtest/gtest.h>
+
+#include <memory>
 
 using namespace SpatialFHE::geom;
 using namespace SpatialFHE::operation::relateng;
@@ -23,7 +24,6 @@ using SpatialFHE::io::WKTReader;
 
 class RelateNGTest : public ::testing::Test {
 protected:
-
     // void checkPrepared(const std::string& wkta, const std::string& wktb) {
     //     std::unique_ptr<Geometry> a = r.read(wkta);
     //     std::unique_ptr<Geometry> b = r.read(wktb);
@@ -62,13 +62,11 @@ protected:
         factory_.reset();
         context->clear();
         context.reset();
-
     }
 
     void checkPrepared(const TFHEGeometry* a, const TFHEGeometry* b) {
-        // std::cout << "checkPrepared is disabled as prepared geometry and indices have not been implemented" << std::endl;
-        // auto prep_a = TFHERelateNG::prepare(a);
-        // auto prep_b = TFHERelateNG::prepare(b);
+        // std::cout << "checkPrepared is disabled as prepared geometry and indices have not been implemented" <<
+        // std::endl; auto prep_a = TFHERelateNG::prepare(a); auto prep_b = TFHERelateNG::prepare(b);
         // EXPECT_EQ(prep_a->equalsTopo(b).decrypt(), a->equals(b).decrypt()) << "preparedEqualsTopo";
         // EXPECT_EQ(prep_a->intersects(b).decrypt(), a->intersects(b).decrypt()) << "preparedIntersects";
         // EXPECT_EQ(prep_a->disjoint(b).decrypt(), a->disjoint(b).decrypt()) << "preparedDisjoint";
@@ -122,23 +120,39 @@ protected:
         std::unique_ptr<TFHEGeometry> a = r.read(wkta);
         std::unique_ptr<TFHEGeometry> b = r.read(wktb);
         TFHERelateMatrixPredicate pred;
+        auto start = std::chrono::high_resolution_clock::now();
         TFHERelateNG::relate(a.get(), b.get(), pred);
+        auto end = std::chrono::high_resolution_clock::now();
         std::string actualVal = pred.getIM()->toString();
         EXPECT_EQ(actualVal, expectedValue) << "checkRelate";
+        std::cout << "Time taken for relate " << expectedValue << " is "
+                  << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms" << std::endl;
         checkPrepared(a.get(), b.get());
     }
 
-    void checkRelateMatches(const std::string& wkta, const std::string& wktb, const std::string pattern, bool expectedValue) {
+    void checkRelateMatches(
+        const std::string& wkta,
+        const std::string& wktb,
+        const std::string pattern,
+        bool expectedValue) {
         auto pred = TFHERelatePredicate::matches(pattern);
         checkPredicate(*pred, wkta, wktb, expectedValue);
     }
 
-    void checkPredicate(TFHETopologyPredicate& pred, const std::string& wkta, const std::string& wktb, bool expectedValue) {
+    void checkPredicate(
+        TFHETopologyPredicate& pred,
+        const std::string& wkta,
+        const std::string& wktb,
+        bool expectedValue) {
         std::unique_ptr<TFHEGeometry> a = r.read(wkta);
         std::unique_ptr<TFHEGeometry> b = r.read(wktb);
+        auto start = std::chrono::high_resolution_clock::now();
         SpatialFHE::TFHEBool actualVal = TFHERelateNG::relate(a.get(), b.get(), pred);
+        auto end = std::chrono::high_resolution_clock::now();
         EXPECT_EQ(actualVal.decrypt(), expectedValue) << "checkPredicate " << pred.name();
+        std::cout << "Time taken for " << pred.name() << " is "
+                  << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms" << std::endl;
         checkPrepared(a.get(), b.get());
     }
 };
-#endif //TFHERELATENGTEST_H
+#endif  // TFHERELATENGTEST_H

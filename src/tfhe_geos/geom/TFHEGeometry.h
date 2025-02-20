@@ -72,6 +72,8 @@ namespace SpatialFHE::geom {
         // Returns the dimension of the geometry.
         virtual Dimension::DimensionType getDimension() const = 0;
 
+        virtual std::unique_ptr<TFHEGeometry> getBoundary() const = 0;
+
         virtual bool isDimension(Dimension::DimensionType dimension) const {
             return getDimension() == dimension;
         }

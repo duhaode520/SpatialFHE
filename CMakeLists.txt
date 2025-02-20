@@ -32,6 +32,12 @@ set(TFHE_C_API "/home/ubuntu/github/tfhe-rs/target/release")
 include_directories(${TFHE_C_API})
 add_library(tfhe SHARED IMPORTED)
 set_target_properties(tfhe PROPERTIES IMPORTED_LOCATION ${TFHE_C_API}/libtfhe.so)
+option(WITH_FEATURE_GPU "Enable TFHE-rs GPU support" OFF)
+if (WITH_FEATURE_GPU)
+#    find_package(OpenMP REQUIRED)
+    message(STATUS "Enable TFHE-rs GPU support")
+    add_definitions(-DWITH_FEATURE_GPU)
+endif ()
 
 # CUDA
 enable_language(CUDA)

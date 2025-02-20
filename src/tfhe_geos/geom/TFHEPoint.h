@@ -40,6 +40,8 @@ namespace SpatialFHE::geom {
 
         [[nodiscard]] Dimension::DimensionType getDimension() const override;
 
+        std::unique_ptr<TFHEGeometry> getBoundary() const override;
+
         void setXY(TFHEInt32 x, TFHEInt32 y);
 
         [[nodiscard]] TFHEInt32 getX() const;
