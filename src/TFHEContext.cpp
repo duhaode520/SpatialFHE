@@ -15,19 +15,19 @@ namespace SpatialFHE {
     void TFHEContext::generateKey() {
         config_builder_default(&configBuilder);
 #ifndef WITH_FEATURE_GPU
-        // config_builder_use_custom_parameters(&configBuilder, SHORTINT_V0_11_PARAM_MESSAGE_2_CARRY_2_KS_PBS_GAUSSIAN_2M64);
-        config_builder_default_with_small_encryption(&configBuilder);
+        config_builder_use_custom_parameters(&configBuilder, SHORTINT_V0_11_PARAM_MESSAGE_2_CARRY_2_KS_PBS_GAUSSIAN_2M64);
+        // config_builder_default_with_small_encryption(&configBuilder);
 #endif
         config_builder_build(configBuilder, &config);
         generate_keys(config, &client_key, &server_key);
 #ifdef WITH_FEATURE_GPU
-        CompressedServerKey *compressedServerKey;
-        compressed_server_key_new(client_key, &compressedServerKey);
-        compressed_server_key_decompress_to_gpu(compressedServerKey, &cuda_server_key);
+        compressed_server_key_new(client_key, &compressed_server_key);
+        compressed_server_key_decompress_to_gpu(compressed_server_key, &cuda_server_key);
         set_cuda_server_key(cuda_server_key);
-        compressed_server_key_destroy(compressedServerKey);
-#endif
+#else
         set_server_key(server_key);
+#endif
+        // set_server_key(server_key);
         public_key_new(client_key, &public_key);
     }
 
@@ -110,6 +110,7 @@ namespace SpatialFHE {
         server_key_destroy(server_key);
         public_key_destroy(public_key);
 #ifdef WITH_FEATURE_GPU
+        compressed_server_key_destroy(compressed_server_key);
         cuda_server_key_destroy(cuda_server_key);
 #endif
     }
@@ -158,6 +159,13 @@ namespace SpatialFHE {
 
     const std::unique_ptr<rpc::server> &TFHEContext::getRpcServer() const {
         return rpc_server;
+    }
+
+    void TFHEContext::setServerKey() const {
+#ifdef WITH_FEATURE_GPU
+        set_cuda_server_key(cuda_server_key);
+#endif
+        set_server_key(server_key);
     }
 
     void TFHEContext::clear() {

@@ -58,7 +58,7 @@ protected:
     }
 
     static void TearDownTestCase() {
-
+        context.reset();
     }
 
 
@@ -431,9 +431,10 @@ TEST_F(TfhersDemo, IntersectTestSpatialFHE) {
 }
 
 TEST_F(TfhersDemo, DivisionGPU) {
-    // TFHEInt32 a(10);
-    // TFHEInt32 b(3);
-    // TFHEInt32 c = a / b;
-    // EXPECT_EQ(c.decrypt(), 10 / 3);
+    TFHEInt32 a(10);
+    TFHEInt32 b(3);
+    TFHEInt32 c = a / b;
+    EXPECT_EQ(c.decrypt(), 10 / 3);
+    std::cout << c.decrypt() << std::endl;
 
 }

@@ -4,6 +4,7 @@
 
 #include "TFHEInt32.h"
 
+#include <cuda_runtime_api.h>
 #include <driver_types.h>
 
 #include <c++/9/stdexcept>
@@ -43,14 +44,22 @@ namespace SpatialFHE {
     TFHEInt32::TFHEInt32(int32_t value, bool trivial) {
         data = nullptr;
 #ifdef DEBUG
-        trivial = true;
+        this->trivial = true;
         ori = value;
 #else
         this->trivial = trivial;
 
 #endif
-        if (trivial) {
+        if (this->trivial) {
+            // GPU key cannot encrypt and decrypt trivial values
+#ifdef WITH_FEATURE_GPU
+            std::thread([&]() {
+                context->setServerKey();
+                fhe_int32_try_encrypt_trivial_i32(value, &data);
+             }).join();
+#else
             fhe_int32_try_encrypt_trivial_i32(value, &data);
+#endif
         } else {
             fhe_int32_try_encrypt_with_public_key_i32(value, context->getPublicKey(), &data);
         }
@@ -61,7 +70,6 @@ namespace SpatialFHE {
         ori = 0;
         this->trivial = true;
 #endif
-
     }
 
     TFHEInt32::TFHEInt32() : data(nullptr) {
@@ -70,7 +78,7 @@ namespace SpatialFHE {
 #endif
     }
 
-    TFHEInt32::TFHEInt32(const TFHEInt32 &other)  : TFHERegisteredType(other) {
+    TFHEInt32::TFHEInt32(const TFHEInt32 &other) : TFHERegisteredType(other) {
         data = nullptr;
         fhe_int32_clone(other.data, &data);
         trivial = other.trivial;
@@ -124,7 +132,14 @@ namespace SpatialFHE {
     int TFHEInt32::decrypt() const {
         int result;
         if (trivial) {
+#ifdef WITH_FEATURE_GPU
+            std::thread([&]() {
+                context->setServerKey();
+                fhe_int32_try_decrypt_trivial(data, &result);
+             }).join();
+#else
             fhe_int32_try_decrypt_trivial(data, &result);
+#endif
         } else {
             if (context->getClientKey() != nullptr) {
                 fhe_int32_decrypt(data, context->getClientKey(), &result);

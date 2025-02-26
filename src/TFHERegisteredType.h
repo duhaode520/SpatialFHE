@@ -21,6 +21,10 @@ namespace SpatialFHE {
             }
         }
 
+        static const TFHEContext* getContext() {
+            return context;
+        }
+
         [[nodiscard]] bool isTrivial() const {
             return trivial;
         }

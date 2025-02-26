@@ -22,7 +22,8 @@ TEST_F(TFHEBasicSuite, IntDecPerfTest) {
     ConfigBuilder* config_builder = nullptr;
 
     config_builder_default(&config_builder);
-    config_builder_default_with_small_encryption(&config_builder);
+    config_builder_use_custom_parameters(&config_builder, SHORTINT_V0_11_PARAM_MESSAGE_2_CARRY_2_KS_PBS_GAUSSIAN_2M64);
+    // config_builder_default_with_small_encryption(&config_builder);
     config_builder_build(config_builder, &config);
     ClientKey* client_key = nullptr;
     ServerKey* server_key = nullptr;
@@ -68,7 +69,8 @@ TEST_F(TFHEBasicSuite, BoolDecPerfTest) {
     ConfigBuilder* config_builder = nullptr;
 
     config_builder_default(&config_builder);
-    config_builder_default_with_small_encryption(&config_builder);
+    config_builder_use_custom_parameters(&config_builder, SHORTINT_V0_11_PARAM_MESSAGE_2_CARRY_2_KS_PBS_GAUSSIAN_2M64);
+    // config_builder_default_with_small_encryption(&config_builder);
     config_builder_build(config_builder, &config);
     ClientKey* client_key = nullptr;
     ServerKey* server_key = nullptr;
@@ -114,7 +116,8 @@ TEST_F(TFHEBasicSuite, AddPerfTest) {
     ConfigBuilder* config_builder = nullptr;
 
     config_builder_default(&config_builder);
-    config_builder_default_with_small_encryption(&config_builder);
+    config_builder_use_custom_parameters(&config_builder, SHORTINT_V0_11_PARAM_MESSAGE_2_CARRY_2_KS_PBS_GAUSSIAN_2M64);
+    // config_builder_default_with_small_encryption(&config_builder);
     config_builder_build(config_builder, &config);
     ClientKey* client_key = nullptr;
     ServerKey* server_key = nullptr;
@@ -311,6 +314,38 @@ TEST_F(TFHEBasicSuite, GPUAddPerfTest) {
     cout << endl;
     cout << "Total time: " << total / ns_per_ms << endl;
     cout << "Avg time:" << static_cast<double>(total / ns_per_ms) / N << endl;
+    client_key_destroy(client_key);
+    compressed_server_key_destroy(compressed_server_key);
+    cuda_server_key_destroy(cuda_server_key);
+    public_key_destroy(public_key);
+}
+
+TEST_F(TFHEBasicSuite, GPUDiv) {
+    Config* config = nullptr;
+    ConfigBuilder* config_builder = nullptr;
+
+    config_builder_default(&config_builder);
+    config_builder_build(config_builder, &config);
+    ClientKey* client_key = nullptr;
+    client_key_generate(config, &client_key);
+    CompressedServerKey* compressed_server_key = nullptr;
+    compressed_server_key_new(client_key, &compressed_server_key);
+    CudaServerKey* cuda_server_key = nullptr;
+    compressed_server_key_decompress_to_gpu(compressed_server_key, &cuda_server_key);
+    set_cuda_server_key(cuda_server_key);
+    PublicKey* public_key;
+    public_key_new(client_key, &public_key);
+
+    FheInt32* a = nullptr;
+    FheInt32* b = nullptr;
+    fhe_int32_try_encrypt_with_public_key_i32(10, public_key, &a);
+    fhe_int32_try_encrypt_with_public_key_i32(2, public_key, &b);
+    FheInt32* result = nullptr;
+    fhe_int32_div(a, b, &result);
+    fhe_int32_destroy(a);
+    fhe_int32_destroy(b);
+    fhe_int32_destroy(result);
+
     client_key_destroy(client_key);
     compressed_server_key_destroy(compressed_server_key);
     cuda_server_key_destroy(cuda_server_key);

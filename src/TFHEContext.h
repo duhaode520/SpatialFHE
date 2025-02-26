@@ -20,6 +20,7 @@ namespace SpatialFHE {
         ServerKey* server_key = nullptr;
         ClientKey* client_key = nullptr;
 #ifdef WITH_FEATURE_GPU
+        CompressedServerKey* compressed_server_key = nullptr;
         CudaServerKey* cuda_server_key = nullptr;
 #endif
 
@@ -61,6 +62,9 @@ namespace SpatialFHE {
 
         [[nodiscard]] const std::unique_ptr<rpc::client>& getRpcClient() const;
         [[nodiscard]] const std::unique_ptr<rpc::server>& getRpcServer() const;
+
+        // set server key for multiple threads;
+        void setServerKey() const;
 
         // only for test
         void clear();

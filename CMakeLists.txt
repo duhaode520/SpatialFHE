@@ -15,8 +15,13 @@ if (LLD_FOUND)
     set(CMAKE_LINKER ${LLD_FOUND})
 endif()
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+
     message(STATUS "Debug mode")
     add_definitions(-DDEBUG)
+    set(TFHE_TARGET "release")
+else()
+    message(STATUS "Release mode")
+    set(TFHE_TARGET "release")
 endif()
 
 option(BUILD_JAVA "Build Java Library" ON)
@@ -28,7 +33,8 @@ include_directories(/phantom)
 # ----------------------------------------
 # TFHE-rs
 # ----------------------------------------
-set(TFHE_C_API "/home/ubuntu/github/tfhe-rs/target/release")
+set(TFHE_C_API /home/ubuntu/github/tfhe-rs/target/${TFHE_TARGET})
+message(STATUS "TFHE_C_API: ${TFHE_C_API}")
 include_directories(${TFHE_C_API})
 add_library(tfhe SHARED IMPORTED)
 set_target_properties(tfhe PROPERTIES IMPORTED_LOCATION ${TFHE_C_API}/libtfhe.so)
