@@ -31,6 +31,7 @@ target_link_libraries(jni${JAVA_ARTIFACT} PRIVATE ZLIB::ZLIB)
 target_link_libraries(jni${JAVA_ARTIFACT} PRIVATE zstd::libzstd)
 target_link_libraries(jni${JAVA_ARTIFACT} PRIVATE unofficial::b64::b64)
 target_link_libraries(jni${JAVA_ARTIFACT} PRIVATE rapidjson)
+target_link_libraries(jni${JAVA_ARTIFACT} PRIVATE tfhe)
 
 install(TARGETS jni${JAVA_ARTIFACT}
     EXPORT ${JAVA_ARTIFACT}Targets

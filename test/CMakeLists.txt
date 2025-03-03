@@ -61,6 +61,7 @@ add_executable(tfhe_geos_perf_test
 	perf_test/PerformanceTestCase.cpp
 	perf_test/PerformanceTestRunner.cpp
 	perf_test/RelateNGLinesOverlappingPerfTest.cpp
+	perf_test/RelateNGPolygonOverlappingPerfTest.cpp
 	perf_test/PerfTestSuite.cpp
 )
 target_link_libraries(tfhe_geos_perf_test PRIVATE gtest_main SpatialFHE tfhe)

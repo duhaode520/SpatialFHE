@@ -164,6 +164,8 @@ TEST_F(TFHEBasicSuite, AddPerfTest) {
     server_key_destroy(server_key);
     public_key_destroy(public_key);
 }
+
+#ifdef WITH_FEATURE_GPU
 TEST_F(TFHEBasicSuite, GPUIntDecPerfTest) {
     Config* config = nullptr;
     ConfigBuilder* config_builder = nullptr;
@@ -213,7 +215,6 @@ TEST_F(TFHEBasicSuite, GPUIntDecPerfTest) {
     public_key_destroy(public_key);
 }
 
-#ifdef WITH_FEATURE_GPU
 TEST_F(TFHEBasicSuite, GPUBoolDecPerfTest) {
     Config* config = nullptr;
     ConfigBuilder* config_builder = nullptr;

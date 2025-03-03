@@ -161,10 +161,11 @@ namespace SpatialFHE {
         return rpc_server;
     }
 
-    void TFHEContext::setServerKey() const {
+    void TFHEContext::setServerKey(bool cpuEnable) const {
 #ifdef WITH_FEATURE_GPU
         set_cuda_server_key(cuda_server_key);
 #endif
+    if (cpuEnable)
         set_server_key(server_key);
     }
 

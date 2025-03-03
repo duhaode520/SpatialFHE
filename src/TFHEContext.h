@@ -64,7 +64,7 @@ namespace SpatialFHE {
         [[nodiscard]] const std::unique_ptr<rpc::server>& getRpcServer() const;
 
         // set server key for multiple threads;
-        void setServerKey() const;
+        void setServerKey(bool cpuEnable=true) const;
 
         // only for test
         void clear();

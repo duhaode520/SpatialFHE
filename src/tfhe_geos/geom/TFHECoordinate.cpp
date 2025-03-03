@@ -60,4 +60,12 @@ namespace SpatialFHE::geom {
         return (xGreater - xLess) * 2 + (yGreater - yLess);
     }
 
+    TFHEInt32 TFHECoordinate::GetX() const {
+        return x;
+    }
+
+    TFHEInt32 TFHECoordinate::GetY() const {
+        return y;
+    }
+
 }  // namespace SpatialFHE::geom

@@ -69,6 +69,7 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy
     $<TARGET_FILE:jni${JAVA_ARTIFACT}>
         ${PROJECT_SOURCE_DIR}/java_api/src/main/resources/${JAVA_NATIVE_PROJECT}/
+  COMMAND ${MAVEN_EXECUTABLE} clean
   COMMAND ${MAVEN_EXECUTABLE} compile -B
   COMMAND ${MAVEN_EXECUTABLE} package -B -Dfatjar=true
   COMMAND ${MAVEN_EXECUTABLE} install -B $<$<BOOL:${SKIP_GPG}>:-Dgpg.skip=true>
@@ -112,6 +113,7 @@ endforeach()
 
 add_custom_command(
   OUTPUT ${JAVA_PROJECT_DIR}/timestamp
+  COMMAND ${MAVEN_EXECUTABLE} clean
   COMMAND ${MAVEN_EXECUTABLE} compile -B
   COMMAND ${MAVEN_EXECUTABLE} package -B -Dfatjar=true
   COMMAND ${MAVEN_EXECUTABLE} install -B $<$<BOOL:${SKIP_GPG}>:-Dgpg.skip=true>

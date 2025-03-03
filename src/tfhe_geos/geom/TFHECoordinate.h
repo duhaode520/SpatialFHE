@@ -35,13 +35,9 @@ namespace SpatialFHE::geom {
         // This comparison might be expensive, as it requires decryption
         [[nodiscard]] TFHEInt32 compareTo(const TFHECoordinate& other) const;
 
-        [[nodiscard]] TFHEInt32 getX() const {
-            return x;
-        }
+        [[nodiscard]] TFHEInt32 GetX() const;
 
-        [[nodiscard]] TFHEInt32 getY() const {
-            return y;
-        }
+        [[nodiscard]] TFHEInt32 GetY() const;
     };
     struct TFHECoordinateLessThan {
         bool operator()(const TFHECoordinate &lhs, const TFHECoordinate &rhs) const {
