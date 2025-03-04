@@ -11,6 +11,7 @@ import java.io.IOException;
 class FHEHelperTest {
 
     static String publicKeyPath, secretKeyPath;
+    static final String serverURL = "127.0.0.1:8080";
     static boolean isInit;
 
     @BeforeEach
@@ -30,9 +31,13 @@ class FHEHelperTest {
             deleteFile(publicKeyPath + ".relin");
             // delete the galois key file
             deleteFile(publicKeyPath + ".galois");
+
+            // TFHE
+            deleteFile(publicKeyPath + ".tfhe");
         }
         if (secretKeyPath != null) {
             deleteFile(secretKeyPath);
+            deleteFile(secretKeyPath + ".tfhe");
             // if SECRET_KEY_PATH includes directory, delete the directory
             if (secretKeyPath.contains("/")) {
                 java.io.File dir = new java.io.File(secretKeyPath.substring(0, secretKeyPath.lastIndexOf("/")));
@@ -59,7 +64,7 @@ class FHEHelperTest {
     }
 
     void compute() {
-        FHEHelper helper = FHEHelper.getOrCreate(publicKeyPath, secretKeyPath, "conf",
+        FHEHelper helper = FHEHelper.getOrCreate(publicKeyPath, secretKeyPath, "conf",serverURL,
             HECrypto.HELibrary.Phantom, isInit, 2);
         assertNotNull(helper);
         assertNotNull(helper.getManager());
@@ -112,7 +117,6 @@ class FHEHelperTest {
         System.out.println("localKeysTest: publicKeyPath = "
                 + publicKeyPath + ", secretKeyPath = " + secretKeyPath + ", isInit = " + isInit);
         compute();
-        TFHEContext context = new TFHEContext();
         WKTReader reader = new WKTReader();
         String a = "LINESTRING(0 0, 900 900)";
         String b = "LINESTRING(0 900, 900 0)";

@@ -81,10 +81,12 @@ SpatialFHE::SpatialFHEManager::SpatialFHEManager(
     const std::string &publicKeyPath,
     const std::string &secretKeyPath,
     const std::string &paramsString,
+    const std::string &serverURL,
     const HECrypto::HELibrary heLibrary,
     bool isInit,
     int max_thread_num = 1) :
-        BaseFHEManager(publicKeyPath, secretKeyPath, paramsString, heLibrary, isInit) {
+        BaseFHEManager(publicKeyPath, secretKeyPath, paramsString, heLibrary, isInit),
+         VectorFHEManager(publicKeyPath, secretKeyPath, serverURL, isInit) {
     this->max_thread_num = max_thread_num;
 }
 SpatialFHE::SpatialFHEManager::~SpatialFHEManager() = default;

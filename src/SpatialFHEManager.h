@@ -4,11 +4,14 @@
 
 #ifndef SPATIALFHEMANAGER_H
 #define SPATIALFHEMANAGER_H
+#include <VectorFHEManager.h>
+
 #include "BaseFHEManager.h"
 #include "MatFHEManager.h"
+#include "VectorFHEManager.h"
 
 namespace SpatialFHE {
-    class SpatialFHEManager : public BaseFHEManager, public MatFHEManager {
+    class SpatialFHEManager : public BaseFHEManager, public MatFHEManager, public VectorFHEManager {
     private:
         int max_thread_num;
 
@@ -23,6 +26,7 @@ namespace SpatialFHE {
             const std::string &publicKeyPath,
             const std::string &secretKeyPath,
             const std::string &paramsString,
+            const std::string &server_url,
             const HECrypto::HELibrary heLibrary,
             bool isInit,
             int max_thread_num);

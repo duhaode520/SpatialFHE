@@ -32,7 +32,7 @@ public:
             })";
         PUBKEY_PATH = "public.key";
         SECKEY_PATH = "secret.key";
-        manager = new SpatialFHEManager(PUBKEY_PATH, SECKEY_PATH, json,
+        manager = new SpatialFHEManager(PUBKEY_PATH, SECKEY_PATH, json, "",
             HECrypto::HELibrary::Phantom, true,  1);
     }
 

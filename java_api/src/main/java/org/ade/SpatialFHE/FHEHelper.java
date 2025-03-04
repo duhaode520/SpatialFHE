@@ -16,57 +16,50 @@ public class FHEHelper {
 
     static volatile FHEHelper instance;
     private static final String JSON_CONFIG_PATH = "fhe.json";
-    private static final String JNI_CONFIG_PATH = "jni.conf";
     private static final Logger logger = LoggerFactory.getLogger(FHEHelper.class);
 
     private final SpatialFHEManager manager;
     private final String publicKeyPath;
 
-    private FHEHelper(String publicKeyPath, String secretKeyPath, String confDir,
-            HECrypto.HELibrary heLibrary, boolean isInit, int maxThreadNum) {
+    private FHEHelper(String publicKeyPath, String secretKeyPath, String confDir, String serverUrl,
+                      HECrypto.HELibrary heLibrary, boolean isInit, int maxThreadNum) {
         // load config
         this.publicKeyPath = publicKeyPath;
-        try {
-            Properties jniConfig = new Properties();
-            jniConfig.load(Files.newInputStream(Paths.get(confDir).resolve(JNI_CONFIG_PATH)));
-            System.load(jniConfig.getProperty("libPath"));
-        } catch (Exception e) {
-            logger.error("Error loading JNI library: {}. Stacktrace: {}", e.getMessage(), e);
+        if (!LibLoader.tryLoadFromConf(confDir)) {
+            logger.error("Failed to load JNI library from config directory");
         }
 
         String jsonConfig = loadConfig(confDir);
-        manager = new SpatialFHEManager(publicKeyPath, secretKeyPath, jsonConfig, heLibrary, isInit, maxThreadNum);
+        manager = new SpatialFHEManager(publicKeyPath, secretKeyPath, jsonConfig, serverUrl, heLibrary, isInit, maxThreadNum);
     }
 
-    private FHEHelper(String publicKeyPath, String secretKeyPath, String libPath, String jsonConfig,
-        HECrypto.HELibrary heLibrary, boolean isInit, int maxThreadNum) {
+    private FHEHelper(String publicKeyPath, String secretKeyPath, String libPath, String jsonConfig, String serverUrl,
+                      HECrypto.HELibrary heLibrary, boolean isInit, int maxThreadNum) {
         this.publicKeyPath = publicKeyPath;
-        try {
-            System.load(libPath);
-        } catch (Exception e) {
-            logger.error("Error loading JNI library: {}. Stacktrace: {}", e.getMessage(), e);
+        if (!LibLoader.tryLoad(libPath)) {
+            logger.error("Failed to load JNI library from path");
         }
-        manager = new SpatialFHEManager(publicKeyPath, secretKeyPath, jsonConfig, heLibrary, isInit, maxThreadNum);
+        manager = new SpatialFHEManager(publicKeyPath, secretKeyPath, jsonConfig, serverUrl, heLibrary, isInit, maxThreadNum);
     }
 
-    public static FHEHelper getOrCreate(String publicKeyPath, String secretKeyPath, String confDir,
-            HECrypto.HELibrary heLibrary, boolean isInit, int maxThreadNum) {
+    public static FHEHelper getOrCreate(String publicKeyPath, String secretKeyPath, String confDir, String serverUrl,
+                                        HECrypto.HELibrary heLibrary, boolean isInit, int maxThreadNum) {
         if (instance == null) {
             synchronized (FHEHelper.class) {
                 if (instance == null) {
-                    instance = new FHEHelper(publicKeyPath, secretKeyPath, confDir, heLibrary, isInit, maxThreadNum);
+                    instance = new FHEHelper(publicKeyPath, secretKeyPath, confDir, serverUrl, heLibrary, isInit, maxThreadNum);
                 }
             }
         }
         return instance;
     }
 
-    public static FHEHelper getOrCreate(String publicKeyPath, String secretKeyPath, String libPath, String jsonConfig,
-            HECrypto.HELibrary heLibrary, boolean isInit, int maxThreadNum) {
+    public static FHEHelper getOrCreate(String publicKeyPath, String secretKeyPath, String libPath, String jsonConfig, String serverUrl,
+                                        HECrypto.HELibrary heLibrary, boolean isInit, int maxThreadNum) {
         if (instance == null) {
             synchronized (FHEHelper.class) {
                 if (instance == null) {
-                    instance = new FHEHelper(publicKeyPath, secretKeyPath, libPath, jsonConfig, heLibrary, isInit, maxThreadNum);
+                    instance = new FHEHelper(publicKeyPath, secretKeyPath, libPath, jsonConfig, serverUrl, heLibrary, isInit, maxThreadNum);
                 }
             }
         }

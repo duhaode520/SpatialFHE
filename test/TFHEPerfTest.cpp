@@ -10,14 +10,14 @@
 
 using namespace std;
 
-class TFHEBasicSuite : public ::testing::Test {
+class TFHEPerfTest : public ::testing::Test {
 protected:
     const int N = 100;
     const int interval = 10;
     const double ns_per_ms = 1000000;
 };
 
-TEST_F(TFHEBasicSuite, IntDecPerfTest) {
+TEST_F(TFHEPerfTest, IntDecPerfTest) {
     Config* config = nullptr;
     ConfigBuilder* config_builder = nullptr;
 
@@ -64,7 +64,7 @@ TEST_F(TFHEBasicSuite, IntDecPerfTest) {
     public_key_destroy(public_key);
 }
 
-TEST_F(TFHEBasicSuite, BoolDecPerfTest) {
+TEST_F(TFHEPerfTest, BoolDecPerfTest) {
     Config* config = nullptr;
     ConfigBuilder* config_builder = nullptr;
 
@@ -111,7 +111,7 @@ TEST_F(TFHEBasicSuite, BoolDecPerfTest) {
     public_key_destroy(public_key);
 }
 
-TEST_F(TFHEBasicSuite, AddPerfTest) {
+TEST_F(TFHEPerfTest, AddPerfTest) {
     Config* config = nullptr;
     ConfigBuilder* config_builder = nullptr;
 

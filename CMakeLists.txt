@@ -17,7 +17,7 @@ endif()
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
     message(STATUS "Debug mode")
-    add_definitions(-DDEBUG)
+#    add_definitions(-DDEBUG)
     set(TFHE_TARGET "release")
 else()
     message(STATUS "Release mode")
