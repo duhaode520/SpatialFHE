@@ -19,7 +19,11 @@ namespace SpatialFHE::geom {
         y = std::move(other.y);
     }
 
-    TFHECoordinate &TFHECoordinate::operator=(const TFHECoordinate &other) = default;
+    TFHECoordinate &TFHECoordinate::operator=(const TFHECoordinate &other) {
+        x = other.x;
+        y = other.y;
+        return *this;
+    };
 
     TFHECoordinate &TFHECoordinate::operator=(TFHECoordinate &&other) noexcept {
         x = std::move(other.x);

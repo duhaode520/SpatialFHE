@@ -39,7 +39,11 @@ namespace SpatialFHE::geom {
     TFHELineString::TFHELineString(const TFHELineString &other) : TFHEGeometry(other), points(other.points->clone()) {}
 
     TFHELineString::TFHELineString(TFHECoordinateSequence *pts, const TFHEGeometryFactory *factory) :
-            TFHEGeometry(factory), points(pts) {}
+            TFHEGeometry(factory), points(pts) {
+            if (points == nullptr) {
+                points = factory->getCoordinateSequenceFactory()->create();
+            }
+        }
 
     TFHELineString::TFHELineString(TFHECoordinateSequence::Ptr &&pts, const TFHEGeometryFactory &factory) :
             TFHEGeometry(&factory), points(std::move(pts)) {

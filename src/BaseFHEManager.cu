@@ -18,6 +18,7 @@ BaseFHEManager::BaseFHEManager(
     const std::string &paramsString,
     const HECrypto::HELibrary heLibrary,
     bool isInit) {
+    this->heLib = heLibrary;
     if (heLibrary == HECrypto::HELibrary::SEAL) {
         this->crypto = std::make_shared<SEALCrypto>(paramsString);
     } else if (heLibrary == HECrypto::HELibrary::Phantom) {

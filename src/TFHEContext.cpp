@@ -73,7 +73,7 @@ namespace SpatialFHE {
             port = std::atoi(server_url.substr(pos + 1).c_str());
         }
         if (!isClient) {
-            rpc_server = std::make_unique<rpc::server>(host, port);
+            rpc_server = std::make_unique<rpc::server>(port);
             rpc_server->async_run(1);
         }
         rpc_client = std::make_unique<rpc::client>(host, port);

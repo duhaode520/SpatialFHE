@@ -11,6 +11,7 @@ namespace SpatialFHE {
     protected:
         std::shared_ptr<HECrypto> crypto;
         std::string publicKeyPath;
+        HECrypto::HELibrary heLib;
 
     public:
         BaseFHEManager();

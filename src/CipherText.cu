@@ -89,6 +89,11 @@ namespace SpatialFHE {
         }
     }
 
-    CipherText::~CipherText() = default;
+    CipherText::~CipherText() {
+        if (holds_alternative<PhantomCiphertext>(this->data)) {
+            PhantomCiphertext ct = get<PhantomCiphertext>(this->data);
+            // fixme: phantom 有显存泄漏的问题，可能需要排查一下phantom的实现
+        }
+    };
 
 }  // namespace SpatialFHE

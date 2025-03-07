@@ -27,7 +27,11 @@
     #include "tfhe_geos/geom/TFHELineString.h"
     #include "tfhe_geos/geom/TFHELinearRing.h"
     #include "tfhe_geos/geom/TFHEPolygon.h"
+    #include "tfhe_geos/geom/TFHECoordinateSequenceFactory.h"
+    #include "tfhe_geos/geom/TFHECoordinateSequence.h"
+    #include "tfhe_geos/geom/TFHEGeometryFactory.h"
     #include "tfhe_geos/io/WKTReader.h"
+    #include "tfhe_geos/util/SineStarFactory.h"
 
 
 %}
@@ -45,18 +49,6 @@
 // %typemap(jtype) int32_t "int"
 // %typemap(jstype) int32_t "int"
 
-namespace std {
-   %template(IntVector)             vector<int>;
-   %template(DoubleVector)          vector<double>;
-   %template(LongVector)            vector<uint32_t>;
-   %rename(LongVector)              vector<uint32_t>;
-   %template(BooleanVector)         vector<bool>;
-   %template(StringVector)          vector<string>;
-   %template(PlainTextVector)       vector<SpatialFHE::PlainText>;
-   %template(CipherTextVector)      vector<SpatialFHE::CipherText>;
-}
-//    %template(TFHERegisteredInt)     TFHERegisteredType<int>;
-//    %template(TFHERegisteredBool)    TFHERegisteredType<bool>;
 %unique_ptr(SpatialFHE::geom::TFHEGeometry)
 %unique_ptr(SpatialFHE::geom::TFHEPoint)
 %unique_ptr(SpatialFHE::geom::TFHELineString)
@@ -64,6 +56,24 @@ namespace std {
 %unique_ptr(SpatialFHE::geom::TFHEPolygon)
 %unique_ptr(SpatialFHE::geom::TFHEEnvelope)
 %unique_ptr(SpatialFHE::geom::TFHECoordinate)
+%unique_ptr(SpatialFHE::geom::TFHECoordinateSequence)
+%unique_ptr(SpatialFHE::geom::TFHEIntersectionMatrix)
+
+namespace std {
+   %template(IntVector)             vector<int>;
+   %template(ByteVector)            vector<uint8_t>;
+   %template(DoubleVector)          vector<double>;
+   %template(LongVector)            vector<uint32_t>;
+   %rename(LongVector)              vector<uint32_t>;
+   %template(BooleanVector)         vector<bool>;
+   %template(StringVector)          vector<string>;
+   %template(PlainTextVector)       vector<SpatialFHE::PlainText>;
+   %template(CipherTextVector)      vector<SpatialFHE::CipherText>;
+   %template(CoordinateVector)      vector<SpatialFHE::geom::TFHECoordinate>;
+   %template(LinearRingVector)      vector<SpatialFHE::geom::TFHELinearRing*>;
+}
+//    %template(TFHERegisteredInt)     TFHERegisteredType<int>;
+//    %template(TFHERegisteredBool)    TFHERegisteredType<bool>;
 
 
 // 还可以添加辅助转换函数
@@ -103,4 +113,8 @@ namespace std {
 %include "tfhe_geos/geom/TFHELineString.h"
 %include "tfhe_geos/geom/TFHELinearRing.h"
 %include "tfhe_geos/geom/TFHEPolygon.h"
+%include "tfhe_geos/geom/TFHECoordinateSequenceFactory.h"
+%include "tfhe_geos/geom/TFHECoordinateSequence.h"
+%include "tfhe_geos/geom/TFHEGeometryFactory.h"
 %include "tfhe_geos/io/WKTReader.h"
+%include "tfhe_geos/util/SineStarFactory.h"

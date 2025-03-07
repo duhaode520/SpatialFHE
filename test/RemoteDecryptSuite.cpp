@@ -28,3 +28,14 @@ TEST_F(RemoteDecryptSuite, doDecryptTest) {
     EXPECT_EQ(result2, false);
     // auto result = client.call("doDecrypt");
 }
+
+TEST_F(RemoteDecryptSuite, doDecryptTestWithHostName) {
+    std::unique_ptr<TFHEContext> context = std::make_unique<TFHEContext>();
+    rpc::client client("dhdmaster", 8080);
+    TFHEBool positive = TFHEBool(true);
+    TFHEBool negative = TFHEBool(false);
+    bool result = positive.remoteDecrypt();
+    bool result2 = negative.remoteDecrypt();
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(result2, false);
+}

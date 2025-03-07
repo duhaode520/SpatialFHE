@@ -102,6 +102,8 @@ namespace SpatialFHE {
         static std::vector<uint8_t> serialize(const TFHEInt32 &item);
         static TFHEInt32 deserialize(std::vector<uint8_t> &data);
 
+        static const TFHEContext* javaGetContext();
+
         friend class TFHEBool;
     };
 

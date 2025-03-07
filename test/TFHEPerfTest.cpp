@@ -166,7 +166,7 @@ TEST_F(TFHEPerfTest, AddPerfTest) {
 }
 
 #ifdef WITH_FEATURE_GPU
-TEST_F(TFHEBasicSuite, GPUIntDecPerfTest) {
+TEST_F(TFHEPerfTest, GPUIntDecPerfTest) {
     Config* config = nullptr;
     ConfigBuilder* config_builder = nullptr;
 
@@ -215,7 +215,7 @@ TEST_F(TFHEBasicSuite, GPUIntDecPerfTest) {
     public_key_destroy(public_key);
 }
 
-TEST_F(TFHEBasicSuite, GPUBoolDecPerfTest) {
+TEST_F(TFHEPerfTest, GPUBoolDecPerfTest) {
     Config* config = nullptr;
     ConfigBuilder* config_builder = nullptr;
 
@@ -265,7 +265,7 @@ TEST_F(TFHEBasicSuite, GPUBoolDecPerfTest) {
     public_key_destroy(public_key);
 }
 
-TEST_F(TFHEBasicSuite, GPUAddPerfTest) {
+TEST_F(TFHEPerfTest, GPUAddPerfTest) {
     Config* config = nullptr;
     ConfigBuilder* config_builder = nullptr;
 
@@ -321,7 +321,7 @@ TEST_F(TFHEBasicSuite, GPUAddPerfTest) {
     public_key_destroy(public_key);
 }
 
-TEST_F(TFHEBasicSuite, GPUDiv) {
+TEST_F(TFHEPerfTest, GPUDiv) {
     Config* config = nullptr;
     ConfigBuilder* config_builder = nullptr;
 

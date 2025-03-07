@@ -14,27 +14,6 @@
 #include "tfhe.h"
 
 namespace SpatialFHE {
-    // std::vector<int32_t> TFHEInt32::doDecryptComparison(std::vector<std::vector<std::byte>> &data) {
-    //     std::vector<FheInt32*> fhe_data(data.size());
-    //     for(int i = 0; i < data.size(); i++) {
-    //         fhe_int32_deserialize(vectorToDynamicBufferView(data[i]), &fhe_data[i]);
-    //     }
-    //
-    //     std::vector<int32_t> result;
-    //     for (const auto & e : fhe_data) {
-    //         int32_t r;
-    //         fhe_int32_decrypt(e, context->getClientKey(), &r);
-    //         result.push_back(r);
-    //     }
-    //     return result;
-    // }
-
-    // int32_t TFHEInt32::remoteDecrypt() {
-    //     int choice = std::rand() % 3;
-    //     TFHEInt32 confused1 = *this % 3;
-    //
-    //
-    // }
 
     void TFHEInt32::registerContext(TFHEContext *ctx) {
         TFHERegisteredType::registerContext(ctx);
@@ -47,9 +26,9 @@ namespace SpatialFHE {
         if (item.data == nullptr) {
             return {};
         }
-        
+
         DynamicBuffer buffer;
-        CompressedFheInt32* compressed;
+        CompressedFheInt32 *compressed;
         fhe_int32_compress(item.data, &compressed);
         compressed_fhe_int32_serialize(compressed, &buffer);
         std::vector<uint8_t> result(buffer.pointer, buffer.pointer + buffer.length);
@@ -62,14 +41,14 @@ namespace SpatialFHE {
         if (data.empty()) {
             return result;
         }
-        
+
         DynamicBufferView view;
         view.pointer = data.data();
-        view.length = data.size()-1;
-        CompressedFheInt32* compressed;
+        view.length = data.size() - 1;
+        CompressedFheInt32 *compressed;
         compressed_fhe_int32_deserialize(view, &compressed);
         compressed_fhe_int32_decompress(compressed, &result.data);
-        
+
 #ifdef DEBUG
         // 如果在DEBUG模式下，可能需要设置原始值
         // 但由于序列化数据中不包含原始值，这里只能设置默认值
@@ -77,6 +56,10 @@ namespace SpatialFHE {
 #endif
         result.trivial = data.back();
         return result;
+    }
+
+    const TFHEContext *TFHEInt32::javaGetContext() {
+        return context;
     }
 
     TFHEInt32::TFHEInt32(int32_t value, bool trivial) {
@@ -94,7 +77,7 @@ namespace SpatialFHE {
             std::thread([&]() {
                 context->setServerKey();
                 fhe_int32_try_encrypt_trivial_i32(value, &data);
-             }).join();
+            }).join();
 #else
             fhe_int32_try_encrypt_trivial_i32(value, &data);
 #endif
@@ -174,7 +157,7 @@ namespace SpatialFHE {
             std::thread([&]() {
                 context->setServerKey();
                 fhe_int32_try_decrypt_trivial(data, &result);
-             }).join();
+            }).join();
 #else
             fhe_int32_try_decrypt_trivial(data, &result);
 #endif

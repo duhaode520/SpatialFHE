@@ -44,7 +44,7 @@ namespace SpatialFHE::geom {
             return;
         }
         if (coords->size() == 1) {
-            coordinates.setAt(coords->getAt(0), 0);
+            coordinates.add(coords->getAt(0));
         } else if (coords->size() > 1) {
             throw std::invalid_argument("Point must have exactly one coordinate");
         }

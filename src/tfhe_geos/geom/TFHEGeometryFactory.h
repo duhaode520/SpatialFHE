@@ -18,12 +18,6 @@ namespace SpatialFHE::geom {
     private:
         friend class TFHEGeometry;
 
-        struct TFHEGeometryFactoryDeleter {
-            void operator()(TFHEGeometryFactory* gf) const {
-                gf->destroy();
-            }
-        };
-
         mutable int refCount = 0;
         const TFHECoordinateSequenceFactory* csFactory = TFHECoordinateSequenceFactory::instance();
         bool autoDestroy;
@@ -33,6 +27,13 @@ namespace SpatialFHE::geom {
         friend class TFHEGeometry;
 
     public:
+        // 这个放在public是为了 SWIG 能使用
+        struct TFHEGeometryFactoryDeleter {
+            void operator()(TFHEGeometryFactory* gf) const {
+                gf->destroy();
+            }
+        };
+
         using Ptr = std::unique_ptr<TFHEGeometryFactory, TFHEGeometryFactoryDeleter>;
 
         static Ptr create();

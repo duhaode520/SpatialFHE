@@ -37,6 +37,7 @@ SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::parallelOp2(
     }
     return {a.getWidth(), a.getHeight(), result};
 }
+
 SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::parallelOp2(
     CipherMat const &a,
     std::vector<PlainText> const &plainVector,
@@ -74,7 +75,7 @@ SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::parallelOp2(
 }
 
 SpatialFHE::SpatialFHEManager::SpatialFHEManager() {
-    max_thread_num = 1;
+    max_thread_num = 8;
 }
 
 SpatialFHE::SpatialFHEManager::SpatialFHEManager(
@@ -84,11 +85,12 @@ SpatialFHE::SpatialFHEManager::SpatialFHEManager(
     const std::string &serverURL,
     const HECrypto::HELibrary heLibrary,
     bool isInit,
-    int max_thread_num = 1) :
+    int max_thread_num = 8) :
         BaseFHEManager(publicKeyPath, secretKeyPath, paramsString, heLibrary, isInit),
-         VectorFHEManager(publicKeyPath, secretKeyPath, serverURL, isInit) {
+        VectorFHEManager(publicKeyPath, secretKeyPath, serverURL, isInit) {
     this->max_thread_num = max_thread_num;
 }
+
 SpatialFHE::SpatialFHEManager::~SpatialFHEManager() = default;
 
 SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::encryptMat(
@@ -97,22 +99,71 @@ SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::encryptMat(
     const std::vector<double> &data) {
     std::vector<PlainText> plain_vec = crypto->EncodeMany(data);
     std::vector<CipherText> cipher_vec;
-    cipher_vec.reserve(plain_vec.size());
-    for (auto &plain : plain_vec) {
-        cipher_vec.emplace_back(crypto->Encrypt(plain));
+    if (heLib == HECrypto::HELibrary::Phantom) {
+        for (auto &plain : plain_vec) {
+            cipher_vec.emplace_back(crypto->Encrypt(plain));
+        }
+    } else {
+        cipher_vec.resize(plain_vec.size());
+        int size = plain_vec.size();
+        int numThreads = std::min(size, (int)std::thread::hardware_concurrency());
+
+        std::vector<std::thread> threads(numThreads);
+        int chunkSize = size / numThreads;
+
+        for (int i = 0; i < numThreads; i++) {
+            threads[i] = std::thread([&, i]() {
+                int start = i * chunkSize;
+                int end = (i == numThreads - 1) ? size : start + chunkSize;
+                for (int j = start; j < end; j++) {
+                    cipher_vec[j] = crypto->Encrypt(plain_vec[j]);
+                }
+            });
+        }
+
+        for (auto &t : threads) {
+            if (t.joinable())
+                t.join();
+        }
     }
+
     return {width, height, cipher_vec};
 }
 
 std::vector<double> SpatialFHE::SpatialFHEManager::decryptMat(CipherMat &cipher_mat) {
     int width = cipher_mat.getWidth();
     int height = cipher_mat.getHeight();
+    int size = cipher_mat.getData().size();
+
     std::vector<PlainText> plain_vec;
-    plain_vec.reserve(cipher_mat.getData().size());
-    for (auto &cipher : cipher_mat.getData()) {
-        plain_vec.emplace_back(crypto->Decrypt(cipher));
+    if (heLib == HECrypto::HELibrary::Phantom) {
+        for (auto &cipher : cipher_mat.getData()) {
+            plain_vec.emplace_back(crypto->Decrypt(cipher));
+        }
+    } else {
+        plain_vec.resize(size);
+        int numThreads = std::min(size, (int)std::thread::hardware_concurrency());
+        std::vector<std::thread> threads(numThreads);
+        int chunkSize = size / numThreads;
+
+        // 并行解密
+        for (int i = 0; i < numThreads; i++) {
+            threads[i] = std::thread([&, i]() {
+                int start = i * chunkSize;
+                int end = (i == numThreads - 1) ? size : start + chunkSize;
+                for (int j = start; j < end; j++) {
+                    plain_vec[j] = crypto->Decrypt(cipher_mat.getData()[j]);
+                }
+            });
+        }
+
+        for (auto &t : threads) {
+            if (t.joinable())
+                t.join();
+        }
     }
-    // Decode each plaintext and store in a vector
+
+    // 解码后的结果
     std::vector<double> result;
     for (auto &plain : plain_vec) {
         std::vector<double> tmp_vector;
@@ -127,6 +178,7 @@ std::vector<double> SpatialFHE::SpatialFHEManager::decryptMat(CipherMat &cipher_
 SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::addMat(CipherMat const &a, CipherMat const &b) {
     return parallelOp2(a, b, [this](CipherText const &x, CipherText const &y) { return crypto->Add(x, y); });
 }
+
 SpatialFHE::CipherMat SpatialFHE::SpatialFHEManager::addMatPlain(CipherMat const &a, const std::vector<double> &plain) {
     std::vector<PlainText> plain_vec = crypto->EncodeMany(plain);
     return parallelOp2(
