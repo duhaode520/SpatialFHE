@@ -309,4 +309,39 @@ namespace SpatialFHE {
     bool TFHEBool::isLocalFalse(const TFHEBool &other) {
         return &tfhe_false == &other;
     }
+
+    std::vector<uint8_t> TFHEBool::serialize(const TFHEBool &item) {
+        if (item.data == nullptr) {
+            return {};
+        }
+        
+        DynamicBuffer buffer;
+        CompressedFheBool* compressed;
+        fhe_bool_compress(item.data, &compressed);
+        compressed_fhe_bool_serialize(compressed, &buffer);
+        std::vector<uint8_t> result(buffer.pointer, buffer.pointer + buffer.length);
+        result.push_back(item.trivial);
+        return result;
+    }
+
+    TFHEBool TFHEBool::deserialize(std::vector<uint8_t> &data) {
+        TFHEBool result;
+        if (data.empty()) {
+            return result;
+        }
+        
+        DynamicBufferView view;
+        view.pointer = data.data();
+        view.length = data.size()-1;
+        CompressedFheBool* compressed;
+        compressed_fhe_bool_deserialize(view, &compressed);
+        compressed_fhe_bool_decompress(compressed, &result.data);
+        
+#ifdef DEBUG
+        // 在DEBUG模式下，只能设置默认值，因为序列化数据中不包含原始值
+        result.ori = false;
+#endif
+        result.trivial = data.back();
+        return result;
+    }
 }  // namespace SpatialFHE

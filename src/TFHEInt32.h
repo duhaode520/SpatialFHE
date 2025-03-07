@@ -91,11 +91,16 @@ namespace SpatialFHE {
         [[nodiscard]] bool leTrivial(int32_t other) const;
         [[nodiscard]] bool neTrivial(int32_t other) const;
 
+
+
         // static method
         static TFHEInt32 max(const TFHEInt32 &a, const TFHEInt32 &b);
         static TFHEInt32 min(const TFHEInt32 &a, const TFHEInt32 &b);
 
         static void registerContext(TFHEContext *ctx);
+
+        static std::vector<uint8_t> serialize(const TFHEInt32 &item);
+        static TFHEInt32 deserialize(std::vector<uint8_t> &data);
 
         friend class TFHEBool;
     };

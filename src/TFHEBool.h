@@ -70,6 +70,10 @@ namespace SpatialFHE {
         static void registerContext(TFHEContext* ctx) ;
         static bool isLocalTrue(const TFHEBool &other);
         static bool isLocalFalse(const TFHEBool &other);
+
+        // 添加序列化和反序列化函数的声明
+        static std::vector<uint8_t> serialize(const TFHEBool &item);
+        static TFHEBool deserialize(std::vector<uint8_t> &data);
     };
 
 }  // namespace SpatialFHE

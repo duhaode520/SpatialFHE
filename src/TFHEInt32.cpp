@@ -8,6 +8,8 @@
 #include <driver_types.h>
 
 #include <c++/9/stdexcept>
+#include <cstddef>
+#include <cstdint>
 
 #include "tfhe.h"
 
@@ -39,6 +41,42 @@ namespace SpatialFHE {
         // if (context->getRpcServer() != nullptr) {
         //     context->getRpcServer()->bind("decryptComparison", &TFHEInt32::doDecryptComparison);
         // }
+    }
+
+    std::vector<uint8_t> TFHEInt32::serialize(const TFHEInt32 &item) {
+        if (item.data == nullptr) {
+            return {};
+        }
+        
+        DynamicBuffer buffer;
+        CompressedFheInt32* compressed;
+        fhe_int32_compress(item.data, &compressed);
+        compressed_fhe_int32_serialize(compressed, &buffer);
+        std::vector<uint8_t> result(buffer.pointer, buffer.pointer + buffer.length);
+        result.push_back(item.trivial);
+        return result;
+    }
+
+    TFHEInt32 TFHEInt32::deserialize(std::vector<uint8_t> &data) {
+        TFHEInt32 result;
+        if (data.empty()) {
+            return result;
+        }
+        
+        DynamicBufferView view;
+        view.pointer = data.data();
+        view.length = data.size()-1;
+        CompressedFheInt32* compressed;
+        compressed_fhe_int32_deserialize(view, &compressed);
+        compressed_fhe_int32_decompress(compressed, &result.data);
+        
+#ifdef DEBUG
+        // 如果在DEBUG模式下，可能需要设置原始值
+        // 但由于序列化数据中不包含原始值，这里只能设置默认值
+        result.ori = 0;
+#endif
+        result.trivial = data.back();
+        return result;
     }
 
     TFHEInt32::TFHEInt32(int32_t value, bool trivial) {
