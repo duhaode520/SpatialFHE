@@ -59,6 +59,7 @@
 %unique_ptr(SpatialFHE::geom::TFHECoordinateSequence)
 %unique_ptr(SpatialFHE::geom::TFHEIntersectionMatrix)
 
+//%shared_ptr(SpatialFHE::geom::TFHEPolygon)
 namespace std {
    %template(IntVector)             vector<int>;
    %template(ByteVector)            vector<uint8_t>;

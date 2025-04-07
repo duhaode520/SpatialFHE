@@ -12,15 +12,11 @@ namespace SpatialFHE {
         int32_t ori;
 #endif
 
-        // /**
-        // * @brief Decrypt comparison data from remote, data range in -1, 0, 1
-        // *
-        // * @param data conjunction of the encrypted data, * including equal number of encrypted -1, 0, 1
-        // * @return decrypted
-        // */
-        // static std::vector<int32_t> doDecryptComparison(std::vector<std::vector<std::byte>> &data);
-        //
-        // int32_t remoteDecrypt();
+
+        // 应当只用在测试程序中
+        static int32_t doDecrypt(std::vector<uint8_t> &data);
+        // remoteDecrypt应当只用在测试程序中
+        int32_t remoteDecrypt() const;
 
     public:
         explicit TFHEInt32(int32_t value, bool trivial=false);

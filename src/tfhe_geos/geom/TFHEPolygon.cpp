@@ -21,7 +21,7 @@ namespace SpatialFHE::geom {
     TFHEPolygon::TFHEPolygon(const TFHEPolygon &other) :
             TFHEGeometry(other), shell(std::make_unique<TFHELinearRing>(*other.shell)), holes(other.holes.size()) {
         for (std::size_t i = 0; i < other.holes.size(); i++) {
-            holes[i] = std::make_unique<TFHELinearRing>(*other.holes[i]);
+            holes[i] = std::make_shared<TFHELinearRing>(*other.holes[i]);
         }
     }
 
@@ -61,11 +61,13 @@ namespace SpatialFHE::geom {
         std::unique_ptr<TFHELinearRing> p_shell,
         std::vector<std::unique_ptr<TFHELinearRing>> p_holes,
         const TFHEGeometryFactory &p_factory) :
-            TFHEGeometry(&p_factory), shell(std::move(p_shell)), holes(std::move(p_holes)) {
+            TFHEGeometry(&p_factory), shell(std::move(p_shell)){
         if (this->shell == nullptr) {
             this->shell = getFactory()->createLinearRing();
         }
-
+        for (auto &hole : p_holes) {
+            holes.emplace_back(std::move(hole));
+        }
         if (this->shell->isEmpty() && hasNonEmptyElements(&this->holes)) {
             throw std::invalid_argument("shell is empty and holes is empty");
         }

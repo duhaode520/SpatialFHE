@@ -4,13 +4,18 @@
 
 #include "TFHEContext.h"
 
+#include <TFHEDecimal.h>
 #include <TFHEInt32.h>
+#include <TFHEInt64.h>
+
 #include "FSManager.h"  // 添加FSManager头文件
 
 namespace SpatialFHE {
     void TFHEContext::registerType() {
         TFHEInt32::registerContext(this);
         TFHEBool::registerContext(this);
+        TFHEInt64::registerContext(this);
+        TFHEDecimal::registerContext(this);
     }
 
     void TFHEContext::generateKey() {
@@ -81,7 +86,7 @@ namespace SpatialFHE {
 
     TFHEContext::TFHEContext() {
         isClient = false;
-        rpcInit("127.0.0.1:8080");
+        rpcInit("127.0.0.1:10080");
         generateKey();
         registerType();
     }

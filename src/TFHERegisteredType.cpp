@@ -12,6 +12,9 @@ namespace SpatialFHE {
     TFHEContext *TFHERegisteredType<int>::context = nullptr;
     template<>
     TFHEContext *TFHERegisteredType<bool>::context = nullptr;
+    template<>
+    TFHEContext *TFHERegisteredType<long>::context = nullptr;
+    template<> TFHEContext *TFHERegisteredType<double>::context = nullptr;
 
     DynamicBufferView vectorToDynamicBufferView(const std::vector<uint8_t> &vec) {
         DynamicBufferView bufferView;

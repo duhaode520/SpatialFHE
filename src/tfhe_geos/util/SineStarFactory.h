@@ -68,6 +68,14 @@ namespace SpatialFHE::util {
             int nPts,
             int nArms,
             double armLengthRatio);
+
+        // return shared TFHEPolygon for java
+        static std::shared_ptr<geom::TFHEPolygon> createShared(
+            geom::TFHECoordinate& origin,
+            double size,
+            int nPts,
+            int nArms,
+            double armLengthRatio);
     };
 
 }  // namespace SpatialFHE::util

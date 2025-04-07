@@ -25,7 +25,7 @@ namespace SpatialFHE::geom {
             const TFHEGeometryFactory& p_factory);
 
         std::unique_ptr<TFHELinearRing> shell;
-        std::vector<std::unique_ptr<TFHELinearRing>> holes;
+        std::vector<std::shared_ptr<TFHELinearRing>> holes;
 
     public:
         friend class TFHEGeometryFactory;

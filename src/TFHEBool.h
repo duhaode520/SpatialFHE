@@ -61,6 +61,8 @@ namespace SpatialFHE {
         explicit operator TFHEInt32() const;
 
         friend class TFHEInt32;
+        friend class TFHEInt64;
+        friend class TFHEDecimal;
 
         // static instance
         static TFHEBool tfhe_true;

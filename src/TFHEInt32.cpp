@@ -7,6 +7,7 @@
 #include <cuda_runtime_api.h>
 #include <driver_types.h>
 
+#include <c++/9/iostream>
 #include <c++/9/stdexcept>
 #include <cstddef>
 #include <cstdint>
@@ -17,9 +18,9 @@ namespace SpatialFHE {
 
     void TFHEInt32::registerContext(TFHEContext *ctx) {
         TFHERegisteredType::registerContext(ctx);
-        // if (context->getRpcServer() != nullptr) {
-        //     context->getRpcServer()->bind("decryptComparison", &TFHEInt32::doDecryptComparison);
-        // }
+        if (context->getRpcServer() != nullptr) {
+            context->getRpcServer()->bind("decryptInt32", &TFHEInt32::doDecrypt);
+        }
     }
 
     std::vector<uint8_t> TFHEInt32::serialize(const TFHEInt32 &item) {
@@ -60,6 +61,17 @@ namespace SpatialFHE {
 
     const TFHEContext *TFHEInt32::javaGetContext() {
         return context;
+    }
+
+    int32_t TFHEInt32::doDecrypt(std::vector<uint8_t> &data) {
+        context->setServerKey();
+        return deserialize(data).decrypt();
+    }
+
+    int32_t TFHEInt32::remoteDecrypt() const{
+        std::vector<uint8_t> data = serialize(*this);
+        auto result = context->getRpcClient()->call("decryptInt32", data);
+        return result.as<int32_t>();
     }
 
     TFHEInt32::TFHEInt32(int32_t value, bool trivial) {
@@ -166,7 +178,8 @@ namespace SpatialFHE {
                 fhe_int32_decrypt(data, context->getClientKey(), &result);
 
             } else {
-                throw std::logic_error("Remote decryption is not supported");
+                std::cerr << "WARN: Remote decryption of int32 should only be used in tests" << std::endl;
+                result = remoteDecrypt();
             }
         }
 
