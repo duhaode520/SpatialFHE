@@ -77,8 +77,8 @@ namespace SpatialFHE::util {
 
                 double ang = i * (2 * MATH_PI / nPts);
                 TFHEInt32::getContext()->setServerKey();
-                TFHEInt32 x = TFHEInt32(curveRadius * cos(ang) + centreX);
-                TFHEInt32 y = TFHEInt32(curveRadius * sin(ang) + centreY);
+                TFHEDecimal x = TFHEDecimal(curveRadius * cos(ang) + centreX);
+                TFHEDecimal y = TFHEDecimal(curveRadius * sin(ang) + centreY);
                 pts[i] = coord(x, y);
             }
         };

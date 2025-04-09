@@ -34,7 +34,7 @@ namespace SpatialFHE {
     }
 
     void RelateNGPolygonOverlappingPerfTest::startRun(int npts) {
-        TFHECoordinate ori((TFHEInt32(ORG_X)), TFHEInt32(ORG_Y));
+        TFHECoordinate ori((TFHEDecimal(ORG_X)), TFHEDecimal(ORG_Y));
         geomA = util::SineStarFactory::create(ori, SIZE, npts, N_ARMS, ARM_RATIO);
 
         int nptsB = npts * B_SIZE_FACTOR / NUM_CASES;
@@ -105,7 +105,7 @@ namespace SpatialFHE {
                     double y = GRID_CELL_SIZE / 2 + j * GRID_CELL_SIZE;
 
                     TFHEInt32::getContext()->setServerKey();
-                    TFHECoordinate coord((TFHEInt32(x)), TFHEInt32(y));
+                    TFHECoordinate coord((TFHEDecimal(x)), TFHEDecimal(y));
                     geomB[i * GRID_SIZE + j] =
                         util::SineStarFactory::create(coord, GRID_CELL_SIZE, npts, N_ARMS, ARM_RATIO);
 #ifndef DEBUG

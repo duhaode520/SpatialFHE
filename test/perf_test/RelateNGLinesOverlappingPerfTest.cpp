@@ -31,7 +31,7 @@ namespace SpatialFHE {
     }
 
     void RelateNGLinesOverlappingPerfTest::startRun(int npts) {
-        TFHECoordinate ori((TFHEInt32(ORG_X)), TFHEInt32(ORG_Y));
+        TFHECoordinate ori((TFHEDecimal(ORG_X)), TFHEDecimal(ORG_Y));
         std::unique_ptr<TFHEGeometry> sineStar = util::SineStarFactory::create(ori, SIZE, npts, N_ARMS, ARM_RATIO);
         geomA = sineStar->getBoundary();
 
@@ -91,7 +91,7 @@ namespace SpatialFHE {
                     double y = GRID_CELL_SIZE / 2 + j * GRID_CELL_SIZE;
 
                     TFHEInt32::getContext()->setServerKey();
-                    TFHECoordinate coord((TFHEInt32(x )), TFHEInt32(y ));
+                    TFHECoordinate coord((TFHEDecimal(x )), TFHEDecimal(y ));
                     auto geom = util::SineStarFactory::create(coord, GRID_CELL_SIZE, npts, N_ARMS, ARM_RATIO);
 #ifndef DEBUG
                     // 没有DEBUG的时候，创建的速度比较慢

@@ -35,7 +35,7 @@ namespace SpatialFHE::geom {
          *
          * @throws IllegalArgumentException if the displacements are both 0
          */
-        static int quadrant(TFHEInt32 dx, TFHEInt32 dy) {
+        static int quadrant(TFHEDecimal dx, TFHEDecimal dy) {
             bool dxNotNeg = (dx >= 0).decrypt();
             bool dyNotNeg = (dy >= 0).decrypt();
             if (dxNotNeg) {

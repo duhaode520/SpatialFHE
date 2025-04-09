@@ -3,6 +3,7 @@
 //
 
 #include "TFHENodeSection.h"
+#include "TFHEInt32.h"
 
 #include <tfhe_geos/geom/enums.h>
 

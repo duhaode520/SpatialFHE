@@ -7,21 +7,21 @@
 #include <cassert>
 
 namespace SpatialFHE::geom {
-    void TFHEEnvelope::init(const TFHEInt32 &x1, const TFHEInt32 &x2, const TFHEInt32 &y1, const TFHEInt32 &y2) {
-        minx = TFHEInt32::min(x1, x2);
-        maxx = TFHEInt32::max(x1, x2);
-        miny = TFHEInt32::min(y1, y2);
-        maxy = TFHEInt32::max(y1, y2);
+    void TFHEEnvelope::init(const TFHEDecimal &x1, const TFHEDecimal &x2, const TFHEDecimal &y1, const TFHEDecimal &y2) {
+        minx = TFHEDecimal::min(x1, x2);
+        maxx = TFHEDecimal::max(x1, x2);
+        miny = TFHEDecimal::min(y1, y2);
+        maxy = TFHEDecimal::max(y1, y2);
     }
 
     TFHEEnvelope::TFHEEnvelope() {
-        minx = TFHEInt32();
-        maxx = TFHEInt32();
-        miny = TFHEInt32();
-        maxy = TFHEInt32();
+        minx = TFHEDecimal();
+        maxx = TFHEDecimal();
+        miny = TFHEDecimal();
+        maxy = TFHEDecimal();
     }
 
-    TFHEEnvelope::TFHEEnvelope(const TFHEInt32 &x1, const TFHEInt32 &x2, const TFHEInt32 &y1, const TFHEInt32 &y2) {
+    TFHEEnvelope::TFHEEnvelope(const TFHEDecimal &x1, const TFHEDecimal &x2, const TFHEDecimal &y1, const TFHEDecimal &y2) {
         init(x1, x2, y1, y2);
     }
 
@@ -61,36 +61,36 @@ namespace SpatialFHE::geom {
         return minx.isNull() || maxx.isNull() || miny.isNull() || maxy.isNull();
     }
 
-    TFHEInt32 TFHEEnvelope::getWidth() const {
+    TFHEDecimal TFHEEnvelope::getWidth() const {
         if (isNull()) {
             return {};
         }
         return maxx - minx;
     }
 
-    TFHEInt32 TFHEEnvelope::getHeight() const {
+    TFHEDecimal TFHEEnvelope::getHeight() const {
         if (isNull()) {
             return {};
         }
         return maxy - miny;
     }
 
-    TFHEInt32 TFHEEnvelope::getMinX() const {
+    TFHEDecimal TFHEEnvelope::getMinX() const {
         assert(!isNull());
         return minx;
     }
 
-    TFHEInt32 TFHEEnvelope::getMinY() const {
+    TFHEDecimal TFHEEnvelope::getMinY() const {
         assert(!isNull());
         return miny;
     }
 
-    TFHEInt32 TFHEEnvelope::getMaxX() const {
+    TFHEDecimal TFHEEnvelope::getMaxX() const {
         assert(!isNull());
         return maxx;
     }
 
-    TFHEInt32 TFHEEnvelope::getMaxY() const {
+    TFHEDecimal TFHEEnvelope::getMaxY() const {
         assert(!isNull());
         return maxy;
     }
@@ -104,10 +104,10 @@ namespace SpatialFHE::geom {
 
     TFHEEnvelope TFHEEnvelope::intersection(const TFHEEnvelope &other) const {
         if (!this->isNull() && !other.isNull()) {
-            TFHEInt32 x1 = TFHEInt32::max(minx, other.minx);
-            TFHEInt32 x2 = TFHEInt32::min(maxx, other.maxx);
-            TFHEInt32 y1 = TFHEInt32::max(miny, other.miny);
-            TFHEInt32 y2 = TFHEInt32::min(maxy, other.maxy);
+            TFHEDecimal x1 = TFHEDecimal::max(minx, other.minx);
+            TFHEDecimal x2 = TFHEDecimal::min(maxx, other.maxx);
+            TFHEDecimal y1 = TFHEDecimal::max(miny, other.miny);
+            TFHEDecimal y2 = TFHEDecimal::min(maxy, other.maxy);
             return {x1, x2, y1, y2};
         } else {
             return {};
@@ -130,7 +130,7 @@ namespace SpatialFHE::geom {
         return intersects(*other);
     }
 
-    TFHEBool TFHEEnvelope::intersects(const TFHEInt32 &x, const TFHEInt32 &y) const {
+    TFHEBool TFHEEnvelope::intersects(const TFHEDecimal &x, const TFHEDecimal &y) const {
         if (this->isNull()) {
             return TFHEBool::tfhe_false;
         } else {
@@ -163,7 +163,7 @@ namespace SpatialFHE::geom {
         return covers(p);
     }
 
-    TFHEBool TFHEEnvelope::contains(const TFHEInt32 &x, const TFHEInt32 &y) const {
+    TFHEBool TFHEEnvelope::contains(const TFHEDecimal &x, const TFHEDecimal &y) const {
         return covers(x, y);
     }
 
@@ -187,7 +187,7 @@ namespace SpatialFHE::geom {
         return covers(p.x, p.y);
     }
 
-    TFHEBool TFHEEnvelope::covers(const TFHEInt32 &x, const TFHEInt32 &y) const {
+    TFHEBool TFHEEnvelope::covers(const TFHEDecimal &x, const TFHEDecimal &y) const {
         if (this->isNull()) {
             return TFHEBool::tfhe_false;
         } else {
@@ -205,17 +205,17 @@ namespace SpatialFHE::geom {
         }
     }
 
-    void TFHEEnvelope::expandToInclude(TFHEInt32 x, TFHEInt32 y) {
+    void TFHEEnvelope::expandToInclude(TFHEDecimal x, TFHEDecimal y) {
         if (isNull()) {
             minx = x;
             maxx = x;
             miny = y;
             maxy = y;
         } else {
-            minx = TFHEInt32::min(minx, x);
-            maxx = TFHEInt32::max(maxx, x);
-            miny = TFHEInt32::min(miny, y);
-            maxy = TFHEInt32::max(maxy, y);
+            minx = TFHEDecimal::min(minx, x);
+            maxx = TFHEDecimal::max(maxx, x);
+            miny = TFHEDecimal::min(miny, y);
+            maxy = TFHEDecimal::max(maxy, y);
         }
     }
 
@@ -230,10 +230,10 @@ namespace SpatialFHE::geom {
             miny = other.miny;
             maxy = other.maxy;
         } else {
-            minx = TFHEInt32::min(minx, other.minx);
-            maxx = TFHEInt32::max(maxx, other.maxx);
-            miny = TFHEInt32::min(miny, other.miny);
-            maxy = TFHEInt32::max(maxy, other.maxy);
+            minx = TFHEDecimal::min(minx, other.minx);
+            maxx = TFHEDecimal::max(maxx, other.maxx);
+            miny = TFHEDecimal::min(miny, other.miny);
+            maxy = TFHEDecimal::max(maxy, other.maxy);
         }
     }
 
@@ -242,14 +242,14 @@ namespace SpatialFHE::geom {
         const TFHECoordinate &p2,
         const TFHECoordinate &q1,
         const TFHECoordinate &q2) {
-        TFHEInt32 minqx = TFHEInt32::min(q1.x, q2.x);
-        TFHEInt32 maxqx = TFHEInt32::max(q1.x, q2.x);
-        TFHEInt32 minpx = TFHEInt32::min(p1.x, p2.x);
-        TFHEInt32 maxpx = TFHEInt32::max(p1.x, p2.x);
-        TFHEInt32 minqy = TFHEInt32::min(q1.y, q2.y);
-        TFHEInt32 maxqy = TFHEInt32::max(q1.y, q2.y);
-        TFHEInt32 minpy = TFHEInt32::min(p1.y, p2.y);
-        TFHEInt32 maxpy = TFHEInt32::max(p1.y, p2.y);
+        TFHEDecimal minqx = TFHEDecimal::min(q1.x, q2.x);
+        TFHEDecimal maxqx = TFHEDecimal::max(q1.x, q2.x);
+        TFHEDecimal minpx = TFHEDecimal::min(p1.x, p2.x);
+        TFHEDecimal maxpx = TFHEDecimal::max(p1.x, p2.x);
+        TFHEDecimal minqy = TFHEDecimal::min(q1.y, q2.y);
+        TFHEDecimal maxqy = TFHEDecimal::max(q1.y, q2.y);
+        TFHEDecimal minpy = TFHEDecimal::min(p1.y, p2.y);
+        TFHEDecimal maxpy = TFHEDecimal::max(p1.y, p2.y);
         return (maxqx >= minpx && minqx <= maxpx && maxqy >= minpy && minqy <= maxpy);
     }
 

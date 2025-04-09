@@ -4,6 +4,7 @@
 #include "tfhe.h"
 
 namespace SpatialFHE {
+    class TFHEDecimal;
 
     class TFHEInt32 : public TFHERegisteredType<int> {
     private:
@@ -99,6 +100,8 @@ namespace SpatialFHE {
         static TFHEInt32 deserialize(std::vector<uint8_t> &data);
 
         static const TFHEContext* javaGetContext();
+
+        explicit operator TFHEDecimal() const;
 
         friend class TFHEBool;
     };

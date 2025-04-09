@@ -82,6 +82,7 @@ namespace SpatialFHE {
         static const TFHEContext* javaGetContext();
 
         friend class TFHEBool;
+        friend class TFHEInt32;
     };
 
 }  // namespace SpatialFHE

@@ -5,7 +5,7 @@
 #include "TFHEDistance.h"
 
 namespace SpatialFHE::algorithm {
-    TFHEInt32 TFHEDistance::pointToSegmentSquared(
+    TFHEDecimal TFHEDistance::pointToSegmentSquared(
         const geom::TFHECoordinate &p,
         const geom::TFHECoordinate &A,
         const geom::TFHECoordinate &B) {
@@ -28,8 +28,8 @@ namespace SpatialFHE::algorithm {
             0<r<1 P is interior to AB
         */
 
-        TFHEInt32 dot = (p.x - A.x) * (B.x - A.x) + (p.y - A.y) * (B.y - A.y);
-        TFHEInt32 L2 = A.distanceSquared(B);
+        TFHEDecimal dot = (p.x - A.x) * (B.x - A.x) + (p.y - A.y) * (B.y - A.y);
+        TFHEDecimal L2 = A.distanceSquared(B);
 
         if((dot <= 0).decrypt()) {
             return p.distanceSquared(A);
@@ -48,7 +48,7 @@ namespace SpatialFHE::algorithm {
             The square of distance = s^2*L^2 = D^2/L^2
         */
 
-        TFHEInt32 d = (A.y - p.y) * (B.x - A.x) - (A.x - p.x) * (B.y - A.y);
+        TFHEDecimal d = (A.y - p.y) * (B.x - A.x) - (A.x - p.x) * (B.y - A.y);
 
         return d*d/L2;
     }

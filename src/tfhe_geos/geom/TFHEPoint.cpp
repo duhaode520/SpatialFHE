@@ -88,15 +88,15 @@ namespace SpatialFHE::geom {
         return factory->createEmptyGeometry(TFHEGeometryTypeId::TFHE_POINT);
     }
 
-    void TFHEPoint::setXY(TFHEInt32 x, TFHEInt32 y) {
+    void TFHEPoint::setXY(TFHEDecimal x, TFHEDecimal y) {
         coordinates.setAt({x, y}, 0);
     }
 
-    TFHEInt32 TFHEPoint::getX() const {
+    TFHEDecimal TFHEPoint::getX() const {
         return coordinates.getAt(0).x;
     }
 
-    TFHEInt32 TFHEPoint::getY() const {
+    TFHEDecimal TFHEPoint::getY() const {
         return coordinates.getAt(0).y;
     }
 }  // namespace SpatialFHE::geom

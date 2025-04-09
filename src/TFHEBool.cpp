@@ -7,6 +7,7 @@
 #include <c++/9/stdexcept>
 
 #include "TFHEInt32.h"
+#include "TFHEDecimal.h"  // 添加TFHEDecimal头文件
 #include "tfhe.h"
 
 namespace SpatialFHE {
@@ -281,6 +282,17 @@ namespace SpatialFHE {
         fhe_bool_cast_into_fhe_int32(this->data, &result.data);
 #ifdef DEBUG
         result.ori = this->ori;
+#endif
+        return result;
+    }
+
+    TFHEBool::operator TFHEDecimal() const {
+        TFHEDecimal result;
+        FheInt64* temp_data;
+        fhe_bool_cast_into_fhe_int64(this->data, &temp_data);
+        result.data = temp_data;
+#ifdef DEBUG
+        result.ori = this->ori ? 1.0 : 0.0;
 #endif
         return result;
     }

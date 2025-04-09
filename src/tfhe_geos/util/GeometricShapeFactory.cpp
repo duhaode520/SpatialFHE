@@ -43,29 +43,29 @@ namespace SpatialFHE::util {
             nSide = 1;
         }
         std::unique_ptr<TFHEEnvelope> env(dim.getEnvelope());
-        TFHEInt32 XsegLen = env->getWidth() / nSide;
-        TFHEInt32 YsegLen = env->getHeight() / nSide;
+        TFHEDecimal XsegLen = env->getWidth() / nSide;
+        TFHEDecimal YsegLen = env->getHeight() / nSide;
 
         std::vector<TFHECoordinate> vc(4 * nSide + 1);
 
         for (i = 0; i < nSide; i++) {
-            TFHEInt32 x = env->getMinX() + XsegLen * i;
-            TFHEInt32 y = env->getMinY();
+            TFHEDecimal x = env->getMinX() + XsegLen * i;
+            TFHEDecimal y = env->getMinY();
             vc[ipt++] = coord(x, y);
         }
         for (i = 0; i < nSide; i++) {
-            TFHEInt32 x = env->getMaxX();
-            TFHEInt32 y = env->getMinY() + YsegLen * i;
+            TFHEDecimal x = env->getMaxX();
+            TFHEDecimal y = env->getMinY() + YsegLen * i;
             vc[ipt++] = coord(x, y);
         }
         for (i = 0; i < nSide; i++) {
-            TFHEInt32 x = env->getMaxX() - XsegLen * i;
-            TFHEInt32 y = env->getMaxY();
+            TFHEDecimal x = env->getMaxX() - XsegLen * i;
+            TFHEDecimal y = env->getMaxY();
             vc[ipt++] = coord(x, y);
         }
         for (i = 0; i < nSide; i++) {
-            TFHEInt32 x = env->getMinX();
-            TFHEInt32 y = env->getMaxY() - YsegLen * i;
+            TFHEDecimal x = env->getMinX();
+            TFHEDecimal y = env->getMaxY() - YsegLen * i;
             vc[ipt++] = coord(x, y);
         }
         vc[ipt++] = vc[0];
@@ -108,11 +108,11 @@ namespace SpatialFHE::util {
             return std::make_unique<TFHEEnvelope>(
                 centre.x - iw / 2, centre.x + iw / 2, centre.y - ih / 2, centre.y + ih / 2);
         }
-        return std::make_unique<TFHEEnvelope>(TFHEInt32(0), TFHEInt32(iw), TFHEInt32(0), TFHEInt32(ih));
+        return std::make_unique<TFHEEnvelope>(TFHEDecimal(0), TFHEDecimal(iw), TFHEDecimal(0), TFHEDecimal(ih));
     }
 
     /*protected*/
-    TFHECoordinate GeometricShapeFactory::coord(TFHEInt32& x, TFHEInt32& y) const {
+    TFHECoordinate GeometricShapeFactory::coord(TFHEDecimal& x, TFHEDecimal& y) const {
         TFHECoordinate ret(x, y);
         return ret;
     }

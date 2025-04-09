@@ -59,8 +59,8 @@ namespace SpatialFHE::algorithm {
         // For horizontal segments, check if the test point is on the segment.
         TFHEBool isHorizontal = (p1.y == point.y) && (p2.y == point.y);
         if (isHorizontal.decrypt()) {
-            TFHEInt32 maxx = TFHEInt32::max(p1.x, p2.x);
-            TFHEInt32 minx = TFHEInt32::min(p1.x, p2.x);
+            TFHEDecimal maxx = TFHEDecimal::max(p1.x, p2.x);
+            TFHEDecimal minx = TFHEDecimal::min(p1.x, p2.x);
             isPointOnSegment = ((point.x >= minx) && (point.x <= maxx)).decrypt();
             return;
         }

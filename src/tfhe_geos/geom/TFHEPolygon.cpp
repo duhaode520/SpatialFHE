@@ -98,11 +98,11 @@ namespace SpatialFHE::geom {
         }
 
         // check vertices order
-        TFHEInt32 prevX = cs.getAt(0).x;
-        TFHEInt32 prevY = cs.getAt(0).y;
+        TFHEDecimal prevX = cs.getAt(0).x;
+        TFHEDecimal prevY = cs.getAt(0).y;
         for (int i = 1; i < 5; i++) {
-            TFHEInt32 x = cs.getAt(i).x;
-            TFHEInt32 y = cs.getAt(i).y;
+            TFHEDecimal x = cs.getAt(i).x;
+            TFHEDecimal y = cs.getAt(i).y;
             result = result && ((x != prevX) != (y != prevY));
             prevX = x;
             prevY = y;

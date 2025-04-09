@@ -3,11 +3,12 @@
 //
 
 #include "TFHECoordinate.h"
+#include "TFHEInt32.h"
 
 #include <utility>
 
 namespace SpatialFHE::geom {
-    TFHECoordinate::TFHECoordinate(TFHEInt32 x, TFHEInt32 y) : x(std::move(x)), y(std::move(y)) {}
+    TFHECoordinate::TFHECoordinate(TFHEDecimal x, TFHEDecimal y) : x(std::move(x)), y(std::move(y)) {}
 
     TFHECoordinate::TFHECoordinate(const TFHECoordinate &other) {
         x = other.x;
@@ -38,9 +39,9 @@ namespace SpatialFHE::geom {
         return x == other.x && y == other.y;
     }
 
-    TFHEInt32 TFHECoordinate::distanceSquared(const TFHECoordinate &p) const {
-        TFHEInt32 dx = x - p.x;
-        TFHEInt32 dy = y - p.y;
+    TFHEDecimal TFHECoordinate::distanceSquared(const TFHECoordinate &p) const {
+        TFHEDecimal dx = x - p.x;
+        TFHEDecimal dy = y - p.y;
         return dx * dx + dy * dy;
     }
 
@@ -57,18 +58,18 @@ namespace SpatialFHE::geom {
     }
 
     TFHEInt32 TFHECoordinate::compareTo(const TFHECoordinate &other) const {
-        TFHEInt32 xLess = TFHEInt32(x < other.x);
-        TFHEInt32 yLess = TFHEInt32(y < other.y);
-        TFHEInt32 xGreater = TFHEInt32(x > other.x);
-        TFHEInt32 yGreater = TFHEInt32(y > other.y);
+        TFHEInt32 xLess = TFHEInt32((x < other.x).decrypt());
+        TFHEInt32 yLess = TFHEInt32((y < other.y).decrypt());
+        TFHEInt32 xGreater = TFHEInt32((x > other.x).decrypt());
+        TFHEInt32 yGreater = TFHEInt32((y > other.y).decrypt());
         return (xGreater - xLess) * 2 + (yGreater - yLess);
     }
 
-    TFHEInt32 TFHECoordinate::GetX() const {
+    TFHEDecimal TFHECoordinate::GetX() const {
         return x;
     }
 
-    TFHEInt32 TFHECoordinate::GetY() const {
+    TFHEDecimal TFHECoordinate::GetY() const {
         return y;
     }
 

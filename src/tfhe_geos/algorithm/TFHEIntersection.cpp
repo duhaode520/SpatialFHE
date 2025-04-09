@@ -3,7 +3,7 @@
 //
 
 #include "TFHEIntersection.h"
-#include "TFHEInt32.h"
+#include "TFHEDecimal.h"
 #include "tfhe_geos/geom/TFHECoordinate.h"
 
 namespace SpatialFHE::algorithm {
@@ -12,17 +12,17 @@ namespace SpatialFHE::algorithm {
         const geom::TFHECoordinate &p2,
         const geom::TFHECoordinate &q1,
         const geom::TFHECoordinate &q2) {
-        TFHEInt32 px = p1.y - p2.y;
-        TFHEInt32 py = p2.x - p1.x;
-        TFHEInt32 pw = p1.x * p2.y - p2.x * p1.y;
+        TFHEDecimal px = p1.y - p2.y;
+        TFHEDecimal py = p2.x - p1.x;
+        TFHEDecimal pw = p1.x * p2.y - p2.x * p1.y;
 
-        TFHEInt32 qx = q1.y - q2.y;
-        TFHEInt32 qy = q2.x - q1.x;
-        TFHEInt32 qw = q1.x * q2.y - q2.x * q1.y;
+        TFHEDecimal qx = q1.y - q2.y;
+        TFHEDecimal qy = q2.x - q1.x;
+        TFHEDecimal qw = q1.x * q2.y - q2.x * q1.y;
 
-        TFHEInt32 x = py * qw - qy * pw;
-        TFHEInt32 y = qx * pw - px * qw;
-        TFHEInt32 w = px * qy - qx * py;
+        TFHEDecimal x = py * qw - qy * pw;
+        TFHEDecimal y = qx * pw - px * qw;
+        TFHEDecimal w = px * qy - qx * py;
 
         geom::TFHECoordinate rv;
 

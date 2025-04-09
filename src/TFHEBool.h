@@ -4,6 +4,7 @@
 
 namespace SpatialFHE {
     class TFHEInt32;
+    class TFHEDecimal;  // 添加前向声明
 
     class TFHEBool : public TFHERegisteredType<bool> {
     private:
@@ -59,6 +60,7 @@ namespace SpatialFHE {
         TFHEBool operator||(bool other) const;
 
         explicit operator TFHEInt32() const;
+        explicit operator TFHEDecimal() const;  // 添加转换为TFHEDecimal的函数声明
 
         friend class TFHEInt32;
         friend class TFHEInt64;

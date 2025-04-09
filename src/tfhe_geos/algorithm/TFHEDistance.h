@@ -10,7 +10,7 @@ namespace SpatialFHE::algorithm {
 
     class TFHEDistance {
     public:
-        static TFHEInt32 pointToSegmentSquared(const geom::TFHECoordinate& p, const geom::TFHECoordinate& A, const geom::TFHECoordinate& B);
+        static TFHEDecimal pointToSegmentSquared(const geom::TFHECoordinate& p, const geom::TFHECoordinate& A, const geom::TFHECoordinate& B);
     };
 
 }  // namespace SpatialFHE::algorithm

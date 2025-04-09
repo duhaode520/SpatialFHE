@@ -53,7 +53,7 @@ namespace SpatialFHE::io {  // geos.io
             return std::make_unique<TFHECoordinateSequence>(static_cast<size_t>(0));
         }
 
-        TFHECoordinate coord(TFHEInt32(0), TFHEInt32(0));
+        TFHECoordinate coord(TFHEDecimal(0), TFHEDecimal(0));
         getPreciseCoordinate(tokenizer, coord);
 
         auto coordinates = std::make_unique<TFHECoordinateSequence>(static_cast<size_t>(0));
@@ -70,8 +70,8 @@ namespace SpatialFHE::io {  // geos.io
     }
 
     void WKTReader::getPreciseCoordinate(StringTokenizer* tokenizer, TFHECoordinate& coord) const {
-        coord.x = TFHEInt32(static_cast<int32_t>(getNextNumber(tokenizer)));
-        coord.y = TFHEInt32(static_cast<int32_t>(getNextNumber(tokenizer)));
+        coord.x = TFHEDecimal(getNextNumber(tokenizer));
+        coord.y = TFHEDecimal(getNextNumber(tokenizer));
     }
 
     bool WKTReader::isNumberNext(StringTokenizer* tokenizer) {

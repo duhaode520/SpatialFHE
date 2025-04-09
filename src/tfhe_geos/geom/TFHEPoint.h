@@ -42,10 +42,10 @@ namespace SpatialFHE::geom {
 
         std::unique_ptr<TFHEGeometry> getBoundary() const override;
 
-        void setXY(TFHEInt32 x, TFHEInt32 y);
+        void setXY(TFHEDecimal x, TFHEDecimal y);
 
-        [[nodiscard]] TFHEInt32 getX() const;
-        [[nodiscard]] TFHEInt32 getY() const;
+        [[nodiscard]] TFHEDecimal getX() const;
+        [[nodiscard]] TFHEDecimal getY() const;
 
         [[nodiscard]] Ptr clone() const;
     };

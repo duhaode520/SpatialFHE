@@ -162,9 +162,9 @@ namespace SpatialFHE::algorithm {
         const TFHECoordinate &q1,
         const TFHECoordinate &q2) {
         const TFHECoordinate *nearestPt = &p1;
-        TFHEInt32 minDist = TFHEDistance::pointToSegmentSquared(p1, q1, q2);
+        TFHEDecimal minDist = TFHEDistance::pointToSegmentSquared(p1, q1, q2);
 
-        TFHEInt32 dist = TFHEDistance::pointToSegmentSquared(p2, q1, q2);
+        TFHEDecimal dist = TFHEDistance::pointToSegmentSquared(p2, q1, q2);
         if ((dist < minDist).decrypt()) {
             minDist = dist;
             nearestPt = &p2;

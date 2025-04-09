@@ -4,6 +4,7 @@
 
 #ifndef TFHEORIENTATION_H
 #define TFHEORIENTATION_H
+#include <TFHEDecimal.h>
 #include <TFHEInt32.h>
 
 #include "tfhe_geos/geom/TFHECoordinate.h"

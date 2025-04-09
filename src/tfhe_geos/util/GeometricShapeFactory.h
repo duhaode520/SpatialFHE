@@ -38,7 +38,7 @@ namespace SpatialFHE::util {
         Dimensions dim;
         uint32_t nPts;
 
-        [[nodiscard]] geom::TFHECoordinate coord(TFHEInt32& x, TFHEInt32& y) const;
+        [[nodiscard]] geom::TFHECoordinate coord(TFHEDecimal& x, TFHEDecimal& y) const;
         const double MATH_PI = 3.14159265358979323846;
 
     public:

@@ -114,8 +114,8 @@ namespace SpatialFHE::algorithm {
     }
 
     int TFHEPolygonNodeTopology::quadrant(const TFHECoordinate *origin, const TFHECoordinate *p) {
-        TFHEInt32 dx = p->x - origin->x;
-        TFHEInt32 dy = p->y - origin->y;
+        TFHEDecimal dx = p->x - origin->x;
+        TFHEDecimal dy = p->y - origin->y;
         return geom::TFHEQuadrant::quadrant(dx, dy);
     }
 }  // namespace SpatialFHE::algorithm

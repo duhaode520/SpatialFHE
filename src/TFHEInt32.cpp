@@ -3,6 +3,7 @@
 //
 
 #include "TFHEInt32.h"
+#include "TFHEDecimal.h"
 
 #include <cuda_runtime_api.h>
 #include <driver_types.h>
@@ -61,6 +62,11 @@ namespace SpatialFHE {
 
     const TFHEContext *TFHEInt32::javaGetContext() {
         return context;
+    }
+    TFHEInt32::operator TFHEDecimal() const {
+        TFHEDecimal result;
+        fhe_int32_cast_into_fhe_int64(data, &result.data);
+        return result;
     }
 
     int32_t TFHEInt32::doDecrypt(std::vector<uint8_t> &data) {

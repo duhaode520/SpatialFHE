@@ -181,6 +181,7 @@ namespace SpatialFHE {
     TFHEDecimal TFHEDecimal::operator*(const TFHEDecimal &other) const {
         TFHEDecimal result;
         fhe_int64_mul(data, other.data, &result.data);
+        fhe_int64_scalar_shr_assign(data, scale);
 #ifdef DEBUG
         result.ori = ori * other.ori;
 #endif
@@ -190,6 +191,7 @@ namespace SpatialFHE {
     TFHEDecimal TFHEDecimal::operator/(const TFHEDecimal &other) const {
         TFHEDecimal result;
         fhe_int64_div(data, other.data, &result.data);
+        fhe_int64_scalar_shl_assign(data, scale);
 #ifdef DEBUG
         result.ori = ori / other.ori;
 #endif
@@ -277,6 +279,7 @@ namespace SpatialFHE {
 
     TFHEDecimal TFHEDecimal::operator*=(const TFHEDecimal &other) {
         fhe_int64_mul_assign(data, other.data);
+        fhe_int64_scalar_shr_assign(data, scale);
 #ifdef DEBUG
         ori *= other.ori;
 #endif
@@ -285,6 +288,7 @@ namespace SpatialFHE {
 
     TFHEDecimal TFHEDecimal::operator/=(const TFHEDecimal &other) {
         fhe_int64_div_assign(data, other.data);
+        fhe_int64_scalar_shl_assign(data, scale);
 #ifdef DEBUG
         ori /= other.ori;
 #endif
@@ -312,6 +316,7 @@ namespace SpatialFHE {
     TFHEDecimal TFHEDecimal::operator*=(double other) {
         int o = other * (1 << scale);
         fhe_int64_scalar_mul_assign(data, o);
+        fhe_int64_scalar_shr_assign(data, scale);
 #ifdef DEBUG
         ori *= other;
 #endif
@@ -321,6 +326,7 @@ namespace SpatialFHE {
     TFHEDecimal TFHEDecimal::operator/=(double other) {
         int o = other * (1 << scale);
         fhe_int64_scalar_div_assign(data, o);
+        fhe_int64_scalar_shl_assign(data, scale);
 #ifdef DEBUG
         ori /= other;
 #endif
@@ -393,6 +399,7 @@ namespace SpatialFHE {
         TFHEDecimal result;
         int o = other * (1 << scale);
         fhe_int64_scalar_mul(data, o, &result.data);
+        fhe_int64_scalar_shr_assign(data, scale);
 #ifdef DEBUG
         result.ori = ori * other;
 #endif
@@ -403,6 +410,7 @@ namespace SpatialFHE {
         TFHEDecimal result;
         int o = other * (1 << scale);
         fhe_int64_scalar_div(data, o, &result.data);
+        fhe_int64_scalar_shl_assign(data, scale);
 #ifdef DEBUG
         result.ori = ori / other;
 #endif

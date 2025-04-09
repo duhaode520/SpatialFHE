@@ -10,11 +10,11 @@ namespace SpatialFHE::algorithm {
         const geom::TFHECoordinate& p2,
         const geom::TFHECoordinate& q) {
         // compute orientation
-        TFHEInt32 dx1 = p2.x - p1.x;
-        TFHEInt32 dy1 = p2.y - p1.y;
-        TFHEInt32 dx2 = q.x - p2.x;
-        TFHEInt32 dy2 = q.y - p2.y;
-        TFHEInt32 cross_product = dx1 * dy2 - dy1 * dx2;
+        TFHEDecimal dx1 = p2.x - p1.x;
+        TFHEDecimal dy1 = p2.y - p1.y;
+        TFHEDecimal dx2 = q.x - p2.x;
+        TFHEDecimal dy2 = q.y - p2.y;
+        TFHEDecimal cross_product = dx1 * dy2 - dy1 * dx2;
         // return orientation
         TFHEBool is_positive = cross_product > 0;
         TFHEBool is_negative = cross_product < 0;
@@ -34,7 +34,7 @@ namespace SpatialFHE::algorithm {
         const geom::TFHECoordinate* upHiPt = &ring->getAt(0);
         const geom::TFHECoordinate* upLoPt = &ring->getAt(1);
 
-        TFHEInt32 prevY = upHiPt->y;
+        TFHEDecimal prevY = upHiPt->y;
         uint32_t iUpHi = 0;
         for (uint32_t i = 1; i <= nPts; i++) {
             const geom::TFHECoordinate* pt = &ring->getAt(i);
